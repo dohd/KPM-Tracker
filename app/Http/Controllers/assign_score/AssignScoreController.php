@@ -204,9 +204,13 @@ class AssignScoreController extends Controller
                     $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
                     $team->points = 0;
                     foreach ($scale->items as $j => $item) {
-                        if ($team->perc_score >= $item->min && $team->perc_score <= $item->max) {
+                        $score = floor($team->perc_score);
+                        if ($score >= $item->min && $score <= $item->max) {
                             $team->points = $item->point; 
                             break;
+                        }
+                        if ($score > $item->max && $j == $scale->items->count() - 1) {
+                            $team->points = $item->point; 
                         }
                     }
                     $team->net_points = $team->points? ($team->points + $team->guest_total_att) : 0;
