@@ -7,13 +7,11 @@ use App\Models\assign_score\AssignScore;
 use App\Models\attendance\Attendance;
 use App\Models\programme\Programme;
 use App\Models\rating_scale\RatingScale;
-use App\Models\rating_scale\RatingScaleItem;
 use App\Models\team_label\TeamLabel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class AssignScoreController extends Controller
 {
@@ -186,9 +184,8 @@ class AssignScoreController extends Controller
                 break;
             case 'Attendance':
                 if ($attendances->count()) {
-                    $date_from = $attendances->first()->date;
-                    $date_to = $attendances->last()->date;
-                    $days = Carbon::parse($date_from)->diffInDays(Carbon::parse($date_to));
+                    $dates = $attendances->pluck('date')->toArray();
+                    $days = count(array_unique($dates));
                 }
                 foreach ($teams as $key => $team) {
                     $team->team_total_att = 0;
