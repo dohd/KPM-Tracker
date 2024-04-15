@@ -15,8 +15,8 @@ class TeamLabelController extends Controller
      */
     public function index()
     {
-        $team_labels = TeamLabel::latest()->get();
- 
+        $team_labels = TeamLabel::orderBy('id', 'desc')->get();
+        
         return view('team_labels.index', compact('team_labels'));
     }
 
@@ -40,11 +40,27 @@ class TeamLabelController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'total' => 'required',
+            'member_list' => 'required',
         ]);
-        try {                      
-            TeamLabel::create($request->except('_token'));
-            return redirect(route('team_labels.index'))->with(['success' => 'TeamLabel created successfully']);
+        $input = $request->except('_token');
+
+        try {         
+            foreach ($input['start_date'] as $key => $date) {
+                $size = @$input['local_size'][$key];
+                if ($date && $size > 0) {
+                    $input['start_date'][$key] = databaseDate($date);
+                } else {
+                    unset($input['start_date'][$key], $input['local_size'][$key], $input['diaspora_size'][$key]);
+                }
+            }
+            $input = array_replace($input, [
+                'start_date' => implode(',', $input['start_date']),
+                'local_size' => implode(',', $input['local_size']),
+                'diaspora_size' => implode(',', $input['diaspora_size']),
+            ]);       
+
+            TeamLabel::create($input);
+            return redirect(route('team_labels.index'))->with(['success' => 'Team Label created successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error creating team label!', $th);
         }
@@ -83,11 +99,27 @@ class TeamLabelController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'total' => 'required',
+            'member_list' => 'required',
         ]);
+        $input = $request->except('_token');
+
         try {            
-            $team_label->update($request->except('_token'));
-            return redirect(route('team_labels.index'))->with(['success' => 'TeamLabel updated successfully']);
+            foreach ($input['start_date'] as $key => $date) {
+                $size = @$input['local_size'][$key];
+                if ($date && $size > 0) {
+                    $input['start_date'][$key] = databaseDate($date);
+                } else {
+                    unset($input['start_date'][$key], $input['local_size'][$key], $input['diaspora_size'][$key]);
+                }
+            }
+            $input = array_replace($input, [
+                'start_date' => implode(',', $input['start_date']),
+                'local_size' => implode(',', $input['local_size']),
+                'diaspora_size' => implode(',', $input['diaspora_size']),
+            ]);
+            
+            $team_label->update($input);
+            return redirect(route('team_labels.index'))->with(['success' => 'Team Label updated successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error updating team label!', $th);
         }
@@ -103,7 +135,7 @@ class TeamLabelController extends Controller
     {
         try {            
             $team_label->delete();
-            return redirect(route('team_labels.index'))->with(['success' => 'TeamLabel deleted successfully']);
+            return redirect(route('team_labels.index'))->with(['success' => 'Team Label deleted successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error deleting team label!', $th);
         }

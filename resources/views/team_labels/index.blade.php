@@ -12,9 +12,9 @@
                           <tr>
                             <th>#No.</th>
                             <th>Code</th>
-                            <th>Team Name</th>
-                            <th>Size</th>
-                            <th>Status</th>
+                            <th>Team Label</th>
+                            <th>Local Size</th>
+                            <th>Diasp. Size</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -24,8 +24,8 @@
                                     <th scope="row">{{ $i+1 }}</th>
                                     <th>{{ tidCode('', $team->tid) }}</th>
                                     <td>{{ $team->name }}</td>
-                                    <td>{{ $team->total }}</td>
-                                    <td>{!! $team->is_active_status_budge !!}</td>
+                                    <td>{{ last(explode(',', $team->local_size)) }}</td>
+                                    <td>{{ last(explode(',', $team->diaspora_size)) }}</td>
                                     <td>{!! $team->action_buttons !!}</td>
                                 </tr>
                             @endforeach
