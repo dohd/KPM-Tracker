@@ -232,9 +232,12 @@ class AssignScoreController extends Controller
                         if ($date->gte($date_from) && $date->lte($date_to)) {
                             $team->total = $local_size_vars[$n];
                             break;
+                        } 
+                        if (!$team->total && $n == count($start_date_vars) - 1) {
+                            $team->total = $local_size_vars[$n];
                         }
                     }
-                    if ($team->total == 0) break;
+                    if ($team->total == 0) continue;
                     $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                     $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
 
