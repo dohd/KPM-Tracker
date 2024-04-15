@@ -29,7 +29,7 @@ trait RatingScaleAttribute
      */
     public function getIsActiveStatusBudgeAttribute()
     {
-        return '<span class="badge bg-'. ($this->is_active? 'success' : 'secondary') .' modal-btn" style="cursor:pointer;" role="button" data-bs-toggle="modal" data-bs-target="#status_modal" data-url="'. route('programmes.update', $this) .'">'
+        return '<span class="badge bg-'. ($this->is_active? 'success' : 'secondary') .' modal-btn" style="cursor:pointer;" role="button" data-bs-toggle="modal" data-bs-target="#status_modal" data-url="'. route('score_cards.update', $this) .'">'
         . $this->is_active_status . '<i class="bi bi-caret-down-fill"></i></span>';
     }
 
