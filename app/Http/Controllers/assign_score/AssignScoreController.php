@@ -221,6 +221,20 @@ class AssignScoreController extends Controller
                             $team->guest_total_att += $attendance->guest_total;
                         }
                     }
+
+                    $team->total = 0;
+                    $date_from = Carbon::parse($input['date_from']);
+                    $date_to = Carbon::parse($input['date_to']);
+                    $start_date_vars = explode(',', $team->start_date);
+                    $local_size_vars = explode(',', $team->local_size);
+                    foreach ($start_date_vars as $n => $date) {
+                        $date = Carbon::parse($date);
+                        if ($date->gte($date_from) && $date->lte($date_to)) {
+                            $team->total = $local_size_vars[$n];
+                            break;
+                        }
+                    }
+                    if ($team->total == 0) break;
                     $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                     $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
 
@@ -410,7 +424,7 @@ class AssignScoreController extends Controller
         $valid_teams = $teams->filter(fn($v) => $v->points > 0);
         if (!$valid_teams->count()) return response()->json(['flash_error' => 'Computation Error! Please verify rating scale and metric data']);
 
-        return response()->json(['flash_success' => 'Scores assigned successfully', 'data' => ['teams' => $teams, 'req_input' => $input]]);
+        return response()->json(['flash_success' => 'Scores assigned successfully', 'data' => ['teams' => $valid_teams, 'req_input' => $input]]);
     }
 
     /**
