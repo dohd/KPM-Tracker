@@ -22,7 +22,7 @@ class AssignScoreController extends Controller
      */
     public function index()
     {
-        $assign_scores = AssignScore::latest()->get();
+        $assign_scores = AssignScore::orderBy('id', 'desc')->get();
         return view('assign_scores.index', compact('assign_scores'));
     }
 
@@ -127,6 +127,30 @@ class AssignScoreController extends Controller
     }
 
     /**
+     * Reset assigned scores
+     */
+    public function reset_scores(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'programme_id' => 'required',
+            'date_from' => 'required',
+            'date_to' => 'required',
+        ]);
+        if ($validator->fails()) return response()->json(['flash_error' => 'Fields required! programme, date_from, date_to']);
+
+        try {            
+            AssignScore::where('programme_id', request('programme_id'))
+            ->whereDate('date_from', '<=', databaseDate(request('date_from')))
+            ->whereDate('date_to', '>=', databaseDate(request('date_to')))
+            ->delete();
+            
+            return response()->json(['flash_success' => 'Computed Scores reset successfully']);
+        } catch (\Throwable $th) {
+            return response()->json(['flash_error' => 'Error reseting computed scores. Something went wrong']);
+        }
+    }
+
+    /**
      * Assign scores based on rating scale
      */
     public function load_scores(Request $request)
@@ -184,10 +208,11 @@ class AssignScoreController extends Controller
                 break;
             case 'Attendance':
                 if ($attendances->count()) {
-                    $dates = $attendances->pluck('date')->toArray();
-                    $days = count(array_unique($dates));
+                    $dates = array_unique($attendances->pluck('date')->toArray());
+                    $days = count($dates);
                 }
                 foreach ($teams as $key => $team) {
+                    $team->days = @$days ?: 1;
                     $team->team_total_att = 0;
                     $team->guest_total_att = 0;
                     foreach ($attendances as $i => $attendance) {
@@ -196,9 +221,9 @@ class AssignScoreController extends Controller
                             $team->guest_total_att += $attendance->guest_total;
                         }
                     }
-                    $team->days = @$days ?: 1;
                     $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                     $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
+
                     $team->points = 0;
                     foreach ($scale->items as $j => $item) {
                         $score = floor($team->perc_score);
@@ -206,7 +231,7 @@ class AssignScoreController extends Controller
                             $team->points = $item->point; 
                             break;
                         }
-                        if ($score > $item->max && $j == $scale->items->count() - 1) {
+                        if ($score > $item->max && $j == count($scale->items) - 1) {
                             $team->points = $item->point; 
                         }
                     }
@@ -376,14 +401,14 @@ class AssignScoreController extends Controller
                 }
                 break;
         }
-
-        $valid_teams = $teams->filter(fn($v) => $v->points > 0);
-        if (!$valid_teams->count()) return response()->json(['flash_error' => 'Computation Error! Please verify rating scale and metric data']);
         $input = array_replace($input, [
             'rating_scale_id' => $scale->id,
             'metric' => $programme->metric,
             'target_amount' => $programme->target_amount,
         ]);
+
+        $valid_teams = $teams->filter(fn($v) => $v->points > 0);
+        if (!$valid_teams->count()) return response()->json(['flash_error' => 'Computation Error! Please verify rating scale and metric data']);
 
         return response()->json(['flash_success' => 'Scores assigned successfully', 'data' => ['teams' => $teams, 'req_input' => $input]]);
     }

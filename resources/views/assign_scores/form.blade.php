@@ -1,6 +1,6 @@
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title">Team Scores</h5>
+        <h5 class="card-title">Monthly Team Scores</h5>
         <div class="card-content p-2">
             <div class="row mb-3">
                 <label for="programme" class="col-md-2">Programme</label>
@@ -17,18 +17,19 @@
             </div>
             <div class="row mb-3">
                 <label for="date" class="col-md-2">From Date</label>
-                <div class="col-md-6 col-12">
+                <div class="col-md-8 col-12">
                     {{ Form::date(null, null, ['class' => 'form-control', 'id' => 'date_from', 'required' => 'required']) }}
                 </div>
             </div>
             <div class="row mb-3">
                 <label for="date" class="col-md-2">To Date</label>
-                <div class="col-md-6 col-12">
-                    {{ Form::date(null, null, ['class' => 'form-control date_to', 'id' => 'date_to', 'required' => 'required']) }}
+                <div class="col-md-8 col-12">
+                    {{ Form::date(null, null, ['class' => 'form-control date_to', 'id' => 'date_to', 'readonly' => 'readonly', 'required' => 'required']) }}
                 </div>
-                <div class="col-md-2 col-12">
-                    <button type="button" class="btn btn-success" id="load">Compute</button>
-                </div>
+            </div>
+            <div class="text-center">
+                <input type="button" value="Reset" class="btn btn-danger" id="reset">
+                <input type="button" value="Compute" class="btn btn-success" id="load">
             </div>
         </div>
     </div>
@@ -63,23 +64,73 @@
 
 @section('script')
 <script>
-    let loadedScoresData = null;
-    $('#load').click(function() {
+    $('#date_from').change(function() {
+        if (!this.value) return $('#date_to').val('');
+        dfrom = new Date(this.value);
+        date = new Date(dfrom.getFullYear(), dfrom.getMonth() + 1, 0);
+        date = date.toLocaleDateString();
+        dto = date.split('/').reverse().join('-');
+        $('#date_to').val(dto);
+    });
+
+    function validateRequiredInput() {
         const programme_id = $('#programme').val();
         const date_from = $('#date_from').val();
         const date_to = $('#date_to').val();
+        if (!(programme_id && date_from && date_to)) {
+            flashMessage({responseJSON:{message: 'Fields required! programme, from_date, to_date'}}); 
+            return false;
+        }
+        return true;
+    }
+
+    // reset scores
+    $('#reset').click(function() {
+        if (!validateRequiredInput()) return false;
+        if (!confirm('Are you sure? This action will delete previously saved records')) return;
         $('#scores-tbl tbody tr').remove();
-        if (!(programme_id && date_from && date_to)) 
-            return flashMessage({responseJSON:{message: 'Fields required! programme, from_date, to_date'}});
         const spinner = @json(spinner());
         $('#scores-tbl tbody').append(`<tr><td colspan="100%">${spinner}</td></tr>`);
 
-        // fetch scores data
+        $.ajax({
+            url: "{{ route('assign_scores.reset_scores') }}",
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                programme_id: $('#programme').val(), 
+                date_from: $('#date_from').val(), 
+                date_to: $('#date_to').val()
+            },
+            success: resp => {
+                $('#scores-tbl tbody tr').remove();
+                if (resp.flash_error) return flashMessage({responseJSON:{message: resp.flash_error}});
+                if (resp.flash_success) return flashMessage({message: resp.flash_success});
+            },
+            error: resp => {
+                $('#scores-tbl tbody tr').remove();
+                flashMessage({});
+            },
+        });
+
+    });
+
+    // compute scores
+    let loadedScoresData = null;
+    $('#load').click(function() {
+        $('#scores-tbl tbody tr').remove();
+        if (!validateRequiredInput()) return false;
+        const spinner = @json(spinner());
+        $('#scores-tbl tbody').append(`<tr><td colspan="100%">${spinner}</td></tr>`);
+
         $.ajax({
             url: "{{ route('assign_scores.load_scores') }}",
             method: 'POST',
             dataType: 'json',
-            data: {programme_id, date_from, date_to},
+            data: {
+                programme_id: $('#programme').val(), 
+                date_from: $('#date_from').val(), 
+                date_to: $('#date_to').val()
+            },
             success: resp => {
                 if (resp.flash_error) {
                     $('#scores-tbl tbody tr').remove();
