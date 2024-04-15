@@ -12,10 +12,10 @@
                         <thead>
                             <tr>
                                 <th>#No</th>
-                                <th>Metric</th>
                                 <th>Date</th>
                                 <th>Programme</th>
                                 <th>Team</th>
+                                <th>Memo</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -23,10 +23,10 @@
                             @foreach ($attendances as $i => $row)
                                 <tr>
                                     <th style="height: {{ count($attendances) == 1? '80px': '' }}">{{ $i+1 }}</th>
-                                    <td>{{ @$row->programme->metric }}</td>
                                     <td>{{ dateFormat($row->date) }}</td>
                                     <td>{{ @$row->programme->name }}</td>
                                     <td>{{ @$row->team->name }}</td>
+                                    <td>{{ @$row->memo }}</td>
                                     <td>{!! $row->action_buttons !!}</td>
                                 </tr>
                             @endforeach
