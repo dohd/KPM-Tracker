@@ -98,8 +98,7 @@ class ScoreCardController extends Controller
         // update status
         if (isset($request->is_active)) {
             try {
-                $score_card->is_active = request('is_active');
-                $score_card->save();
+                $score_card->update(['is_active' => request('is_active')]);
                 return redirect()->back()->with('success', 'Status updated successfully');
             } catch (\Throwable $th) {
                 return errorHandler('Error updating status!', $th);
