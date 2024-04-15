@@ -5,6 +5,12 @@
     </div>
 </div>
 <div class="row mb-3">
+    <label for="name" class="col-md-2">Max Aggregate Score</label>
+    <div class="col-md-8 col-12">
+        {{ Form::number('max_aggr_score', null, ['class' => 'form-control', 'placeholder' => 'Maximum aggregate score']) }}
+    </div>
+</div>
+<div class="row mb-3">
     <label for="name" class="col-md-2">Metric</label>
     <div class="col-md-8 col-12">
         <select name="metric" id="metric" class="form-control select2" data-placeholder="Choose Metric" autocomplete="false" required>

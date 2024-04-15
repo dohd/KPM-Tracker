@@ -15,7 +15,7 @@ class ProgrammeController extends Controller
      */
     public function index()
     {
-        $programmes = Programme::latest()->get();
+        $programmes = Programme::orderBy('id', 'desc')->get();
 
         return view('programmes.index', compact('programmes'));
     }

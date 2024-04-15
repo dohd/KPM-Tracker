@@ -43,6 +43,13 @@ class ReportController extends Controller
                 ->whereIn('assign_scores.id', $assigned_scores->pluck('id')->toArray())
                 ->groupBy('programme_id')
                 ->get();
+            // apply max aggregate score limit
+            foreach ($team->programme_scores as $key => $team_prog_score) {
+                $programme = Programme::find($team_prog_score->programme_id);
+                if ($programme->max_aggr_score && $team_prog_score->total > $programme->max_aggr_score) {
+                    $team->programme_scores[$key]['total'] = $programme->max_aggr_score;
+                }
+            }
             $team->programme_score_total = $team->programme_scores->sum('total');
             $teams[$key] = $team;
         }

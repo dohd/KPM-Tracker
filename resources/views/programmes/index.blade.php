@@ -14,7 +14,7 @@
                             <th>#No.</th>
                             <th>Code</th>
                             <th>Programme Name</th>
-                            <th>Status</th>
+                            {{-- <th>Status</th> --}}
                             <th>Action</th>
                         </tr>
                         </thead>
@@ -24,7 +24,7 @@
                                     <th scope="row">{{ $i+1 }}</th>
                                     <th>{{ tidCode('',$programme->tid) }}</th>
                                     <td>{{ $programme->name }}</td>
-                                    <td>{!! $programme->is_active_status_budge !!}</td>
+                                    {{-- <td>{!! $programme->is_active_status_budge !!}</td> --}}
                                     <td>{!! $programme->action_buttons !!}</td>
                                 </tr>
                             @endforeach
