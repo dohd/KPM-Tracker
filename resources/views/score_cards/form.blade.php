@@ -232,7 +232,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (isset($score_card))
+                        @if (isset($score_card->items) && count($score_card->items))
                             @foreach ($score_card->items as $item)
                                 <tr>
                                     <td>

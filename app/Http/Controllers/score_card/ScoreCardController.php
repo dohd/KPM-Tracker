@@ -95,10 +95,11 @@ class ScoreCardController extends Controller
      */
     public function update(Request $request, RatingScale $score_card)
     {   
-        // active status
-        if (request('is_active')) {
+        // update status
+        if (isset($request->is_active)) {
             try {
-                $score_card->update(['is_active' => request('is_active')]);
+                $score_card->is_active = request('is_active');
+                $score_card->save();
                 return redirect()->back()->with('success', 'Status updated successfully');
             } catch (\Throwable $th) {
                 return errorHandler('Error updating status!', $th);
