@@ -1,7 +1,7 @@
 <div class="row mb-3">
     <label for="date" class="col-md-2">Date</label>
     <div class="col-md-8 col-12">
-        {{ Form::date('date', null, ['class' => 'form-control', 'required' => 'required']) }}
+        {{ Form::date('date', null, ['class' => 'form-control', 'id' => 'date', 'required' => 'required']) }}
     </div>
 </div>
 <div class="row mb-3">
@@ -151,5 +151,19 @@
         });
     });
     $('#programme').change();
+
+    // on editing
+    const attendance = @json(@$attendance);
+    if (attendance && attendance.id) {
+        const isComputed = @json(@$is_computed);
+        if (isComputed) {
+            $('#date').attr('readonly', true);
+            $('.metric input').attr('readonly', true);
+            $('#programme, #team').attr('disabled', true);
+            const programmeInp = `<input type="hidden" name="programme_id" value="${$('#programme').val()}">`;
+            const teamInp = `<input type="hidden" name="team_id" value="${$('#team').val()}">`;
+            $('form').append(programmeInp + teamInp);
+        }
+    }
 </script>
 @stop

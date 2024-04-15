@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\attendance;
 
 use App\Http\Controllers\Controller;
+use App\Models\assign_score\AssignScore;
 use App\Models\attendance\Attendance;
 use App\Models\programme\Programme;
 use App\Models\team_label\TeamLabel;
@@ -17,7 +18,7 @@ class AttendanceController extends Controller
      */
     public function index()
     {
-        $attendances = Attendance::latest()->get();
+        $attendances = Attendance::orderBy('id', 'desc')->get();
 
         return view('attendances.index', compact('attendances'));
     }
@@ -114,8 +115,12 @@ class AttendanceController extends Controller
     {
         $teams = TeamLabel::get();
         $programmes = Programme::get();
-
-        return view('attendances.edit', compact('attendance', 'teams', 'programmes'));
+        $is_computed = AssignScore::where(['team_id' => $attendance->team_id,'programme_id' => $attendance->programme_id])
+            ->whereDate('date_from', '>=', $attendance->date)
+            ->whereDate('date_to', '<=', $attendance->date)
+            ->exists();
+        
+        return view('attendances.edit', compact('attendance', 'teams', 'programmes', 'is_computed'));
     }
 
     /**
@@ -126,7 +131,7 @@ class AttendanceController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Attendance $attendance)
-    {
+    { 
         $request->validate([
             'date' => 'required',
             'programme_id' => 'required',
