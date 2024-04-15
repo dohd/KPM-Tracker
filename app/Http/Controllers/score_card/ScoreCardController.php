@@ -17,7 +17,7 @@ class ScoreCardController extends Controller
      */
     public function index()
     {
-        $rating_scales = RatingScale::latest()->get();
+        $rating_scales = RatingScale::orderBy('id', 'desc')->get();
  
         return view('score_cards.index', compact('rating_scales'));
     }
@@ -40,8 +40,6 @@ class ScoreCardController extends Controller
      */
     public function store(Request $request)
     { 
-        // $request->validate([]);
-        
         try {     
             DB::beginTransaction();
 
@@ -96,8 +94,16 @@ class ScoreCardController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, RatingScale $score_card)
-    {
-        $request->validate([]);
+    {   
+        // active status
+        if (request('is_active')) {
+            try {
+                $score_card->update(['is_active' => request('is_active')]);
+                return redirect()->back()->with('success', 'Status updated successfully');
+            } catch (\Throwable $th) {
+                return errorHandler('Error updating status!', $th);
+            }
+        }
             
         try {            
             DB::beginTransaction();

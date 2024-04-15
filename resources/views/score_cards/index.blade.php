@@ -35,4 +35,13 @@
             </div>
         </div>
     </div>
+    @include('score_cards.partial.status_modal')
+@stop
+
+@section('script')
+<script>
+    $('.modal-btn').click(function() {
+        $('#status-form').attr('action', $(this).attr('data-url'));
+    });
+</script>
 @stop
