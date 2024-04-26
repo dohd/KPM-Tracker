@@ -35,7 +35,7 @@ class ReportController extends Controller
         $assigned_scores = AssignScore::whereDate('date_from', '>=', $input['date_from'])
         ->whereDate('date_to', '<=', $input['date_to'])
         ->get(['id', 'programme_id', 'team_id']);
-    
+        
         $teams = TeamLabel::whereIn('id', $assigned_scores->pluck('team_id')->toArray())->get(['id', 'name']);
         foreach ($teams as $key => $team) {
             $team->programme_scores = $team->assigned_scores()
@@ -44,16 +44,16 @@ class ReportController extends Controller
                 ->groupBy('programme_id')
                 ->get();
             // apply max aggregate score limit
-            foreach ($team->programme_scores as $key => $team_prog_score) {
+            foreach ($team->programme_scores as $i => $team_prog_score) {
                 $programme = Programme::find($team_prog_score->programme_id);
                 if ($programme->max_aggr_score && $team_prog_score->total > $programme->max_aggr_score) {
-                    $team->programme_scores[$key]['total'] = $programme->max_aggr_score;
+                    $team->programme_scores[$i]['total'] = $programme->max_aggr_score;
                 }
             }
             $team->programme_score_total = $team->programme_scores->sum('total');
             $teams[$key] = $team;
         }
-
+        
         // assign position
         $orderd_teams = $teams->sortByDesc('programme_score_total');
         foreach ($orderd_teams->keys() as $i => $pos) {
