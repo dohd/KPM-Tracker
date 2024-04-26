@@ -18,13 +18,13 @@
             <div class="row mb-3">
                 <label for="date" class="col-md-2">From Date</label>
                 <div class="col-md-8 col-12">
-                    {{ Form::date(null, null, ['class' => 'form-control', 'id' => 'date_from', 'required' => 'required']) }}
+                    {{ Form::date(null, null, ['class' => 'form-control', 'id' => 'date_from', 'placeholder' => 'dd/mm/yyyy', 'required' => 'required']) }}
                 </div>
             </div>
             <div class="row mb-3">
                 <label for="date" class="col-md-2">To Date</label>
                 <div class="col-md-8 col-12">
-                    {{ Form::date(null, null, ['class' => 'form-control date_to', 'id' => 'date_to', 'readonly' => 'readonly', 'required' => 'required']) }}
+                    {{ Form::date(null, null, ['class' => 'form-control date_to', 'id' => 'date_to', 'placeholder' => 'dd/mm/yyyy', 'readonly' => 'readonly', 'required' => 'required']) }}
                 </div>
             </div>
             <div class="text-center">
