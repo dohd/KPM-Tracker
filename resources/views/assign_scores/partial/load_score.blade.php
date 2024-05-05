@@ -14,9 +14,11 @@
             </tr>
         </thead>
         <tbody>
+            @php $n = 0; @endphp
             @foreach ($teams as $i => $item)
+                @php $n++; @endphp
                 <tr>
-                    <td>{{ $i+1 }}</td>
+                    <td>{{ $n }}</td>
                     <td class="fw-bold">{{ $item->name }}</td>
                     <td>{{ $item->total }}</td>
                     <td class="fw-bold">{{ $item->team_total_att }}</td>
@@ -56,9 +58,11 @@
             </tr>
         </thead>
         <tbody>
+            @php $n = 0; @endphp
             @foreach ($teams as $i => $team)
+                @php $n++; @endphp
                 <tr>
-                    <td>{{ $i+1 }}</td>
+                    <td>{{ $n }}</td>
                     <td>{{ $team->name }}</td>
                     <td>{{ numberFormat($input['target_amount']) }}</td>
                     <td>{{ numberFormat($team->accrued_amount) }}</td>
