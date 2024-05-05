@@ -178,10 +178,12 @@ class AssignScoreController extends Controller
                     $team->extra_points = 0;
                     $team->accrued_amount = 0;
                     foreach ($attendances as $i => $attendance) {
-                        $date = Carbon::parse($attendance->date);
-                        $prog_date = Carbon::parse($programme->amount_perc_by);
-                        if ($date->lte($prog_date)) {
-                            $team->accrued_amount += $attendance->grant_amount;
+                        if ($attendance->team_id == $team->id) {
+                            $date = Carbon::parse($attendance->date);
+                            $prog_date = Carbon::parse($programme->amount_perc_by);
+                            if ($date->lte($prog_date)) {
+                                $team->accrued_amount += $attendance->grant_amount;
+                            }
                         }
                     }
                     // points
@@ -222,25 +224,39 @@ class AssignScoreController extends Controller
                         }
                     }
 
-                    $team->total = 0;
+                    $team_counts = [];
                     $date_from = Carbon::parse($input['date_from']);
                     $date_to = Carbon::parse($input['date_to']);
                     $start_date_vars = explode(',', $team->start_date);
                     $local_size_vars = explode(',', $team->local_size);
+                    $start_date_obj = array_combine($start_date_vars, $local_size_vars);
+                    sort($start_date_vars);
                     foreach ($start_date_vars as $n => $date) {
-                        $date = Carbon::parse($date);
-                        if ($date->gte($date_from) && $date->lte($date_to)) {
-                            $team->total = $local_size_vars[$n];
-                            break;
+                        $tc_date = Carbon::parse($date);
+                        if ($tc_date->eq($date_from)) {
+                            $team_counts[] = $start_date_obj[$date];
+                        }
+                        elseif ($tc_date->gte($date_from) && $tc_date->lte($date_to)) {
+                            $team_counts[] = $start_date_obj[$date];
+                            $prev_date = @$start_date_vars[$n-1];
+                            if ($prev_date) {
+                                $tc_prev_date = Carbon::parse($prev_date);
+                                if ($tc_prev_date->lte($date_from)) {
+                                    $team_counts[] = $start_date_obj[$prev_date];
+                                }
+                            }
                         } 
-                        if (!$team->total && $n == count($start_date_vars) - 1) {
-                            $team->total = $local_size_vars[$n];
+                        $last_indx = count($start_date_vars) - 1;
+                        if (!$team_counts && $n == $last_indx && $tc_date->lte($date_from)) {
+                            $team_counts[] = $start_date_obj[$date];
                         }
                     }
+                    $team_counts_sum = array_reduce($team_counts, fn($prev, $curr) => $prev+$curr, 0);
+                    $team->total = $team_counts? ceil($team_counts_sum / count($team_counts)) : 0;
                     if ($team->total == 0) continue;
+
                     $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                     $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
-
                     $team->points = 0;
                     foreach ($scale->items as $j => $item) {
                         $score = floor($team->perc_score);
