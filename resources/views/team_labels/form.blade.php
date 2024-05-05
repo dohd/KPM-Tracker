@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div style="width:60%; margin-left:auto; margin-right:auto">
+<div style="width:65%; margin-left:auto; margin-right:auto">
     <table class="table table-bordered table-sm">
         <thead>
             <tr>
@@ -28,7 +28,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (range(1,5) as $i => $item)
+            @foreach (range(1,12) as $i => $item)
                 <tr>
                     <td><input type="date" name="start_date[]" value="{{ @(explode(',', $team_label->start_date)[$i]) }}" class="form-control"></td>
                     <td><input type="number" name="local_size[]" value="{{ @(explode(',', $team_label->local_size)[$i]) }}" class="form-control" placeholder="Local Size"></td>
