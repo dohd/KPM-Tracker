@@ -24,7 +24,7 @@
             <div class="row mb-3">
                 <label for="date" class="col-md-2">To Date</label>
                 <div class="col-md-8 col-12">
-                    {{ Form::date(null, null, ['class' => 'form-control date_to', 'id' => 'date_to', 'placeholder' => 'dd/mm/yyyy', 'readonly' => 'readonly', 'required' => 'required']) }}
+                    {{ Form::date(null, null, ['class' => 'form-control date_to', 'id' => 'date_to', 'placeholder' => 'dd/mm/yyyy', 'required' => 'required']) }}
                 </div>
             </div>
             <div class="text-center">
@@ -64,6 +64,7 @@
 
 @section('script')
 <script>
+    /**
     $('#date_from').change(function() {
         if (!this.value) return $('#date_to').val('');
         dfrom = new Date(this.value);
@@ -72,6 +73,7 @@
         dto = date.split('/').reverse().join('-');
         $('#date_to').val(dto);
     });
+    */
 
     function validateRequiredInput() {
         const programme_id = $('#programme').val();
