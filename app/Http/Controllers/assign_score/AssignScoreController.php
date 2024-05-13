@@ -157,14 +157,18 @@ class AssignScoreController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'programme_id' => 'required',
-            'date_from' => 'required',
-            'date_to' => 'required',
         ]);
-        if ($validator->fails()) return response()->json(['flash_error' => 'Fields required! programme, date_from, date_to']);
+        if ($validator->fails()) return response()->json(['flash_error' => 'Fields required! programme']);
         
         $input = inputClean($request->except('_token'));
-        $scale = RatingScale::where('is_active', 1)->first();
         $programme = Programme::find($input['programme_id']);
+        $input['date_from'] = $programme->period_from;
+        $input['date_to'] = $programme->period_to;
+        if (!isset($input['date_from'], $input['date_to'])) {
+            return response()->json(['flash_error' => 'Programme computation period required!']);
+        }
+        
+        $scale = RatingScale::where('is_active', 1)->first();
         $attendances = Attendance::where('programme_id', $programme->id)
             ->whereBetween('date', [$input['date_from'], $input['date_to']])
             ->orderBy('date', 'ASC')
@@ -188,9 +192,11 @@ class AssignScoreController extends Controller
                     }
                     // points
                     $conditional_amount = round(0.01 * $programme->amount_perc * $programme->target_amount);
-                    if ($team->accrued_amount >= $conditional_amount) {
+                    $team->points = round($team->accrued_amount / $conditional_amount * $programme->score);
+                    if ($team->points > $programme->score) {
                         $team->points = $programme->score;
                     }
+
                     // extra points
                     $above_conditional_amount = round(0.01 * $programme->above_amount_perc * $programme->target_amount);
                     $every_conditional_amount = round(0.01 * $programme->every_amount_perc * $programme->target_amount);

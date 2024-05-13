@@ -15,7 +15,7 @@
                     </select>   
                 </div>
             </div>
-            <div class="row mb-3">
+            {{-- <div class="row mb-3">
                 <label for="date" class="col-md-2">From Date</label>
                 <div class="col-md-8 col-12">
                     {{ Form::date(null, null, ['class' => 'form-control', 'id' => 'date_from', 'placeholder' => 'dd/mm/yyyy', 'required' => 'required']) }}
@@ -26,7 +26,7 @@
                 <div class="col-md-8 col-12">
                     {{ Form::date(null, null, ['class' => 'form-control date_to', 'id' => 'date_to', 'placeholder' => 'dd/mm/yyyy', 'required' => 'required']) }}
                 </div>
-            </div>
+            </div> --}}
             <div class="text-center">
                 <input type="button" value="Reset" class="btn btn-danger" id="reset">
                 <input type="button" value="Compute" class="btn btn-success" id="load">
@@ -77,13 +77,9 @@
 
     function validateRequiredInput() {
         const programme_id = $('#programme').val();
-        const date_from = $('#date_from').val();
-        const date_to = $('#date_to').val();
-        if (!(programme_id && date_from && date_to)) {
-            flashMessage({responseJSON:{message: 'Fields required! programme, from_date, to_date'}}); 
-            return false;
-        }
-        return true;
+        if (programme_id) return true;
+        flashMessage({responseJSON:{message: 'Fields required! programme'}}); 
+        return false;
     }
 
     // reset scores
@@ -100,8 +96,6 @@
             dataType: 'json',
             data: {
                 programme_id: $('#programme').val(), 
-                date_from: $('#date_from').val(), 
-                date_to: $('#date_to').val()
             },
             success: resp => {
                 $('#scores-tbl tbody tr').remove();
@@ -130,8 +124,6 @@
             dataType: 'json',
             data: {
                 programme_id: $('#programme').val(), 
-                date_from: $('#date_from').val(), 
-                date_to: $('#date_to').val()
             },
             success: resp => {
                 if (resp.flash_error) {

@@ -29,6 +29,28 @@
         </select>   
     </div>
 </div>
+<div class="row mb-3">
+    <label for="period" class="col-md-2">Computation Type</label>
+    <div class="col-md-8 col-12">
+        <select name="compute_type" id="compute_type" class="form-control select2" data-placeholder="Computation Type" autocomplete="false" required>
+            <option value=""></option>
+            @foreach (['Daily', 'Monthly'] as $item)
+                <option value="{{ $item }}" {{ @$programme->compute_type == $item? 'selected' : '' }}>{{ $item }}</option>
+            @endforeach
+        </select>   
+    </div>
+</div>
+<div class="row mb-3">
+    <label for="period_from" class="col-md-2">Computation From</label>
+    <div class="col-md-8 col-12">
+        <div class="row g-1">
+            <div class="col-md-4" style="margin-right: 10px;">{{ Form::date('period_from', null, ['class' => 'form-control', 'id' => 'period_from', 'required' => 'required']) }}</div>
+            <div class="col-md-3"><label for="period_to">Computation To</label></div>
+            <div class="col-md-4">{{ Form::date('period_to', null, ['class' => 'form-control', 'id' => 'period_to', 'required' => 'required']) }}</div>
+        </div>
+    </div>
+</div>
+
 
 <!-- finance section -->
 <div id="fin-section" class="d-none">

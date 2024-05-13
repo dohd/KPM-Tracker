@@ -4,7 +4,9 @@ namespace App\Http\Controllers\programme;
 
 use App\Http\Controllers\Controller;
 use App\Models\programme\Programme;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class ProgrammeController extends Controller
 {
@@ -41,15 +43,26 @@ class ProgrammeController extends Controller
         $request->validate([
             'name' => 'required',
             'metric' => 'required',
+            'compute_type' => 'required',
+            'period_from' => 'required',
+            'period_to' => 'required',
             'score' => request('metric') == 'Finance'? 'required' : '',
             'max_extra_score' => request('extra_score')? 'required' : '',
         ]);
 
         try {     
             $input = $request->except('_token');
-            foreach ($request->except('name', 'metric', 'memo') as $key => $value) {
-                if ($key == 'amount_perc_by') $input[$key] = databaseDate($value);
+            foreach ($request->except('name', 'metric', 'memo', 'compute_type') as $key => $value) {
+                if (in_array($key, ['period_from', 'period_to', 'amount_perc_by'])) $input[$key] = databaseDate($value);
                 else $input[$key] = numberClean($value);
+            }
+            // compare month for compute type monthly
+            $period_from = Carbon::parse($input['period_from']);
+            $period_to = Carbon::parse($input['period_to']);
+            if ($input['compute_type'] == 'Monthly') {
+                if ($period_from->format('m') != $period_to->format('m')) {
+                    throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
+                }
             }
 
             Programme::create($input);
@@ -94,15 +107,26 @@ class ProgrammeController extends Controller
         $request->validate([
             'name' => 'required',
             'metric' => 'required',
+            'compute_type' => 'required',
+            'period_from' => 'required',
+            'period_to' => 'required',
             'score' => request('metric') == 'Finance'? 'required' : '',
             'max_extra_score' => request('extra_score')? 'required' : '',
         ]);
 
         try {    
             $input = $request->except('_token');
-            foreach ($request->except('name', 'metric', 'memo') as $key => $value) {
-                if ($key == 'amount_perc_by') $input[$key] = databaseDate($value);
+            foreach ($request->except('name', 'metric', 'memo', 'compute_type') as $key => $value) {
+                if (in_array($key, ['period_from', 'period_to', 'amount_perc_by'])) $input[$key] = databaseDate($value);
                 else $input[$key] = numberClean($value);
+            }
+            // compare month for compute type monthly
+            $period_from = Carbon::parse($input['period_from']);
+            $period_to = Carbon::parse($input['period_to']);
+            if ($input['compute_type'] == 'Monthly') {
+                if ($period_from->format('m') != $period_to->format('m')) {
+                    throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
+                }
             }
 
             $programme->update($input); 
