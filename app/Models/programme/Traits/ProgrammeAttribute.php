@@ -47,8 +47,8 @@ trait ProgrammeAttribute
     {
         return +$this->attributes['every_amount_perc'];
     }
-    public function getAboveAmountPercAttribute()
+    public function getAboveAmountAttribute()
     {
-        return +$this->attributes['above_amount_perc'];
+        return +$this->attributes['above_amount'];
     }
 }

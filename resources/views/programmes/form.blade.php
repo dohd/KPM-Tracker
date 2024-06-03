@@ -55,13 +55,13 @@
 <!-- finance section -->
 <div id="fin-section" class="d-none">
     <div class="row mb-3">
-        <label for="amount" class="col-md-2">Overall Target</label>
+        <label for="amount" class="col-md-2">Target</label>
         <div class="col-md-8 col-12">
             {{ Form::number('target_amount', null, ['class' => 'form-control', 'id' => 'target_amount', 'placeholder' => 'Overall Target Amount']) }}
         </div>
     </div>
     <div class="row mb-3">
-        <label for="target_condition" class="col-md-2">Target %</label>
+        <label for="target_condition" class="col-md-2">Conditional %</label>
         <div class="col-md-8 col-12">
             <div class="row g-1">
                 <div class="col-md-5">{{ Form::number('amount_perc', null, ['class' => 'form-control', 'id' => 'amount_perc', 'placeholder' => 'Target Amount']) }}</div>
@@ -79,19 +79,16 @@
     <div class="row mb-3">
         <label for="score_points" class="col-md-2">Extra Points</label>
         <div class="col-md-8 col-12">
-            {{ Form::number('extra_score', null, ['class' => 'form-control', 'placeholder' => 'Extra Points']) }}
-        </div>
-    </div>
-    <div class="row mb-3">
-        <label for="target_condition" class="col-md-2">Extra Points For Every %</label>
-        <div class="col-md-8 col-12">
             <div class="row g-1">
-                <div class="col-md-5">{{ Form::number('every_amount_perc', null, ['class' => 'form-control', 'placeholder' => 'Amount']) }}</div>
-                <div class="col-md-2 text-center pt-1">Above %</div>
-                <div class="col-md-5">{{ Form::number('above_amount_perc', null, ['class' => 'form-control', 'placeholder' => 'Amount']) }}</div>
+                <div class="col-md-2">{{ Form::number('extra_score', null, ['class' => 'form-control', 'placeholder' => 'Extra Points']) }}</div>
+                <div class="col-md-3 text-center pt-1">For Every %</div>
+                <div class="col-md-2">{{ Form::number('every_amount_perc', null, ['class' => 'form-control', 'placeholder' => 'Amount']) }}</div>
+                <div class="col-md-2 text-center pt-1">Above</div>
+                <div class="col-md-3">{{ Form::number('above_amount', null, ['class' => 'form-control', 'placeholder' => 'Amount']) }}</div>
             </div>
         </div>
     </div>
+    
     <div class="row mb-3">
         <label for="max_extra_points" class="col-md-2">Max Extra Points</label>
         <div class="col-md-8 col-12">
