@@ -15,18 +15,6 @@
                     </select>   
                 </div>
             </div>
-            {{-- <div class="row mb-3">
-                <label for="date" class="col-md-2">From Date</label>
-                <div class="col-md-8 col-12">
-                    {{ Form::date(null, null, ['class' => 'form-control', 'id' => 'date_from', 'placeholder' => 'dd/mm/yyyy', 'required' => 'required']) }}
-                </div>
-            </div>
-            <div class="row mb-3">
-                <label for="date" class="col-md-2">To Date</label>
-                <div class="col-md-8 col-12">
-                    {{ Form::date(null, null, ['class' => 'form-control date_to', 'id' => 'date_to', 'placeholder' => 'dd/mm/yyyy', 'required' => 'required']) }}
-                </div>
-            </div> --}}
             <div class="text-center">
                 <input type="button" value="Reset" class="btn btn-danger" id="reset">
                 <input type="button" value="Compute" class="btn btn-success" id="load">
@@ -94,9 +82,7 @@
             url: "{{ route('assign_scores.reset_scores') }}",
             method: 'POST',
             dataType: 'json',
-            data: {
-                programme_id: $('#programme').val(), 
-            },
+            data: {programme_id: $('#programme').val()},
             success: resp => {
                 $('#scores-tbl tbody tr').remove();
                 if (resp.flash_error) return flashMessage({responseJSON:{message: resp.flash_error}});

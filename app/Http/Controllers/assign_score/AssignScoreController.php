@@ -132,21 +132,20 @@ class AssignScoreController extends Controller
     public function reset_scores(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'programme_id' => 'required',
-            'date_from' => 'required',
-            'date_to' => 'required',
+            'programme_id' => 'required'
         ]);
-        if ($validator->fails()) return response()->json(['flash_error' => 'Fields required! programme, date_from, date_to']);
+        if ($validator->fails()) return response()->json(['flash_error' => 'Fields required! programme']);
 
         try {            
-            AssignScore::where('programme_id', request('programme_id'))
-            ->whereDate('date_from', '<=', databaseDate(request('date_from')))
-            ->whereDate('date_to', '>=', databaseDate(request('date_to')))
+            $programme = Programme::find(request('programme_id'));
+            AssignScore::where('programme_id', $programme->id)
+            ->whereDate('date_from', '>=', $programme->period_from)
+            ->whereDate('date_to', '<=', $programme->period_to)
             ->delete();
             
             return response()->json(['flash_success' => 'Computed Scores reset successfully']);
         } catch (\Throwable $th) {
-            return response()->json(['flash_error' => 'Error reseting computed scores. Something went wrong']);
+            return response()->json(['flash_error' => 'Something went wrong. Error reseting computed scores!']);
         }
     }
 
@@ -193,23 +192,18 @@ class AssignScoreController extends Controller
                     // points
                     $conditional_amount = round(0.01 * $programme->amount_perc * $programme->target_amount);
                     $team->points = round($team->accrued_amount / $conditional_amount * $programme->score);
-                    if ($team->points > $programme->score) {
-                        $team->points = $programme->score;
-                    }
+                    if ($team->points > $programme->score) $team->points = $programme->score;
 
                     // extra points
-                    $above_conditional_amount = round(0.01 * $programme->above_amount_perc * $programme->target_amount);
-                    $every_conditional_amount = round(0.01 * $programme->every_amount_perc * $programme->target_amount);
-                    if ($team->accrued_amount > $above_conditional_amount) {
-                        if ($above_conditional_amount && $every_conditional_amount) {
-                            $every_amount_freq = floor(($team->accrued_amount - $above_conditional_amount)/$every_conditional_amount);
-                            if ($every_amount_freq <= $programme->max_extra_score) {
-                                $team->extra_points = $every_amount_freq;
-                            } else {
-                                $team->extra_points = $programme->max_extra_score;
-                            }
+                    $above_conditional_amount = $team->accrued_amount - $programme->above_amount;
+                    $every_conditional_amount = round(0.01 * $programme->every_amount_perc * $above_conditional_amount);
+                    if ($programme->above_amount && $every_conditional_amount) {
+                        $team->extra_points = floor($above_conditional_amount / $every_conditional_amount);
+                        if ($programme->max_extra_score && $team->extra_points > $programme->max_extra_score) {
+                            $team->extra_points = $programme->max_extra_score;
                         }
                     }
+                    
                     $team->net_points = $team->points + $team->extra_points;
                     $teams[$key] = $team;
                 }
