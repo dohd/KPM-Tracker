@@ -74,6 +74,10 @@ class ReportController extends Controller
             $marked_keys[] = $pos;
             $marked_totals[] = $score_total;
         }
+        // order by position
+        $orderd_teams = $teams->sortBy('position');
+        $teams = collect();
+        $orderd_teams->each(fn($v) => $teams->add($v));
 
         $filename = 'Team_Performance';
         $meta['title'] = 'Team Performance';
