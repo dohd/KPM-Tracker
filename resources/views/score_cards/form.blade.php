@@ -184,7 +184,7 @@
         <h5 class="card-title">Choir Scale</h5>
         <div class="card-content p-2">
             <div class="row mb-3">
-                <label for="choir_no" class="col-md-2">Choirs Members</label>
+                <label for="choir_no" class="col-md-2">Choir Members</label>
                 <div class="col-md-8 col-12">
                     {{ Form::number('choir_no', null, ['class' => 'form-control', 'placeholder' => 'Number of choir members']) }}
                 </div>

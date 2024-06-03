@@ -253,6 +253,7 @@ class AssignScoreController extends Controller
                     }
                     $team_counts_sum = array_reduce($team_counts, fn($prev, $curr) => $prev+$curr, 0);
                     $team->total = $team_counts? ceil($team_counts_sum / count($team_counts)) : 0;
+                    if ($programme->include_choir) $team->total = $scale->choir_no;
                     if ($team->total == 0) continue;
 
                     $team->team_avg_att = round($team->team_total_att / $team->days, 4);

@@ -30,9 +30,19 @@
     </div>
 </div>
 <div class="row mb-3">
+    <label for="period" class="col-md-2">Include Choir</label>
+    <div class="col-md-8 col-12">
+        <select name="include_choir" id="include_choir" class="form-control select2" autocomplete="false">
+            @foreach (['No', 'Yes'] as $i => $item)
+                <option value="{{ $i }}" {{ @$programme->include_choir == $i? 'selected' : '' }}>{{ $item }}</option>
+            @endforeach
+        </select>   
+    </div>
+</div>
+<div class="row mb-3">
     <label for="period" class="col-md-2">Computation Type</label>
     <div class="col-md-8 col-12">
-        <select name="compute_type" id="compute_type" class="form-control select2" data-placeholder="Computation Type" autocomplete="false" required>
+        <select name="compute_type" id="compute_type" class="form-control select2" data-placeholder="-- Computation Type --" autocomplete="false" required>
             <option value=""></option>
             @foreach (['Daily', 'Monthly'] as $item)
                 <option value="{{ $item }}" {{ @$programme->compute_type == $item? 'selected' : '' }}>{{ $item }}</option>
@@ -115,6 +125,11 @@
             $('#fin-section').addClass('d-none');
             ['#score', '#target_amount', '#amount_perc', '#amount_perc_by']
             .forEach(v => $(v).attr('required', false));
+        }
+        if (this.value == 'Attendance') {
+            $('#include_choir').parents('div.row').removeClass('d-none');
+        } else {
+            $('#include_choir').parents('div.row').addClass('d-none');
         }
     });
     $('#metric').change();
