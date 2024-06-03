@@ -115,6 +115,12 @@
             {{ Form::number('team_mission_total', null, ['class' => 'form-control', 'placeholder' => 'No. of team missions', 'autocomplete' => 'false']) }}
         </div>
     </div>
+    <div class="row mb-3">
+        <label for="team_mission_amount" class="col-md-2">Amount Allocated</label>
+        <div class="col-md-8 col-12">
+            {{ Form::number('team_mission_amount', null, ['class' => 'form-control', 'placeholder' => 'Amount Allocated', 'autocomplete' => 'false']) }}
+        </div>
+    </div>
 </div>
 <!-- choir member metric -->
 <div class="metric d-none" key="Choir-Member">

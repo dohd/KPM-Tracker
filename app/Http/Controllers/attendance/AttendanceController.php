@@ -66,7 +66,7 @@ class AttendanceController extends Controller
             foreach ($input as $key => $value) {
                 $keys = [
                     'team_total', 'guest_total', 'grant_amount', 'retreat_leader_total', 'online_meeting_team_total', 'activities_total', 'summit_leader_total',
-                    'recruit_total', 'initiative_total', 'team_mission_total', 'choir_member_total', 'other_activities_total',
+                    'recruit_total', 'initiative_total', 'team_mission_total', 'choir_member_total', 'other_activities_total', 'team_mission_amount',
                 ];
                 if (in_array($key, $keys)) {
                     $input[$key] = numberClean($value);
@@ -154,7 +154,7 @@ class AttendanceController extends Controller
             foreach ($input as $key => $value) {
                 $keys = [
                     'team_total', 'guest_total', 'grant_amount', 'retreat_leader_total', 'online_meeting_team_total', 'activities_total', 'summit_leader_total',
-                    'recruit_total', 'initiative_total', 'team_mission_total', 'choir_member_total', 'other_activities_total',
+                    'recruit_total', 'initiative_total', 'team_mission_total', 'choir_member_total', 'other_activities_total', 'team_mission_amount',
                 ];
                 if (in_array($key, $keys)) {
                     $input[$key] = numberClean($value);
