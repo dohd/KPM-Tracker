@@ -138,9 +138,11 @@ class AssignScoreController extends Controller
 
         try {            
             $programme = Programme::find(request('programme_id'));
+            $year = date('Y', strtotime($programme->period_from));
+
             AssignScore::where('programme_id', $programme->id)
-            ->whereDate('date_from', '>=', $programme->period_from)
-            ->whereDate('date_to', '<=', $programme->period_to)
+            ->whereYear('date_from', $year)
+            ->whereYear('date_to', $year)
             ->delete();
             
             return response()->json(['flash_success' => 'Computed Scores reset successfully']);
