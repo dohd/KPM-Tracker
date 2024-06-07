@@ -6,9 +6,13 @@
                 <th>Team Name</th>
                 <th>Team Count</th>
                 <th>Total Team Att.</th>
-                <th>Total Guest Att.</th>
-                <th>Total Average Att.</th>
-                <th>% Score</th>
+                @if ($input['programme_include_choir'])
+                    <th>Total Average Att.</th>
+                @else
+                    <th>Total Guest Att.</th>
+                    <th>Total Average Att.</th>
+                    <th>% Score</th>
+                @endif
                 <th>Points</th>
                 <th>Total</th>
             </tr>
@@ -22,9 +26,13 @@
                     <td class="fw-bold">{{ $item->name }}</td>
                     <td>{{ $item->total }}</td>
                     <td class="fw-bold">{{ $item->team_total_att }}</td>
-                    <td>{{ $item->guest_total_att }}</td>
-                    <td class="fw-bold">{{ $item->team_avg_att }}</td>
-                    <td>{{ $item->perc_score }}</td>
+                    @if ($input['programme_include_choir'])
+                        <td class="fw-bold">{{ $item->team_avg_att }}</td>
+                    @else
+                        <td>{{ $item->guest_total_att }}</td>
+                        <td class="fw-bold">{{ $item->team_avg_att }}</td>
+                        <td>{{ $item->perc_score }}</td>
+                    @endif
                     <td>{{ $item->points }}</td>
                     <td class="fw-bold">{{ $item->net_points }}</td>
                     <input type="hidden" name="programme_id[]" value="{{ $input['programme_id'] }}">

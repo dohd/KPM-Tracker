@@ -254,23 +254,33 @@ class AssignScoreController extends Controller
                         }
                     }
                     $team_counts_sum = array_reduce($team_counts, fn($prev, $curr) => $prev+$curr, 0);
-                    $team->total = $team_counts? ceil($team_counts_sum / count($team_counts)) : 0;
-                    if ($programme->include_choir) $team->total = $scale->choir_no;
-                    if ($team->total == 0) continue;
+                    
+                    if ($programme->include_choir) {
+                        $team->total = $scale->choir_no;
+                        if ($team->total == 0) continue;
 
-                    $team->team_avg_att = round($team->team_total_att / $team->days, 4);
-                    $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
-                    $team->points = 0;
-                    foreach ($scale->items as $j => $item) {
-                        $score = floor($team->perc_score);
-                        if ($score >= $item->min && $score <= $item->max) {
-                            $team->points = $item->point; 
-                            break;
-                        }
-                        if ($score > $item->max && $j == count($scale->items) - 1) {
-                            $team->points = $item->point; 
+                        $team->team_avg_att = round($team->team_total_att / $team->days, 4);
+                        $team->perc_score = 0;
+                        $team->points = $team->team_avg_att;
+                    } else {
+                        $team->total = $team_counts? ceil($team_counts_sum / count($team_counts)) : 0;
+                        if ($team->total == 0) continue;
+
+                        $team->team_avg_att = round($team->team_total_att / $team->days, 4);
+                        $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
+                        $team->points = 0;
+                        foreach ($scale->items as $j => $item) {
+                            $score = floor($team->perc_score);
+                            if ($score >= $item->min && $score <= $item->max) {
+                                $team->points = $item->point; 
+                                break;
+                            }
+                            if ($score > $item->max && $j == count($scale->items) - 1) {
+                                $team->points = $item->point; 
+                            }
                         }
                     }
+                    
                     $team->net_points = $team->points? ($team->points + $team->guest_total_att) : 0;
                     $teams[$key] = $team;
                 }
@@ -438,6 +448,7 @@ class AssignScoreController extends Controller
                 break;
         }
         $input = array_replace($input, [
+            'programme_include_choir' => $programme->include_choir,
             'rating_scale_id' => $scale->id,
             'metric' => $programme->metric,
             'target_amount' => $programme->target_amount,
