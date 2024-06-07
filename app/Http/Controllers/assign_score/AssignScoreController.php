@@ -226,34 +226,40 @@ class AssignScoreController extends Controller
                         }
                     }
 
-                    $team_counts = [];
+                    $team_local_sizes = [];
+                    $team_diasp_sizes = [];
                     $date_from = Carbon::parse($input['date_from']);
                     $date_to = Carbon::parse($input['date_to']);
                     $start_date_vars = explode(',', $team->start_date);
                     $local_size_vars = explode(',', $team->local_size);
-                    $start_date_obj = array_combine($start_date_vars, $local_size_vars);
+                    $diasp_size_vars = explode(',', $team->diaspora_size);
+                    $date_local_size_obj = array_combine($start_date_vars, $local_size_vars);
+                    $date_diasp_size_obj = array_combine($start_date_vars, $diasp_size_vars);
                     sort($start_date_vars);
                     foreach ($start_date_vars as $n => $date) {
                         $tc_date = Carbon::parse($date);
                         if ($tc_date->eq($date_from)) {
-                            $team_counts[] = $start_date_obj[$date];
+                            $team_local_sizes[] = $date_local_size_obj[$date];
+                            $team_diasp_sizes[] = $date_diasp_size_obj[$date];
                         }
                         elseif ($tc_date->gte($date_from) && $tc_date->lte($date_to)) {
-                            $team_counts[] = $start_date_obj[$date];
+                            $team_local_sizes[] = $date_local_size_obj[$date];
+                            $team_diasp_sizes[] = $date_diasp_size_obj[$date];
                             $prev_date = @$start_date_vars[$n-1];
                             if ($prev_date) {
                                 $tc_prev_date = Carbon::parse($prev_date);
                                 if ($tc_prev_date->lte($date_from)) {
-                                    $team_counts[] = $start_date_obj[$prev_date];
+                                    $team_local_sizes[] = $date_local_size_obj[$prev_date];
+                                    $team_diasp_sizes[] = $date_diasp_size_obj[$date];
                                 }
                             }
                         } 
                         $last_indx = count($start_date_vars) - 1;
-                        if (!$team_counts && $n == $last_indx && $tc_date->lte($date_from)) {
-                            $team_counts[] = $start_date_obj[$date];
+                        if (!$team_local_sizes && $n == $last_indx && $tc_date->lte($date_from)) {
+                            $team_local_sizes[] = $date_local_size_obj[$date];
+                            $team_diasp_sizes[] = $date_diasp_size_obj[$date];
                         }
                     }
-                    $team_counts_sum = array_reduce($team_counts, fn($prev, $curr) => $prev+$curr, 0);
                     
                     if ($programme->include_choir) {
                         $team->total = $scale->choir_no;
@@ -262,10 +268,20 @@ class AssignScoreController extends Controller
                         $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                         $team->perc_score = 0;
                         $team->points = $team->team_avg_att;
-                    } else {
-                        $team->total = $team_counts? ceil($team_counts_sum / count($team_counts)) : 0;
+                    } 
+                    else {
+                        $team->total = 0;
+                        $local_sizes_sum = array_reduce($team_local_sizes, fn($prev, $curr) => $prev+$curr, 0);
+                        $diasp_sizes_sum = array_reduce($team_diasp_sizes, fn($prev, $curr) => $prev+$curr, 0);
+                        if ($programme->team_size == 'total_size' && $team_local_sizes && $team_diasp_sizes) {
+                            $team->total = ceil($local_sizes_sum / count($team_local_sizes)) + ceil($diasp_sizes_sum / count($team_diasp_sizes));
+                        } elseif ($programme->team_size == 'diaspora_size' && $team_diasp_sizes) {
+                            $team->total = ceil($diasp_sizes_sum / count($team_diasp_sizes));
+                        } elseif ($team_local_sizes) {
+                            $team->total = ceil($local_sizes_sum / count($team_local_sizes));
+                        }
+                        
                         if ($team->total == 0) continue;
-
                         $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                         $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
                         $team->points = 0;
