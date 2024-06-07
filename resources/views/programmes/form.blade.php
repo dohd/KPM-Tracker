@@ -30,11 +30,21 @@
     </div>
 </div>
 <div class="row mb-3">
-    <label for="period" class="col-md-2">Include Choir</label>
+    <label for="include_choir" class="col-md-2">Include Choir</label>
     <div class="col-md-8 col-12">
         <select name="include_choir" id="include_choir" class="form-control select2" autocomplete="false">
             @foreach (['No', 'Yes'] as $i => $item)
                 <option value="{{ $i }}" {{ @$programme->include_choir == $i? 'selected' : '' }}>{{ $item }}</option>
+            @endforeach
+        </select>   
+    </div>
+</div>
+<div class="row mb-3">
+    <label for="team_size" class="col-md-2">Team Size</label>
+    <div class="col-md-8 col-12">
+        <select name="team_size" id="team_size" class="form-control select2" autocomplete="false">
+            @foreach (['local_size' => 'Local Team Size', 'diaspora_size' => 'Diaspora Team Size', 'total_size' => 'Total Team Size'] as $key => $item)
+                <option value="{{ $key }}" {{ @$programme->team_size == $key? 'selected' : '' }}>{{ $item }}</option>
             @endforeach
         </select>   
     </div>
@@ -126,10 +136,13 @@
             ['#score', '#target_amount', '#amount_perc', '#amount_perc_by']
             .forEach(v => $(v).attr('required', false));
         }
+
         if (this.value == 'Attendance') {
             $('#include_choir').parents('div.row').removeClass('d-none');
+            $('#team_size').parents('div.row').removeClass('d-none');
         } else {
             $('#include_choir').parents('div.row').addClass('d-none');
+            $('#team_size').parents('div.row').addClass('d-none');
         }
     });
     $('#metric').change();
