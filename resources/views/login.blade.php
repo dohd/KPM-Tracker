@@ -86,7 +86,7 @@
                 </div>
               </div>
               <div class="credits">
-                Designed by <a href="#">Proffer Systems</a>
+                Designed by <a href="#">Dojotech Solutions</a>
               </div>
             </div>
           </div>
