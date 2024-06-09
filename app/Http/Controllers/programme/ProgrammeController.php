@@ -52,7 +52,8 @@ class ProgrammeController extends Controller
 
         try {     
             $input = $request->except('_token');
-            foreach ($request->except('name', 'metric', 'memo', 'compute_type') as $key => $value) {
+            $date_num_vars = $request->except('name', 'metric', 'memo', 'compute_type', 'include_choir', 'team_size');
+            foreach ($date_num_vars as $key => $value) {
                 if (in_array($key, ['period_from', 'period_to', 'amount_perc_by'])) $input[$key] = databaseDate($value);
                 else $input[$key] = numberClean($value);
             }
@@ -64,7 +65,7 @@ class ProgrammeController extends Controller
                     throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
                 }
             }
-
+            
             Programme::create($input);
 
             return redirect(route('programmes.index'))->with(['success' => 'Programme created successfully']);
@@ -116,7 +117,8 @@ class ProgrammeController extends Controller
 
         try {    
             $input = $request->except('_token');
-            foreach ($request->except('name', 'metric', 'memo', 'compute_type') as $key => $value) {
+            $date_num_vars = $request->except('name', 'metric', 'memo', 'compute_type', 'include_choir', 'team_size');
+            foreach ($date_num_vars as $key => $value) {
                 if (in_array($key, ['period_from', 'period_to', 'amount_perc_by'])) $input[$key] = databaseDate($value);
                 else $input[$key] = numberClean($value);
             }
@@ -128,7 +130,7 @@ class ProgrammeController extends Controller
                     throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
                 }
             }
-
+            
             $programme->update($input); 
 
             return redirect(route('programmes.index'))->with(['success' => 'Programme updated successfully']);

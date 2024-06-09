@@ -4,7 +4,7 @@
             <tr>
                 <th>No.</th>
                 <th>Team Name</th>
-                <th>Team Count</th>
+                <th>Team Size</th>
                 <th>Total Team Att.</th>
                 @if ($input['programme_include_choir'])
                     <th>Total Average Att.</th>
