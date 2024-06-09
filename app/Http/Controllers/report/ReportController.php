@@ -43,14 +43,18 @@ class ReportController extends Controller
                 ->whereIn('assign_scores.id', $assigned_scores->pluck('id')->toArray())
                 ->groupBy('programme_id')
                 ->get();
-            // apply max aggregate score limit
+            
             foreach ($team->programme_scores as $i => $team_prog_score) {
                 $programme = Programme::find($team_prog_score->programme_id);
+                // apply max aggregate score limit
                 if ($programme->max_aggr_score && $team_prog_score->total > $programme->max_aggr_score) {
                     $team->programme_scores[$i]['total'] = $programme->max_aggr_score;
                 }
+                // allow decimals for only choir programmes
+                if (!$programme->include_choir) $team->programme_scores[$i]['total'] = round($team_prog_score->total);
             }
             $team->programme_score_total = $team->programme_scores->sum('total');
+            $team->programme_score_total = round($team->programme_score_total);
             $teams[$key] = $team;
         }
         
