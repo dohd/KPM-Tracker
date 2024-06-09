@@ -22,3 +22,14 @@
         {{ Form::text('phone', null, ['class' => 'form-control', 'required' => 'required']) }}
     </div>
 </div>
+<div class="row mb-3">
+    <label for="user_type" class="col-md-2">User Type</label>
+    <div class="col-md-6 col-12">
+        <select name="user_type" id="user_type" class="form-control select2" data-placeholder="Choose User Type" autocomplete="false" required>
+            <option value=""></option>
+            @foreach (['Admin' => 'Chairperson', 'Standard' => 'Team Lead'] as $key => $item)
+                <option value="{{ $key }}" {{ @$user_profile->user_type == $key? 'selected' : '' }}>{{ $item }}</option>
+            @endforeach
+        </select>   
+    </div>
+</div>

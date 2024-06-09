@@ -28,6 +28,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'is_active',
+        'user_type',
         'created_by',
         'ins'
     ];

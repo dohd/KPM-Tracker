@@ -48,6 +48,7 @@ class UserProfileController extends Controller
             'lname' => 'required',
             'email' => ['required', Rule::unique('users')->ignore(auth()->user()->id)],
             'phone' => 'required',
+            'user_type' => 'required',
         ]);
 
         try {           
@@ -112,14 +113,16 @@ class UserProfileController extends Controller
                 'lname' => 'required',
                 'email' => ['required', Rule::unique('users')->ignore($user_profile->id)],
                 'phone' => 'required',
+                'user_type' => 'required',
             ]);
     
             try {
                 DB::beginTransaction();
                 
-                $input = $request->only(['fname', 'lname', 'email', 'phone']);
+                $input = $request->only(['fname', 'lname', 'email', 'phone', 'user_type']);
                 // $role = Role::find($input['role_id']);
                 // $user_profile->syncRoles([$role->name]);
+                // dd($input);
                 $user_profile->update($input);
                 
                 DB::commit();
