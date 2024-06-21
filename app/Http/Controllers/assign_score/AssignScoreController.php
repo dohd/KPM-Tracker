@@ -274,7 +274,7 @@ class AssignScoreController extends Controller
                         $local_sizes_sum = array_reduce($team_local_sizes, fn($prev, $curr) => $prev+$curr, 0);
                         $diasp_sizes_sum = array_reduce($team_diasp_sizes, fn($prev, $curr) => $prev+$curr, 0);
                         if ($programme->team_size == 'total_size' && $team_local_sizes && $team_diasp_sizes) {
-                            $team->total = ceil($local_sizes_sum / count($team_local_sizes)) + ceil($diasp_sizes_sum / count($team_diasp_sizes));
+                            $team->total = ceil(($local_sizes_sum + $diasp_sizes_sum) / count($team_local_sizes));
                         } elseif ($programme->team_size == 'diaspora_size' && $team_diasp_sizes) {
                             $team->total = ceil($diasp_sizes_sum / count($team_diasp_sizes));
                         } elseif ($team_local_sizes) {
