@@ -1,10 +1,10 @@
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title">Monthly Team Scores</h5>
+        <h5 class="card-title">Monthly Team Scores <input type="button" value="Reset" class="btn btn-outline-danger float-end" id="reset"></h5>
         <div class="card-content p-2">
             <div class="row mb-3">
-                <label for="programme" class="col-md-2">Programme</label>
-                <div class="col-md-8 col-12">
+                <label for="programme" class="col-md-2">Team Programme</label>
+                <div class="col-md-7 col-12">
                     <select id="programme" class="form-control select2" data-placeholder="Choose Programme" required>
                         <option value=""></option>
                         @foreach ($programmes as $row)
@@ -14,10 +14,9 @@
                         @endforeach
                     </select>   
                 </div>
-            </div>
-            <div class="text-center">
-                <input type="button" value="Reset" class="btn btn-danger" id="reset">
-                <input type="button" value="Compute" class="btn btn-success" id="load">
+                <div class="col-md-2">
+                    <input type="button" value="Compute Scores" class="btn btn-success" id="load">
+                </div>
             </div>
         </div>
     </div>

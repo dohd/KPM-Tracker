@@ -67,8 +67,10 @@ class Attendance extends Model
             return $instance;
         });
 
-        static::addGlobalScope('ins', function ($builder) {
-            // $builder->where('ins', '=', auth()->user()->ins);
+        static::addGlobalScope('team_id', function ($builder) {
+            if (in_array(auth()->user()->user_type, ['captain', 'member'])) {
+                $builder->where('team_id', auth()->user()->team_id);
+            }
         });
     }
 }

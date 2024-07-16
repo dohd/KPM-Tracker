@@ -23,12 +23,28 @@
     </div>
 </div>
 <div class="row mb-3">
-    <label for="user_type" class="col-md-2">User Type</label>
+    <label for="user_type" class="col-md-2">Role<span class="text-danger">*</span></label>
     <div class="col-md-6 col-12">
-        <select name="user_type" id="user_type" class="form-control select2" data-placeholder="Choose User Type" autocomplete="false" required>
+        <select name="user_type" id="user_type" class="form-control select2" data-placeholder="Choose Role" autocomplete="false" required>
+            @foreach (['chair', 'captain', 'member'] as $item)
+                @if (@$user_profile->user_type)
+                    <option value="{{ $item }}" {{ $user_profile->user_type == $item? 'selected' : '' }}>{{ ucfirst($item) }}</option>
+                @else
+                    <option value="{{ $item }}" {{  $item == 'member'? 'selected' : '' }}>{{ ucfirst($item) }}</option>
+                @endif
+            @endforeach
+        </select>   
+    </div>
+</div>
+<div class="row mb-3">
+    <label for="user_type" class="col-md-2">Team</label>
+    <div class="col-md-6 col-12">
+        <select name="team_id" id="team" class="form-control select2" data-placeholder="Choose Team" autocomplete="false">
             <option value=""></option>
-            @foreach (['Admin' => 'Chairperson', 'Standard' => 'Team Lead'] as $key => $item)
-                <option value="{{ $key }}" {{ @$user_profile->user_type == $key? 'selected' : '' }}>{{ $item }}</option>
+            @foreach ($teams as $team)
+                <option value="{{ $team->id }}" {{ @$user_profile->team_id == $team->id? 'selected' : '' }}>
+                    {{ tidCode('', $team->tid) }} - {{ $team->name }}
+                </option>
             @endforeach
         </select>   
     </div>

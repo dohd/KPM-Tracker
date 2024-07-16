@@ -4,6 +4,7 @@ namespace App\Http\Controllers\user_profile;
 
 use App\Http\Controllers\Controller;
 use App\Models\role\Role;
+use App\Models\team_label\TeamLabel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +33,8 @@ class UserProfileController extends Controller
     public function create()
     {
         $roles = Role::get();
-        return view('user_profiles.create', compact('roles'));
+        $teams = TeamLabel::get();
+        return view('user_profiles.create', compact('roles', 'teams'));
     }
 
     /**
@@ -44,11 +46,11 @@ class UserProfileController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'user_type' => 'required',
             'fname' => 'required',
             'lname' => 'required',
             'email' => ['required', Rule::unique('users')->ignore(auth()->user()->id)],
             'phone' => 'required',
-            'user_type' => 'required',
         ]);
 
         try {           
@@ -88,7 +90,8 @@ class UserProfileController extends Controller
     public function edit(User $user_profile)
     {
         $roles = Role::get();
-        return view('user_profiles.edit', compact('user_profile', 'roles'));
+        $teams = TeamLabel::get();
+        return view('user_profiles.edit', compact('user_profile', 'roles', 'teams'));
     }
 
     /**
@@ -109,17 +112,17 @@ class UserProfileController extends Controller
             }
         } else {
             $request->validate([
+                'user_type' => 'required',
                 'fname' => 'required',
                 'lname' => 'required',
                 'email' => ['required', Rule::unique('users')->ignore($user_profile->id)],
                 'phone' => 'required',
-                'user_type' => 'required',
             ]);
     
             try {
                 DB::beginTransaction();
                 
-                $input = $request->only(['fname', 'lname', 'email', 'phone', 'user_type']);
+                $input = $request->only(['fname', 'lname', 'email', 'phone', 'user_type', 'team_id']);
                 // $role = Role::find($input['role_id']);
                 // $user_profile->syncRoles([$role->name]);
                 // dd($input);

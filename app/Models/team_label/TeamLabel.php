@@ -65,8 +65,10 @@ class TeamLabel extends Model
             return $instance;
         });
 
-        static::addGlobalScope('ins', function ($builder) {
-            // $builder->where('ins', auth()->user()->ins);
+        static::addGlobalScope('id', function ($builder) {
+            if (in_array(auth()->user()->user_type, ['captain', 'member'])) {
+                $builder->where('id', auth()->user()->team_id);
+            }
         });
     }
 }

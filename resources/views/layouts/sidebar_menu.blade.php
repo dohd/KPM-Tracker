@@ -8,7 +8,7 @@
     </li>
     <!-- End Dashboard Nav -->
 
-    @if (auth()->user()->user_type == 'Admin')
+    @if (auth()->user()->user_type == 'chair')
       <li class="nav-heading">Programme Management</li>
       <!-- metric input -->
       <li class="nav-item">
@@ -58,7 +58,7 @@
       </li>
     @endif
 
-    @if (auth()->user()->user_type == 'Standard')
+    @if (in_array(auth()->user()->user_type, ['captain', 'member']))
       <li class="nav-heading">Programme Management</li>
       <!-- metric input -->
       <li class="nav-item">
@@ -75,13 +75,15 @@
         </a>
       </li>
 
-      <li class="nav-heading">Account Settings</li>
-      <!-- teams -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ route('team_labels.index') }}">
-          <i class="bi bi-people"></i><span>Team Assignment</span>
-        </a>
-      </li>
+      @if (in_array(auth()->user()->user_type, ['captain']))
+        <li class="nav-heading">Account Settings</li>
+        <!-- teams -->
+        <li class="nav-item">
+          <a class="nav-link collapsed" href="{{ route('team_labels.index') }}">
+            <i class="bi bi-people"></i><span>Team Assignment</span>
+          </a>
+        </li>
+      @endif
     @endif
   </ul>
 </aside>
