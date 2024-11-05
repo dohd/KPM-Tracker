@@ -27,7 +27,7 @@
       <li class="nav-heading">Reports</li>
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
-          <i class="bi bi-table"></i><span>Performance Report</span>
+          <i class="bi bi-table"></i><span>Team Performance</span>
         </a>
       </li>
       
