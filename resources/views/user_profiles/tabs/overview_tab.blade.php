@@ -3,7 +3,7 @@
   @php
     $details = [
       'Full Name' => $user_profile->name,
-      'Company' => @$user_profile->tenant->name,
+      'Organisation' => @$user_profile->tenant->name,
       'Role' => $role->name,
       'Username' => $user_profile->username,
       'Phone' => $user_profile->phone,
