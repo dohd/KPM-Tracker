@@ -15,6 +15,7 @@
                             <th>Full Name</th>
                             <th>Telephone</th>
                             <th>Email</th>
+                            <th>Role</th>
                             <th>Status</th>
                             <th>Action</th>
                           </tr>
@@ -26,6 +27,7 @@
                                     <td>{{ $user->name }}</td>
                                     <td>{{ $user->phone }}</td>
                                     <td>{{ $user->email }}</td>
+                                    <td>{{ ucfirst($user->user_type) }}</td>
                                     <td>{!! $user->is_active_status_budge !!}</td>
                                     <td>{!! $user->action_buttons !!}</td>
                                 </tr>
