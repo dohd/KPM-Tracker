@@ -1,25 +1,31 @@
 @extends('layouts.core')
-@section('title', 'Performance Report')
+@section('title', 'Team Performance')
 
 @section('content')
 <div class="pagetitle">
     <div class="row">
       <div class="col-6">
-        <h1>Performance Report</h1>
+        <h1>Team Performance</h1>
       </div>
     </div>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Performance Report</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Team Performance</a></li>
       </ol>
     </nav>
 </div>
 
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title">Team Performance</h5>
+        <h5 class="card-title mb-0">Team Performance</h5>
         <div class="card-content p-2">
+            <div class="row">
+                <div class="col-md-12 bg-light pt-3 mb-2">
+                    <p>Date range should cover full program period i.e Jan to Dec</p>
+                </div>
+                <hr style="border: none; border-bottom: 2px solid black;">
+            </div>
             {{ Form::open(['route' => 'reports.generate_performance', 'method' => 'POST', 'target' => '_blank']) }}
                 <div class="row mb-3">
                     <label for="date" class="col-md-2">From Date</label>
@@ -44,7 +50,7 @@
                     </div>
                     <div class="col-md-2 col-12">
                         <div class="text-center">
-                            {{ Form::submit('Generate', ['class' => 'btn btn-primary']) }}
+                            {{ Form::submit('Run Report', ['class' => 'btn btn-primary']) }}
                         </div>
                     </div>
                 </div>
