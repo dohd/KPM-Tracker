@@ -3,7 +3,7 @@
 @section('title', 'Metric Input Management')
     
 @section('content')
-    @include('attendances.header')
+    @include('metrics.header')
     <div class="card">
         <div class="card-body">
             <div class="card-content p-2">
@@ -21,9 +21,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($attendances as $i => $row)
+                            @foreach ($metrics as $i => $row)
                                 <tr>
-                                    <th style="height: {{ count($attendances) == 1? '80px': '' }}">{{ $i+1 }}</th>
+                                    <th style="height: {{ count($metrics) == 1? '80px': '' }}">{{ $i+1 }}</th>
                                     <td style="width:10%">{{ dateFormat($row->date) }}</td>
                                     <td>{{ @$row->programme->name }}</td>
                                     @php $metric = @$row->programme->metric @endphp

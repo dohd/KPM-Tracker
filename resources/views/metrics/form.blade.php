@@ -10,7 +10,7 @@
         <select name="programme_id" id="programme" class="form-control select2" data-placeholder="Choose Programme" required>
             <option value=""></option>
             @foreach ($programmes as $row)
-                <option value="{{ $row->id }}" metric="{{ $row->metric ?: 'Finance' }}" {{ $row->id == @$attendance->programme_id? 'selected' : '' }}>
+                <option value="{{ $row->id }}" metric="{{ $row->metric ?: 'Finance' }}" {{ $row->id == @$metric->programme_id? 'selected' : '' }}>
                     {{ tidCode('', $row->tid) }} - {{ $row->name }}
                 </option>
             @endforeach
@@ -23,14 +23,14 @@
         <select name="team_id" id="team" class="form-control select2" data-placeholder="Choose Team" required>
             <option value=""></option>
             @foreach ($teams as $row)
-                <option value="{{ $row->id }}" {{ $row->id == @$attendance->team_id? 'selected' : '' }}>
+                <option value="{{ $row->id }}" {{ $row->id == @$metric->team_id? 'selected' : '' }}>
                     {{ tidCode('', $row->tid) }} - {{ $row->name }}
                 </option>
             @endforeach
         </select>   
     </div>
 </div>
-<!-- attendance metric -->
+<!-- Attendance metric -->
 <div class="metric d-none" key="Attendance">
     <div class="row mb-3">
         <label for="team_total" class="col-md-2">No. of Team</label>
@@ -159,8 +159,8 @@
     $('#programme').change();
 
     // on editing
-    const attendance = @json(@$attendance);
-    if (attendance && attendance.id) {
+    const metric = @json(@$metric);
+    if (metric && metric.id) {
         const isComputed = @json(@$is_computed);
         if (isComputed) {
             $('#date').attr('readonly', true);

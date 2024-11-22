@@ -12,7 +12,7 @@
       <li class="nav-heading">Programme Management</li>
       <!-- metric input -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ route('attendances.index') }}">
+        <a class="nav-link collapsed" href="{{ route('metrics.index') }}">
           <i class="bi bi-person-lines-fill"></i></i><span>Metric Input</span>
         </a>
       </li>
@@ -62,7 +62,7 @@
       <li class="nav-heading">Programme Management</li>
       <!-- metric input -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ route('attendances.index') }}">
+        <a class="nav-link collapsed" href="{{ route('metrics.index') }}">
           <i class="bi bi-person-lines-fill"></i></i><span>Metric Input</span>
         </a>
       </li>

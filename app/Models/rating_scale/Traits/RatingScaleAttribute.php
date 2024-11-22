@@ -39,7 +39,7 @@ trait RatingScaleAttribute
     public function getScaleTypeTextAttribute()
     {
         switch ($this->scale_type) {
-            case 'attendance_size': return 'Attendance Size';
+            case 'metric_size': return 'Metric Size';
             case 'generic_count': return 'Generic Count';
         }
     }

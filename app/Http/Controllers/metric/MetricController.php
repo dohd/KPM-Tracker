@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\attendance;
+namespace App\Http\Controllers\metric;
 
 use App\Http\Controllers\Controller;
 use App\Models\assign_score\AssignScore;
-use App\Models\attendance\Attendance;
+use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\team_label\TeamLabel;
 use Illuminate\Http\Request;
 
-class AttendanceController extends Controller
+class MetricController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,9 +18,9 @@ class AttendanceController extends Controller
      */
     public function index()
     {
-        $attendances = Attendance::orderBy('id', 'desc')->get();
+        $metrics = Metric::orderBy('id', 'desc')->get();
 
-        return view('attendances.index', compact('attendances'));
+        return view('metrics.index', compact('metrics'));
     }
 
     /**
@@ -33,7 +33,7 @@ class AttendanceController extends Controller
         $teams = TeamLabel::get();
         $programmes = Programme::get();
 
-        return view('attendances.create', compact('teams', 'programmes'));
+        return view('metrics.create', compact('teams', 'programmes'));
     }
 
     /**
@@ -74,21 +74,21 @@ class AttendanceController extends Controller
             }
 
             // duplicate entry
-            $is_exists = Attendance::whereDate('date', $input['date'])
+            $is_exists = Metric::whereDate('date', $input['date'])
                 ->where(['programme_id' => $input['programme_id'], 'team_id' => $input['team_id']])
                 ->exists();
             if ($is_exists) return errorHandler('Metric input exists for a similar date');
 
             // duplicate meeting
-            $is_exists = Attendance::whereHas('programme', fn($q) => $q->where('metric', 'Online-Meeting'))
+            $is_exists = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Online-Meeting'))
                 ->whereMonth('date', date('m', strtotime($input['date'])))
                 ->where(['programme_id' => $input['programme_id'], 'team_id' => $input['team_id']])
                 ->exists();
             if ($is_exists) return errorHandler('Metric input exists for a similar month');
                 
-            Attendance::create($input);
+            Metric::create($input);
 
-            return redirect(route('attendances.index'))->with(['success' => 'Metric Input created successfully']);
+            return redirect(route('metrics.index'))->with(['success' => 'Metric Input created successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error creating Metric Input! ', $th);
         }
@@ -100,9 +100,9 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Attendance $attendance)
+    public function show(Metric $metric)
     {
-        return view('attendances.view', compact('attendance'));
+        return view('metrics.view', compact('metric'));
     }
 
     /**
@@ -111,16 +111,16 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Attendance $attendance)
+    public function edit(Metric $metric)
     {
         $teams = TeamLabel::get();
         $programmes = Programme::get();
-        $is_computed = AssignScore::where(['team_id' => $attendance->team_id,'programme_id' => $attendance->programme_id])
-            ->whereDate('date_from', '>=', $attendance->date)
-            ->whereDate('date_to', '<=', $attendance->date)
+        $is_computed = AssignScore::where(['team_id' => $metric->team_id,'programme_id' => $metric->programme_id])
+            ->whereDate('date_from', '>=', $metric->date)
+            ->whereDate('date_to', '<=', $metric->date)
             ->exists();
         
-        return view('attendances.edit', compact('attendance', 'teams', 'programmes', 'is_computed'));
+        return view('metrics.edit', compact('metric', 'teams', 'programmes', 'is_computed'));
     }
 
     /**
@@ -130,7 +130,7 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Attendance $attendance)
+    public function update(Request $request, Metric $metric)
     { 
         $request->validate([
             'date' => 'required',
@@ -162,23 +162,23 @@ class AttendanceController extends Controller
             }
 
             // duplicate entry
-            $is_exists = Attendance::where('id', '!=', $attendance->id)
+            $is_exists = Metric::where('id', '!=', $metric->id)
                 ->whereDate('date', $input['date'])
                 ->where(['programme_id' => $input['programme_id'], 'team_id' => $input['team_id']])
                 ->exists();
             if ($is_exists) return errorHandler('Metric input exists for a similar date');
 
             // duplicate meeting
-            $is_exists = Attendance::where('id', '!=', $attendance->id)
+            $is_exists = Metric::where('id', '!=', $metric->id)
                 ->whereHas('programme', fn($q) => $q->where('metric', 'Online-Meeting'))
                 ->whereMonth('date', date('m', strtotime($input['date'])))
                 ->where(['programme_id' => $input['programme_id'], 'team_id' => $input['team_id']])
                 ->exists();
             if ($is_exists) return errorHandler('Metric input exists for a similar month');
 
-            $attendance->update($input);
+            $metric->update($input);
 
-            return redirect(route('attendances.index'))->with(['success' => 'Metric Input updated successfully']);              
+            return redirect(route('metrics.index'))->with(['success' => 'Metric Input updated successfully']);              
         } catch (\Throwable $th) {
             return errorHandler('Error updating Metric Input! ', $th);
         }
@@ -190,11 +190,11 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Attendance $attendance)
+    public function destroy(Metric $metric)
     {
         try {
-            $attendance->delete();
-            return redirect(route('attendances.index'))->with(['success' => 'Metric Input deleted successfully']);
+            $metric->delete();
+            return redirect(route('metrics.index'))->with(['success' => 'Metric Input deleted successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error deleting Metric Input! ', $th);
         }

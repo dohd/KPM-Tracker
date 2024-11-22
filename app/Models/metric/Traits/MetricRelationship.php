@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\attendance\Traits;
+namespace App\Models\metric\Traits;
 
 use App\Models\programme\Programme;
 use App\Models\team_label\TeamLabel;
 
-trait AttendanceRelationship
+trait MetricRelationship
 {
     public function team()
     {

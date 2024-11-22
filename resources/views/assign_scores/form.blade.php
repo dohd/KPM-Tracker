@@ -8,7 +8,7 @@
                     <select id="programme" class="form-control select2" data-placeholder="Choose Programme" required>
                         <option value=""></option>
                         @foreach ($programmes as $row)
-                            <option value="{{ $row->id }}" {{ $row->id == @$attendance->programme_id? 'selected' : '' }}>
+                            <option value="{{ $row->id }}" {{ $row->id == @$metric->programme_id? 'selected' : '' }}>
                                 {{ tidCode('', $row->tid) }} - {{ $row->name }}
                             </option>
                         @endforeach

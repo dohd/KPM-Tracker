@@ -3,8 +3,8 @@
 use App\Http\Controllers\assign_score\AssignScoreController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\attendance\AttendanceController;
 use App\Http\Controllers\config\ConfigController;
+use App\Http\Controllers\metric\MetricController;
 use App\Http\Controllers\pdf\PdfController;
 use App\Http\Controllers\programme\ProgrammeController;
 use App\Http\Controllers\report\ReportController;
@@ -34,8 +34,8 @@ Route::group(['middleware' => 'auth'], function() {
     // Dashboard
     Route::get('home', [HomeController::class, 'index'])->name('home');
 
-    // Attendance
-    Route::resource('attendances', AttendanceController::class);
+    // Metrics
+    Route::resource('metrics', MetricController::class);
 
     // Assign Scores
     Route::post('assign_scores/load_scores_datatable', [AssignScoreController::class, 'load_scores_datatable'])->name('assign_scores.load_scores_datatable');

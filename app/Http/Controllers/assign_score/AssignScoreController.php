@@ -4,7 +4,7 @@ namespace App\Http\Controllers\assign_score;
 
 use App\Http\Controllers\Controller;
 use App\Models\assign_score\AssignScore;
-use App\Models\attendance\Attendance;
+use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\rating_scale\RatingScale;
 use App\Models\team_label\TeamLabel;
@@ -170,11 +170,11 @@ class AssignScoreController extends Controller
         }
         
         $scale = RatingScale::where('is_active', 1)->first();
-        $attendances = Attendance::where('programme_id', $programme->id)
+        $metrics = Metric::where('programme_id', $programme->id)
             ->whereBetween('date', [$input['date_from'], $input['date_to']])
             ->orderBy('date', 'ASC')
             ->get();
-        $teams = TeamLabel::whereIn('id', $attendances->pluck('team_id')->toArray())->get();   
+        $teams = TeamLabel::whereIn('id', $metrics->pluck('team_id')->toArray())->get();   
         
         switch ($programme->metric) {
             case 'Finance':
@@ -182,12 +182,12 @@ class AssignScoreController extends Controller
                     $team->points = 0;
                     $team->extra_points = 0;
                     $team->accrued_amount = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            $date = Carbon::parse($attendance->date);
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            $date = Carbon::parse($metric->date);
                             $prog_date = Carbon::parse($programme->amount_perc_by);
                             if ($date->lte($prog_date)) {
-                                $team->accrued_amount += $attendance->grant_amount;
+                                $team->accrued_amount += $metric->grant_amount;
                             }
                         }
                     }
@@ -210,19 +210,19 @@ class AssignScoreController extends Controller
                     $teams[$key] = $team;
                 }
                 break;
-            case 'Attendance':
-                if ($attendances->count()) {
-                    $dates = array_unique($attendances->pluck('date')->toArray());
+            case 'Metric':
+                if ($metrics->count()) {
+                    $dates = array_unique($metrics->pluck('date')->toArray());
                     $days = count($dates);
                 }
                 foreach ($teams as $key => $team) {
                     $team->days = @$days ?: 1;
                     $team->team_total_att = 0;
                     $team->guest_total_att = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            $team->team_total_att += $attendance->team_total;
-                            $team->guest_total_att += $attendance->guest_total;
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            $team->team_total_att += $metric->team_total;
+                            $team->guest_total_att += $metric->guest_total;
                         }
                     }
 
@@ -305,11 +305,11 @@ class AssignScoreController extends Controller
                 foreach ($teams as $key => $team) {
                     $team->no_meetings = 0;
                     $team->no_leaders = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            if ($attendance->retreat_leader_total >= $scale->retreat_leader_no) {
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            if ($metric->retreat_leader_total >= $scale->retreat_leader_no) {
                                 $team->no_meetings++;
-                                $team->no_leaders += $attendance->retreat_leader_total;
+                                $team->no_leaders += $metric->retreat_leader_total;
                             }
                         }
                     }
@@ -324,8 +324,8 @@ class AssignScoreController extends Controller
             case 'Online-Meeting': 
                 foreach ($teams as $key => $team) {
                     $team->no_meetings = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
                             $team->no_meetings++;
                         }
                     }
@@ -340,9 +340,9 @@ class AssignScoreController extends Controller
             case 'Team-Bonding': 
                 foreach ($teams as $key => $team) {
                     $team->tb_activities_total = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            $team->tb_activities_total += $attendance->activities_total;
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            $team->tb_activities_total += $metric->activities_total;
                         }
                     }
                     $team->points = 0;
@@ -360,9 +360,9 @@ class AssignScoreController extends Controller
             case 'Summit-Meeting': 
                 foreach ($teams as $key => $team) {
                     $team->summit_meetings_total = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            if ($attendance->summit_leader_total >= $scale->summit_leaders_no) {
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            if ($metric->summit_leader_total >= $scale->summit_leaders_no) {
                                 $team->summit_meetings_total++;
                             }
                         }
@@ -378,9 +378,9 @@ class AssignScoreController extends Controller
             case 'Member-Recruitment': 
                 foreach ($teams as $key => $team) {
                     $team->recruits_total = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            $team->recruits_total += $attendance->recruit_total;
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            $team->recruits_total += $metric->recruit_total;
                         }
                     }
                     $team->points = 0;
@@ -397,9 +397,9 @@ class AssignScoreController extends Controller
             case 'New-Initiative': 
                 foreach ($teams as $key => $team) {
                     $team->initiatives_total = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            $team->initiatives_total += $attendance->initiative_total;
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            $team->initiatives_total += $metric->initiative_total;
                         }
                     }
                     $team->points = 0;
@@ -417,9 +417,9 @@ class AssignScoreController extends Controller
             case 'Team-Mission': 
                 foreach ($teams as $key => $team) {
                     $team->missions_total = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            $team->missions_total += $attendance->team_mission_total;
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            $team->missions_total += $metric->team_mission_total;
                         }
                     }
                     $team->points = 0;
@@ -433,9 +433,9 @@ class AssignScoreController extends Controller
             case 'Choir-Member': 
                 foreach ($teams as $key => $team) {
                     $team->choir_members_total = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            $team->choir_members_total += $attendance->choir_member_total;
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            $team->choir_members_total += $metric->choir_member_total;
                         }
                     }
                     $team->points = 0;
@@ -449,9 +449,9 @@ class AssignScoreController extends Controller
             case 'Other-Activities': 
                 foreach ($teams as $key => $team) {
                     $team->other_activities_total = 0;
-                    foreach ($attendances as $i => $attendance) {
-                        if ($attendance->team_id == $team->id) {
-                            $team->other_activities_total += $attendance->other_activities_total;
+                    foreach ($metrics as $i => $metric) {
+                        if ($metric->team_id == $team->id) {
+                            $team->other_activities_total += $metric->other_activities_total;
                         }
                     }
                     $team->points = 0;

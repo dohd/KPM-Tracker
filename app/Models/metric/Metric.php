@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Models\attendance;
+namespace App\Models\metric;
 
-use App\Models\attendance\Traits\AttendanceAttribute;
-use App\Models\attendance\Traits\AttendanceRelationship;
+use App\Models\metric\Traits\MetricAttribute;
+use App\Models\metric\Traits\MetricRelationship;
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Attendance extends Model
+class Metric extends Model
 {
-    use ModelTrait, AttendanceAttribute, AttendanceRelationship;    
+    use ModelTrait, MetricAttribute, MetricRelationship;    
 
     /**
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'attendance';
+    protected $table = 'metrics';
 
     /**
      * Mass Assignable fields of model

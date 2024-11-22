@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models\attendance\Traits;
+namespace App\Models\metric\Traits;
 
-trait AttendanceAttribute
+trait MetricAttribute
 {
     /**
      * Action Button Attribute to show in grid
@@ -11,9 +11,9 @@ trait AttendanceAttribute
     public function getActionButtonsAttribute()
     {
         return $this->getButtonWrapperAttribute(null,
-            // $this->getViewButtonAttribute('attendances.show', 'view-attendance'),
-            $this->getEditButtonAttribute('attendances.edit', 'edit-attendance'),
-            $this->getDeleteButtonAttribute('attendances.destroy', 'delete-attendance'),
+            // $this->getViewButtonAttribute('metrics.show', 'view-metric'),
+            $this->getEditButtonAttribute('metrics.edit', 'edit-metric'),
+            $this->getDeleteButtonAttribute('metrics.destroy', 'delete-metric'),
         );
     }
 
