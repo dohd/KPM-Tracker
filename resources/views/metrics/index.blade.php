@@ -1,6 +1,6 @@
 @extends('layouts.core')
 
-@section('title', 'Metric Input Management')
+@section('title', 'Metrics Management')
     
 @section('content')
     @include('metrics.header')

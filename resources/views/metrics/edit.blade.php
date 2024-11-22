@@ -1,12 +1,12 @@
 @extends('layouts.core')
 
-@section('title', 'Edit | Metric Input Management')
+@section('title', 'Edit | Metrics Management')
     
 @section('content')
     @include('metrics.header')
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Metric Input Details</h5>
+            <h5 class="card-title">Metric Details</h5>
             <div class="card-content p-2">
                 {{ Form::model($metric, ['route' => ['metrics.update', $metric], 'method' => 'PATCH', 'files' => true, 'class' => 'form']) }}
                     @include('metrics.form')

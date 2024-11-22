@@ -1,12 +1,12 @@
 @extends('layouts.core')
 
-@section('title', 'Create | Metric Input Management')
+@section('title', 'Create | Metrics Management')
     
 @section('content')
     @include('metrics.header')
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Metric Input Details</h5>
+            <h5 class="card-title">Metric Details</h5>
             <div class="card-content p-2">
                 {{ Form::open(['route' => 'metrics.store', 'method' => 'POST', 'files' => true, 'class' => 'form']) }}
                     @include('metrics.form')
