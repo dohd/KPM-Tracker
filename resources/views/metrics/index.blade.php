@@ -14,8 +14,9 @@
                                 <th>#No</th>
                                 <th>Date</th>
                                 <th>Program</th>
-                                <th>Amount</th>
+                                {{-- <th>Amount</th> --}}
                                 <th>Team</th>
+                                <th>Status</th>
                                 <th>Memo</th>
                                 <th>Action</th>
                             </tr>
@@ -26,13 +27,14 @@
                                     <th style="height: {{ count($metrics) == 1? '80px': '' }}">{{ $i+1 }}</th>
                                     <td style="width:10%">{{ dateFormat($row->date) }}</td>
                                     <td>{{ @$row->programme->name }}</td>
-                                    @php $metric = @$row->programme->metric @endphp
+                                    {{-- @php $metric = @$row->programme->metric @endphp
                                     @if (in_array($metric, ['Finance', 'Team-Mission']))
                                         <td>{{ $metric == 'Finance'? numberFormat($row->grant_amount) : numberFormat($row->team_mission_amount) }}</td>
                                     @else
                                         <td></td>
-                                    @endif
+                                    @endif --}}
                                     <td>{{ @$row->team->name }}</td>
+                                    <td>{!! $row->in_score? '<span class="text-success">Scored</span>' : '<span class="text-secondary">N/Score</span>' !!}</td>
                                     <td>{{ @$row->memo }}</td>
                                     <td>{!! $row->action_buttons !!}</td>
                                 </tr>

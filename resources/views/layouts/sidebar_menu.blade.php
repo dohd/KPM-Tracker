@@ -13,7 +13,7 @@
       <!-- metric input -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{ route('metrics.index') }}">
-          <i class="bi bi-person-lines-fill"></i></i><span>Metric Input</span>
+          <i class="bi bi-person-lines-fill"></i></i><span>Manage Metrics</span>
         </a>
       </li>
       <!-- assign scores -->
