@@ -10,7 +10,7 @@ use App\Http\Controllers\programme\ProgrammeController;
 use App\Http\Controllers\report\ReportController;
 use App\Http\Controllers\score_card\ScoreCardController;
 use App\Http\Controllers\storage\StorageController;
-use App\Http\Controllers\team_label\TeamLabelController;
+use App\Http\Controllers\team\TeamController;
 use App\Http\Controllers\user_profile\UserProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -45,7 +45,7 @@ Route::group(['middleware' => 'auth'], function() {
 
     // key Parameters
     Route::resource('programmes', ProgrammeController::class);
-    Route::resource('team_labels', TeamLabelController::class);
+    Route::resource('teams', TeamController::class);
     Route::resource('score_cards', ScoreCardController::class);
 
     // User Profiles

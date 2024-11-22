@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Models\team_label;
+namespace App\Models\team;
 
 use App\Models\ModelTrait;
-use App\Models\team_label\Traits\TeamLabelAttribute;
-use App\Models\team_label\Traits\TeamLabelRelationship;
+use App\Models\team\Traits\TeamAttribute;
+use App\Models\team\Traits\TeamRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class TeamLabel extends Model
+class Team extends Model
 {
-    use ModelTrait, TeamLabelAttribute, TeamLabelRelationship;    
+    use ModelTrait, TeamAttribute, TeamRelationship;    
 
     /**
      * The database table used by the model.

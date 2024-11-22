@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Models\team_label\Traits;
+namespace App\Models\team\Traits;
 
 use App\Models\assign_score\AssignScore;
 use App\Models\programme\Programme;
+use App\Models\team\TeamSize;
 
-trait TeamLabelRelationship
+trait TeamRelationship
 {
     public function programmes()
     {
@@ -15,5 +16,10 @@ trait TeamLabelRelationship
     public function assigned_scores()
     {
         return $this->hasMany(AssignScore::class, 'team_id');
+    }
+
+    public function team_sizes()
+    {
+        return $this->hasMany(TeamSize::class);
     }
 }

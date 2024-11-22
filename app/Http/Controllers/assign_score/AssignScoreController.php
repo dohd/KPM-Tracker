@@ -7,7 +7,7 @@ use App\Models\assign_score\AssignScore;
 use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\rating_scale\RatingScale;
-use App\Models\team_label\TeamLabel;
+use App\Models\team\Team;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -182,7 +182,7 @@ class AssignScoreController extends Controller
             ->whereBetween('date', [$input['date_from'], $input['date_to']])
             ->orderBy('date', 'ASC')
             ->get();
-        $teams = TeamLabel::whereIn('id', $metrics->pluck('team_id')->toArray())->get();   
+        $teams = Team::whereIn('id', $metrics->pluck('team_id')->toArray())->get();   
         
         switch ($programme->metric) {
             case 'Finance':

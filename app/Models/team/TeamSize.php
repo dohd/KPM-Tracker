@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\team_label;
+namespace App\Models\team;
 
 use App\Models\ModelTrait;
 use Illuminate\Database\Eloquent\Model;

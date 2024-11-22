@@ -4,7 +4,7 @@ namespace App\Http\Controllers\user_profile;
 
 use App\Http\Controllers\Controller;
 use App\Models\role\Role;
-use App\Models\team_label\TeamLabel;
+use App\Models\team\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +33,7 @@ class UserProfileController extends Controller
     public function create()
     {
         $roles = Role::get();
-        $teams = TeamLabel::get();
+        $teams = Team::get();
         return view('user_profiles.create', compact('roles', 'teams'));
     }
 
@@ -90,7 +90,7 @@ class UserProfileController extends Controller
     public function edit(User $user_profile)
     {
         $roles = Role::get();
-        $teams = TeamLabel::get();
+        $teams = Team::get();
         return view('user_profiles.edit', compact('user_profile', 'roles', 'teams'));
     }
 

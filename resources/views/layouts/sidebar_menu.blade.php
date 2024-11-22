@@ -46,7 +46,7 @@
       </li>
       <!-- teams -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ route('team_labels.index') }}">
+        <a class="nav-link collapsed" href="{{ route('teams.index') }}">
           <i class="bi bi-people"></i><span>Team Management</span>
         </a>
       </li>
@@ -79,7 +79,7 @@
         <li class="nav-heading">Account Settings</li>
         <!-- teams -->
         <li class="nav-item">
-          <a class="nav-link collapsed" href="{{ route('team_labels.index') }}">
+          <a class="nav-link collapsed" href="{{ route('teams.index') }}">
             <i class="bi bi-people"></i><span>Team Assignment</span>
           </a>
         </li>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\report;
 use App\Http\Controllers\Controller;
 use App\Models\assign_score\AssignScore;
 use App\Models\programme\Programme;
-use App\Models\team_label\TeamLabel;
+use App\Models\team\Team;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -36,7 +36,7 @@ class ReportController extends Controller
         ->whereDate('date_to', '<=', $input['date_to'])
         ->get(['id', 'programme_id', 'team_id']);
         
-        $teams = TeamLabel::whereIn('id', $assigned_scores->pluck('team_id')->toArray())->get(['id', 'name']);
+        $teams = Team::whereIn('id', $assigned_scores->pluck('team_id')->toArray())->get(['id', 'name']);
         foreach ($teams as $key => $team) {
             $team->programme_scores = $team->assigned_scores()
                 ->selectRaw('programme_id, SUM(net_points) as total')

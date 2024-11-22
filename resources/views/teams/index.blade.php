@@ -1,8 +1,8 @@
 @extends('layouts.core')
-@section('title', 'Teams Management')
+@section('title', 'Team Management')
     
 @section('content')
-    @include('team_labels.header')
+    @include('teams.header')
     <div class="card">
         <div class="card-body">
             <div class="card-content p-2">
@@ -19,7 +19,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                            @foreach ($team_labels as $i => $team)
+                            @foreach ($teams as $i => $team)
                                 <tr>
                                     <th scope="row">{{ $i+1 }}</th>
                                     <th>{{ tidCode('', $team->tid) }}</th>

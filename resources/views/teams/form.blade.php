@@ -30,9 +30,9 @@
         <tbody>
             @foreach (range(1,12) as $i => $item)
                 <tr>
-                    <td><input type="date" name="start_date[]" value="{{ @(explode(',', $team_label->start_date)[$i]) }}" class="form-control"></td>
-                    <td><input type="number" name="local_size[]" value="{{ @(explode(',', $team_label->local_size)[$i]) }}" class="form-control" placeholder="Local Size"></td>
-                    <td><input type="number" name="diaspora_size[]" value="{{ @(explode(',', $team_label->diaspora_size)[$i]) }}" class="form-control" placeholder="Diaspora Size"></td>
+                    <td><input type="date" name="start_date[]" value="{{ @(explode(',', $team->start_date)[$i]) }}" class="form-control"></td>
+                    <td><input type="number" name="local_size[]" value="{{ @(explode(',', $team->local_size)[$i]) }}" class="form-control" placeholder="Local Size"></td>
+                    <td><input type="number" name="diaspora_size[]" value="{{ @(explode(',', $team->diaspora_size)[$i]) }}" class="form-control" placeholder="Diaspora Size"></td>
                 </tr>
             @endforeach
         </tbody>

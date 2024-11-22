@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\team_label;
+namespace App\Http\Controllers\team;
 
 use App\Http\Controllers\Controller;
-use App\Models\team_label\TeamLabel;
-use App\Models\team_label\TeamSize;
+use App\Models\team\Team;
+use App\Models\team\TeamSize;
 use Illuminate\Http\Request;
 use DB;
 
-class TeamLabelController extends Controller
+class TeamController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,9 +17,9 @@ class TeamLabelController extends Controller
      */
     public function index()
     {
-        $team_labels = TeamLabel::latest()->get();
+        $teams = Team::latest()->get();
 
-        return view('team_labels.index', compact('team_labels'));
+        return view('teams.index', compact('teams'));
     }
 
     /**
@@ -29,7 +29,7 @@ class TeamLabelController extends Controller
      */
     public function create()
     {
-        return view('team_labels.create');
+        return view('teams.create');
     }
 
     /**
@@ -62,18 +62,18 @@ class TeamLabelController extends Controller
 
             // save Team
             unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
-            $team = TeamLabel::create($input);
+            $team = Team::create($input);
 
             // save Team size
-            $teamSizeArr['team_id'] = array_fill(0, count($teamSizeArr['local_size']), $team_label->id);
+            $teamSizeArr['team_id'] = array_fill(0, count($teamSizeArr['local_size']), $team->id);
             $teamSizeArr = databaseArray($teamSizeArr);
             TeamSize::insert($teamSizeArr);
 
             DB::commit();
 
-            return redirect(route('team_labels.index'))->with(['success' => 'Team Label created successfully']);
+            return redirect(route('teams.index'))->with(['success' => 'Team created successfully']);
         } catch (\Throwable $th) {
-            return errorHandler('Error creating team label!', $th);
+            return errorHandler('Error creating Team!', $th);
         }
     }
 
@@ -83,9 +83,9 @@ class TeamLabelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(TeamLabel $team_label)
+    public function show(Team $team)
     {
-        return view('team_labels.view', compact('team_label'));
+        return view('teams.view', compact('team'));
     }
 
     /**
@@ -94,9 +94,9 @@ class TeamLabelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(TeamLabel $team_label)
+    public function edit(Team $team)
     {
-        return view('team_labels.edit', compact('team_label'));
+        return view('teams.edit', compact('team'));
     }
 
     /**
@@ -106,7 +106,7 @@ class TeamLabelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, TeamLabel $team_label)
+    public function update(Request $request, Team $team)
     {
         $request->validate([
             'name' => 'required',
@@ -130,19 +130,19 @@ class TeamLabelController extends Controller
 
             // update Team
             unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
-            $team_label->update($input);
+            $team->update($input);
 
             // save Team size
-            $teamSizeArr['team_id'] = array_fill(0, count($teamSizeArr['local_size']), $team_label->id);
+            $teamSizeArr['team_id'] = array_fill(0, count($teamSizeArr['local_size']), $team->id);
             $teamSizeArr = databaseArray($teamSizeArr);
-            TeamSize::where('team_id', $team_label->id)->delete();
+            $team->team_sizes()->delete();
             TeamSize::insert($teamSizeArr);
 
             DB::commit();
 
-            return redirect(route('team_labels.index'))->with(['success' => 'Team Label updated successfully']);
+            return redirect(route('teams.index'))->with(['success' => 'Team updated successfully']);
         } catch (\Throwable $th) {
-            return errorHandler('Error updating team label!', $th);
+            return errorHandler('Error updating Team!', $th);
         }
     }
 
@@ -152,13 +152,16 @@ class TeamLabelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(TeamLabel $team_label)
+    public function destroy(Team $team)
     {
-        try {            
-            $team_label->delete();
-            return redirect(route('team_labels.index'))->with(['success' => 'Team Label deleted successfully']);
+        try {   
+            DB::beginTransaction();    
+            $team->team_sizes()->delete();
+            $team->delete();
+            DB::commit();
+            return redirect(route('teams.index'))->with(['success' => 'Team deleted successfully']);
         } catch (\Throwable $th) {
-            return errorHandler('Error deleting team label!', $th);
+            return errorHandler('Error deleting Team!', $th);
         }
     }
 }

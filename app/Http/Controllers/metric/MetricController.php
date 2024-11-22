@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\metric;
 
 use App\Http\Controllers\Controller;
-use App\Models\assign_score\AssignScore;
 use App\Models\metric\Metric;
 use App\Models\programme\Programme;
-use App\Models\team_label\TeamLabel;
+use App\Models\team\Team;
 use Illuminate\Http\Request;
 
 class MetricController extends Controller
@@ -30,7 +29,7 @@ class MetricController extends Controller
      */
     public function create()
     {        
-        $teams = TeamLabel::get();
+        $teams = Team::get();
         $programmes = Programme::get();
 
         return view('metrics.create', compact('teams', 'programmes'));
@@ -118,7 +117,7 @@ class MetricController extends Controller
             return errorHandler("You don't have rights to edit this metric!");
         }
 
-        $teams = TeamLabel::get();
+        $teams = Team::get();
         $programmes = Programme::get();
         
         return view('metrics.edit', compact('metric', 'teams', 'programmes'));
