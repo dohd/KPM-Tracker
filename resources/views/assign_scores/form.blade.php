@@ -3,9 +3,9 @@
         <h5 class="card-title">Monthly Team Scores <input type="button" value="Reset" class="btn btn-outline-danger float-end" id="reset"></h5>
         <div class="card-content p-2">
             <div class="row mb-3">
-                <label for="programme" class="col-md-2">Team Programme</label>
+                <label for="programme" class="col-md-2">Team Program</label>
                 <div class="col-md-7 col-12">
-                    <select id="programme" class="form-control select2" data-placeholder="Choose Programme" required>
+                    <select id="programme" class="form-control select2" data-placeholder="Choose Program" required>
                         <option value=""></option>
                         @foreach ($programmes as $row)
                             <option value="{{ $row->id }}" {{ $row->id == @$metric->programme_id? 'selected' : '' }}>
@@ -42,12 +42,13 @@
             <hr>
             <div class="text-center">
                 <a href="{{ route('assign_scores.create') }}" class="btn btn-secondary">Cancel</a>
-                {{ Form::submit('Submit', ['class' => 'btn btn-primary']) }}
+                {{ Form::submit('Submit Scores', ['class' => 'btn btn-primary']) }}
             </div>
         </div>
     </div>
 </div>
 <input type="hidden" id="load_score_status">
+<input type="hidden" name="metric_ids" id="metric_ids">
 
 @section('script')
 <script>
@@ -82,12 +83,12 @@
             method: 'POST',
             dataType: 'json',
             data: {programme_id: $('#programme').val()},
-            success: resp => {
+            success: data => {
                 $('#scores-tbl tbody tr').remove();
-                if (resp.flash_error) return flashMessage({responseJSON:{message: resp.flash_error}});
-                if (resp.flash_success) return flashMessage({message: resp.flash_success});
+                if (data.flash_error) return flashMessage({responseJSON:{message: data.flash_error}});
+                if (data.flash_success) return flashMessage({message: data.flash_success});
             },
-            error: resp => {
+            error: data => {
                 $('#scores-tbl tbody tr').remove();
                 flashMessage({});
             },
@@ -110,17 +111,20 @@
             data: {
                 programme_id: $('#programme').val(), 
             },
-            success: resp => {
-                if (resp.flash_error) {
-                    $('#scores-tbl tbody tr').remove();
-                    return flashMessage({responseJSON:{message: resp.flash_error}});
-                }
-                if (resp.flash_success) {
-                    loadedScoresData = resp.data;
+            success: data => {
+                $('#metric_ids').val('');
+                if (data.flash_success) {
+                    const payload = data.data;
+                    $('#metric_ids').val(payload.req_input.metric_ids);
+                    // set loaded scores
+                    loadedScoresData = payload;
                     $('#load_score_status').change();
-                };
+                } else if (data.flash_error) {
+                    $('#scores-tbl tbody tr').remove();
+                    return flashMessage({responseJSON:{message: data.flash_error}});
+                }
             },
-            error: resp => {
+            error: (xhr, status, error) => {
                 $('#scores-tbl tbody tr').remove();
                 flashMessage({});
             },
@@ -137,7 +141,7 @@
             success: data => {
                 $('#scores-tbl').html(data);
             },
-            error: data => {
+            error: (xhr, status, error) => {
                 $('#scores-tbl tbody tr').remove();
                 flashMessage({});
             },

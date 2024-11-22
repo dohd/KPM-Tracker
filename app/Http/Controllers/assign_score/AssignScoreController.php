@@ -45,12 +45,17 @@ class AssignScoreController extends Controller
      */
     public function store(Request $request)
     {  
-        if (!request('point')) 
+        if (!request('point')) {
             return errorHandler('Not Allowed! Generate Team Scores before submission');
-        
+        }
+
         try {          
+            $metric_ids = explode(',', request('metric_ids'));
+            $input = $request->except('_token', 'metric_ids');
+
             DB::beginTransaction();
 
+            // overwrite previous scores
             AssignScore::where('programme_id', $request->programme_id[0])
             ->when(isset($request->rating_scale_id[0]), fn($q) => $q->where('rating_scale_id', $request->rating_scale_id[0]))
             ->whereDate('date_from', '>=', $request->date_from[0])
@@ -58,11 +63,14 @@ class AssignScoreController extends Controller
             ->whereIn('team_id', $request->team_id)
             ->delete();
 
-            $input = $request->except('_token');
+            // save scores
             $input['user_id'] = array_fill(0, count($request->team_id), auth()->user()->id);
             $input['ins'] = array_fill(0, count($request->team_id), auth()->user()->ins);
             $data_items = databaseArray($input);
             AssignScore::insert($data_items);
+
+            // mark metrics used for scoring
+            Metric::whereIn('id', $metric_ids)->update(['in_score' => 1]);
 
             DB::commit();
             return redirect(route('assign_scores.create'))->with(['success' => 'Assigned scores created successfully']);
@@ -127,7 +135,7 @@ class AssignScoreController extends Controller
     }
 
     /**
-     * Reset assigned scores
+     * Reset saved scores
      */
     public function reset_scores(Request $request)
     {
@@ -152,17 +160,17 @@ class AssignScoreController extends Controller
     }
 
     /**
-     * Assign scores based on rating scale
+     * Load programe scores using rating scale 
      */
-    public function load_scores(Request $request)
+    public function loadScores(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'programme_id' => 'required',
         ]);
         if ($validator->fails()) return response()->json(['flash_error' => 'Fields required! programme']);
-        
         $input = inputClean($request->except('_token'));
-        $programme = Programme::find($input['programme_id']);
+
+        $programme = Programme::findOrFail($input['programme_id']);
         $input['date_from'] = $programme->period_from;
         $input['date_to'] = $programme->period_to;
         if (!isset($input['date_from'], $input['date_to'])) {
@@ -463,26 +471,34 @@ class AssignScoreController extends Controller
                 }
                 break;
         }
+        
+        // throw error if no points computed
+        $valid_teams = $teams->filter(fn($v) => $v->points > 0);
+        if (!count($valid_teams)) {
+            return response()->json(['flash_error' => 'Computation Error! Please verify rating scale and metric data']);
+        }
+
         $input = array_replace($input, [
             'programme_include_choir' => $programme->include_choir,
             'rating_scale_id' => $scale->id,
             'metric' => $programme->metric,
+            'metric_ids' => $metrics->pluck('id')->implode(','),
             'target_amount' => $programme->target_amount,
         ]);
 
-        $valid_teams = $teams->filter(fn($v) => $v->points > 0);
-        if (!$valid_teams->count()) return response()->json(['flash_error' => 'Computation Error! Please verify rating scale and metric data']);
-
-        return response()->json(['flash_success' => 'Scores assigned successfully', 'data' => ['teams' => $valid_teams, 'req_input' => $input]]);
+        return response()->json([
+            'flash_success' => 'Scores assigned successfully', 
+            'data' => ['teams' => $valid_teams, 'req_input' => $input]
+        ]);
     }
 
     /**
-     * Load assigned scores table rows
+     * Render datatable for loaded scores
      */
     public function load_scores_datatable(Request $request)
     {
-        $teams = array_map(fn($v) => (object) $v, $request->teams);
         $input = $request->req_input;
-        return view('assign_scores.partial.load_score', compact('teams', 'input'));
+        $teams = array_map(fn($v) => (object) $v, $request->teams);
+        return view('assign_scores.partial.load_score_table', compact('teams', 'input'));
     }
 }

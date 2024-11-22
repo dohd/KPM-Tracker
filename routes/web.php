@@ -40,7 +40,7 @@ Route::group(['middleware' => 'auth'], function() {
     // Assign Scores
     Route::post('assign_scores/load_scores_datatable', [AssignScoreController::class, 'load_scores_datatable'])->name('assign_scores.load_scores_datatable');
     Route::post('assign_scores/reset_scores', [AssignScoreController::class, 'reset_scores'])->name('assign_scores.reset_scores');
-    Route::post('assign_scores/load_scores', [AssignScoreController::class, 'load_scores'])->name('assign_scores.load_scores');
+    Route::post('assign_scores/load_scores', [AssignScoreController::class, 'loadScores'])->name('assign_scores.load_scores');
     Route::resource('assign_scores', AssignScoreController::class);
 
     // key Parameters
