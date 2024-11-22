@@ -1,5 +1,5 @@
 @extends('layouts.core')
-@section('title', 'Create | Teams')
+@section('title', 'Create | Teams Management')
     
 @section('content')
     @include('team_labels.header')

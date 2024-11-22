@@ -1,7 +1,7 @@
 <div class="pagetitle">
   <div class="row">
     <div class="col-6">
-      <h1>Teams</h1>
+      <h1>Teams Management</h1>
     </div>
     <div class="col-6">
       <a href="{{ route('team_labels.create') }}" class="btn btn-primary float-end ms-1"><i class="bi bi-plus-circle"></i> Create</a>
