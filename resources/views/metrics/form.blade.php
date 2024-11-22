@@ -160,16 +160,13 @@
 
     // on editing
     const metric = @json(@$metric);
-    if (metric && metric.id) {
-        const isComputed = @json(@$is_computed);
-        if (isComputed) {
-            $('#date').attr('readonly', true);
-            $('.metric input').attr('readonly', true);
-            $('#programme, #team').attr('disabled', true);
-            const programmeInp = `<input type="hidden" name="programme_id" value="${$('#programme').val()}">`;
-            const teamInp = `<input type="hidden" name="team_id" value="${$('#team').val()}">`;
-            $('form').append(programmeInp + teamInp);
-        }
+    if (metric && metric.id && metric.in_score) {
+        $('#date').attr('readonly', true);
+        $('.metric input').attr('readonly', true);
+        $('#programme, #team').attr('disabled', true);
+        const programmeInp = `<input type="hidden" name="programme_id" value="${$('#programme').val()}">`;
+        const teamInp = `<input type="hidden" name="team_id" value="${$('#team').val()}">`;
+        $('form').append(programmeInp + teamInp);
     }
 </script>
 @stop

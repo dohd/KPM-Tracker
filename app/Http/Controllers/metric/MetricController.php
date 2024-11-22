@@ -113,14 +113,15 @@ class MetricController extends Controller
      */
     public function edit(Metric $metric)
     {
+        // restric non-chair users from editing scored metrics
+        if ($metric->in_score && auth()->user()->user_type != 'chair') {
+            return errorHandler("You don't have rights to edit this metric!");
+        }
+
         $teams = TeamLabel::get();
         $programmes = Programme::get();
-        $is_computed = AssignScore::where(['team_id' => $metric->team_id,'programme_id' => $metric->programme_id])
-            ->whereDate('date_from', '>=', $metric->date)
-            ->whereDate('date_to', '<=', $metric->date)
-            ->exists();
         
-        return view('metrics.edit', compact('metric', 'teams', 'programmes', 'is_computed'));
+        return view('metrics.edit', compact('metric', 'teams', 'programmes'));
     }
 
     /**
@@ -192,6 +193,11 @@ class MetricController extends Controller
      */
     public function destroy(Metric $metric)
     {
+        // restric non-chair users from deleting scored metrics
+        if ($metric->in_score && auth()->user()->user_type != 'chair') {
+            return errorHandler("You don't have rights to delete this metric!");
+        }
+
         try {
             $metric->delete();
             return redirect(route('metrics.index'))->with(['success' => 'Metric Input deleted successfully']);
