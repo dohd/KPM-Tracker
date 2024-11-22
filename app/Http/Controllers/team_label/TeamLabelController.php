@@ -4,7 +4,9 @@ namespace App\Http\Controllers\team_label;
 
 use App\Http\Controllers\Controller;
 use App\Models\team_label\TeamLabel;
+use App\Models\team_label\TeamSize;
 use Illuminate\Http\Request;
+use DB;
 
 class TeamLabelController extends Controller
 {
@@ -15,8 +17,8 @@ class TeamLabelController extends Controller
      */
     public function index()
     {
-        $team_labels = TeamLabel::orderBy('id', 'desc')->get();
-        
+        $team_labels = TeamLabel::latest()->get();
+
         return view('team_labels.index', compact('team_labels'));
     }
 
@@ -44,22 +46,31 @@ class TeamLabelController extends Controller
         ]);
         $input = $request->except('_token');
 
-        try {         
+        try {    
+            DB::beginTransaction();
+               
             foreach ($input['start_date'] as $key => $date) {
                 $size = @$input['local_size'][$key];
-                if ($date && $size > 0) {
-                    $input['start_date'][$key] = databaseDate($date);
-                } else {
-                    unset($input['start_date'][$key], $input['local_size'][$key], $input['diaspora_size'][$key]);
-                }
+                if ($date && $size > 0) $input['start_date'][$key] = databaseDate($date);
+                else unset($input['start_date'][$key], $input['local_size'][$key], $input['diaspora_size'][$key]);
             }
-            $input = array_replace($input, [
-                'start_date' => implode(',', $input['start_date']),
-                'local_size' => implode(',', $input['local_size']),
-                'diaspora_size' => implode(',', $input['diaspora_size']),
-            ]);       
+            $teamSizeArr = [
+                'start_period' => $input['start_date'],
+                'local_size' => $input['local_size'],
+                'diaspora_size' => $input['diaspora_size'],
+            ];
 
-            TeamLabel::create($input);
+            // save Team
+            unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
+            $team = TeamLabel::create($input);
+
+            // save Team size
+            $teamSizeArr['team_id'] = array_fill(0, count($teamSizeArr['local_size']), $team_label->id);
+            $teamSizeArr = databaseArray($teamSizeArr);
+            TeamSize::insert($teamSizeArr);
+
+            DB::commit();
+
             return redirect(route('team_labels.index'))->with(['success' => 'Team Label created successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error creating team label!', $th);
@@ -103,22 +114,32 @@ class TeamLabelController extends Controller
         ]);
         $input = $request->except('_token');
 
-        try {            
+        try {   
+            DB::beginTransaction();
+
             foreach ($input['start_date'] as $key => $date) {
                 $size = @$input['local_size'][$key];
-                if ($date && $size > 0) {
-                    $input['start_date'][$key] = databaseDate($date);
-                } else {
-                    unset($input['start_date'][$key], $input['local_size'][$key], $input['diaspora_size'][$key]);
-                }
+                if ($date && $size > 0) $input['start_date'][$key] = databaseDate($date);
+                else unset($input['start_date'][$key], $input['local_size'][$key], $input['diaspora_size'][$key]);
             }
-            $input = array_replace($input, [
-                'start_date' => implode(',', $input['start_date']),
-                'local_size' => implode(',', $input['local_size']),
-                'diaspora_size' => implode(',', $input['diaspora_size']),
-            ]);
-            
+            $teamSizeArr = [
+                'start_period' => $input['start_date'],
+                'local_size' => $input['local_size'],
+                'diaspora_size' => $input['diaspora_size'],
+            ];
+
+            // update Team
+            unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
             $team_label->update($input);
+
+            // save Team size
+            $teamSizeArr['team_id'] = array_fill(0, count($teamSizeArr['local_size']), $team_label->id);
+            $teamSizeArr = databaseArray($teamSizeArr);
+            TeamSize::where('team_id', $team_label->id)->delete();
+            TeamSize::insert($teamSizeArr);
+
+            DB::commit();
+
             return redirect(route('team_labels.index'))->with(['success' => 'Team Label updated successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error updating team label!', $th);
