@@ -24,7 +24,7 @@
 
             <tr>
                 <td colspan="2">
-                    <h4 class="fw-bolder text-center mt-2">Programme Management</h4>
+                    <h4 class="fw-bolder text-center mt-2">Program Management</h4>
                 </td>
             </tr>
             @php
@@ -83,7 +83,7 @@
             @php
                 $modules = [
                     'donor' => 'Donor', 
-                    'programme' => 'Key-Programme', 
+                    'programme' => 'Key-Program', 
                     'region' => 'Target Region', 
                     'cohort' => 'Target Cohort', 
                     'age-group' => 'Age Group', 

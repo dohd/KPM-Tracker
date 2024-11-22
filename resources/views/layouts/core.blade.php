@@ -6,7 +6,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
   <title>@yield('title')</title>
-  <meta content="Web based Programme Management Software for NGOs and CSOs" name="description">
+  <meta content="Web based Program Management Software for NGOs and CSOs" name="description">
   <meta content="NGO, CSO, Proposal, Action, Plan, Participant, Log Frame" name="keywords">
   <meta content="Eteral Solutions" name="author">
 

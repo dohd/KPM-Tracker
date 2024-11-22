@@ -5,9 +5,9 @@
     </div>
 </div>
 <div class="row mb-3">
-    <label for="programme" class="col-md-2">Programme</label>
+    <label for="programme" class="col-md-2">Program</label>
     <div class="col-md-8 col-12">
-        <select name="programme_id" id="programme" class="form-control select2" data-placeholder="Choose Programme" required>
+        <select name="programme_id" id="programme" class="form-control select2" data-placeholder="Choose Program" required>
             <option value=""></option>
             @foreach ($programmes as $row)
                 <option value="{{ $row->id }}" metric="{{ $row->metric ?: 'Finance' }}" {{ $row->id == @$metric->programme_id? 'selected' : '' }}>

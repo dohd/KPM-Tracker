@@ -1,7 +1,7 @@
 <div class="pagetitle">
   <div class="row">
     <div class="col-6">
-      <h1>Programme Management</h1>
+      <h1>Program Management</h1>
     </div>
     <div class="col-6">
       {{-- @can('create-programme') --}}
@@ -14,7 +14,7 @@
   <nav>
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-      <li class="breadcrumb-item active"><a href="{{ route('programmes.index') }}">Programme</a></li>
+      <li class="breadcrumb-item active"><a href="{{ route('programmes.index') }}">Program</a></li>
     </ol>
   </nav>
 </div>

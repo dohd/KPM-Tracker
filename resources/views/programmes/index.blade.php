@@ -1,6 +1,6 @@
 @extends('layouts.core')
 
-@section('title', 'Programme Management')
+@section('title', 'Program Management')
     
 @section('content')
     @include('programmes.header')
@@ -13,7 +13,7 @@
                         <tr>
                             <th>#No.</th>
                             <th>Code</th>
-                            <th>Programme Name</th>
+                            <th>Program Name</th>
                             {{-- <th>Status</th> --}}
                             <th>Action</th>
                         </tr>

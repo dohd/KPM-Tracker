@@ -9,7 +9,7 @@
     <!-- End Dashboard Nav -->
 
     @if (auth()->user()->user_type == 'chair')
-      <li class="nav-heading">Programme Management</li>
+      <li class="nav-heading">Program Management</li>
       <!-- metric input -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{ route('metrics.index') }}">
@@ -35,7 +35,7 @@
       <!-- key programmes -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{ route('programmes.index') }}">
-          <i class="bi bi-tag"></i><span>Key Programmes</span>
+          <i class="bi bi-tag"></i><span>Key Programs</span>
         </a>
       </li>
       <!-- score cards -->
@@ -59,7 +59,7 @@
     @endif
 
     @if (in_array(auth()->user()->user_type, ['captain', 'member']))
-      <li class="nav-heading">Programme Management</li>
+      <li class="nav-heading">Program Management</li>
       <!-- metric input -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{ route('metrics.index') }}">

@@ -13,7 +13,7 @@
                             <tr>
                                 <th>#No</th>
                                 <th>Date</th>
-                                <th>Programme</th>
+                                <th>Program</th>
                                 <th>Amount</th>
                                 <th>Team</th>
                                 <th>Memo</th>

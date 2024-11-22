@@ -12,7 +12,7 @@
                           <tr>
                             <th>#No.</th>
                             <th>Code</th>
-                            <th>Programme Name</th>
+                            <th>Program Name</th>
                             <th>Period From</th>
                             <th>Period To</th>
                             <th>Action</th>

@@ -1,12 +1,12 @@
 @extends('layouts.core')
 
-@section('title', 'View | Programme Management')
+@section('title', 'View | Program Management')
     
 @section('content')
     @include('programmes.header')
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Programme Details</h5>
+            <h5 class="card-title">Program Details</h5>
             <div class="card-content p-2">
                 <h4 class="text-center"><b>{{ $programme->name }}</b></h4>
                 <h5>Activity Report</h5>
