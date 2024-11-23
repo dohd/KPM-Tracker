@@ -19,6 +19,23 @@ class TeamController extends Controller
     {
         $teams = Team::latest()->get();
 
+        // DB::beginTransaction();
+        // foreach (Team::get() as $team) {
+        //     $dates = explode(',', $team->start_date);
+        //     $sizes1 = explode(',', $team->local_size);
+        //     $sizes2 = explode(',', $team->diaspora_size);
+        //     foreach ($dates as $i => $date) {
+        //         if (TeamSize::where('team_id', $team->id)->where('start_period', $date)->first()) continue;
+        //         TeamSize::create([
+        //             'team_id' => $team->id,
+        //             'start_period' => $date,
+        //             'local_size' => @$sizes1[$i],
+        //             'diaspora_size' => @$sizes2[$i],
+        //         ]);
+        //     }
+        // }
+        // DB::commit();
+
         return view('teams.index', compact('teams'));
     }
 
@@ -29,6 +46,11 @@ class TeamController extends Controller
      */
     public function create()
     {
+        // permit only chair to create a team 
+        if (auth()->user()->user_type != 'chair') {
+            return errorHandler("You don't have the rights to create a team!");
+        }
+
         return view('teams.create');
     }
 
@@ -61,7 +83,12 @@ class TeamController extends Controller
             ];
 
             // save Team
-            unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
+            // unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
+            foreach ($input as $key => $value) {
+                if (in_array($key, ['start_date', 'local_size', 'diaspora_size'])) {
+                    $input[$key] = implode(',', $value);
+                }
+            }
             $team = Team::create($input);
 
             // save Team size
@@ -129,7 +156,12 @@ class TeamController extends Controller
             ];
 
             // update Team
-            unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
+            // unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
+            foreach ($input as $key => $value) {
+                if (in_array($key, ['start_date', 'local_size', 'diaspora_size'])) {
+                    $input[$key] = implode(',', $value);
+                }
+            }
             $team->update($input);
 
             // save Team size
@@ -154,10 +186,17 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
+        // permit only chair to delete a team 
+        if (auth()->user()->user_type != 'chair') {
+            return errorHandler("You don't have the rights to delete a team!");
+        }
+
         try {   
             DB::beginTransaction();    
+            
             $team->team_sizes()->delete();
             $team->delete();
+
             DB::commit();
             return redirect(route('teams.index'))->with(['success' => 'Team deleted successfully']);
         } catch (\Throwable $th) {

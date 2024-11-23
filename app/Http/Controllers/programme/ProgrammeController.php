@@ -93,6 +93,12 @@ class ProgrammeController extends Controller
      */
     public function edit(Programme $programme)
     {
+        // permit only the chair to edit 
+        $hasScores = $programme->assignScores()->exists();
+        if ($hasScores && auth()->user()->user_type != 'chair') {
+            return errorHandler("You don't have the rights to edit this program");
+        }
+
         return view('programmes.edit', compact('programme'));
     }
 
@@ -147,6 +153,12 @@ class ProgrammeController extends Controller
      */
     public function destroy(Programme $programme)
     {
+        // permit only the chair to edit 
+        $hasScores = $programme->assignScores()->exists();
+        if ($hasScores && auth()->user()->user_type != 'chair') {
+            return errorHandler("You don't have the rights to delete this program");
+        }
+
         try {            
             $programme->delete();
             return redirect(route('programmes.index'))->with(['success' => 'Programme deleted successfully']);

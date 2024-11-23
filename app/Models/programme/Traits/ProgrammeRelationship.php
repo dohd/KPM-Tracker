@@ -2,18 +2,12 @@
 
 namespace App\Models\programme\Traits;
 
-use App\Models\action_plan\ActionPlan;
-use App\Models\participant_list\ParticipantList;
+use App\Models\assign_score\AssignScore;
 
 trait ProgrammeRelationship
 {
-    public function participant_lists()
+    public function assignScores()
     {
-        return $this->hasManyThrough(ParticipantList::class, ActionPlan::class, 'programme_id', 'action_plan_id', 'id', 'id');
-    }
-
-    public function action_plans()
-    {
-        return $this->hasMany(ActionPlan::class);
+        return $this->hasMany(AssignScore::class);
     }
 }

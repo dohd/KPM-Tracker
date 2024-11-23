@@ -28,11 +28,28 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (range(1,12) as $i => $item)
+            @php $n = 12 @endphp
+            @foreach ($team->team_sizes as $row)
+                @php $n-- @endphp
+                @if ($row->in_score && auth()->user()->user_type != 'chair')
+                    <tr>
+                        <td><input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control" readonly></td>
+                        <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control" readonly></td>
+                        <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control" readonly></td>
+                    </tr>
+                @else
+                    <tr>
+                        <td><input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control"></td>
+                        <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control" placeholder="Local Size"></td>
+                        <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control" placeholder="Diaspora Size"></td>
+                    </tr>
+                @endif
+            @endforeach
+            @foreach (array_fill(0,$n,0) as $i)
                 <tr>
-                    <td><input type="date" name="start_date[]" value="{{ @(explode(',', $team->start_date)[$i]) }}" class="form-control"></td>
-                    <td><input type="number" name="local_size[]" value="{{ @(explode(',', $team->local_size)[$i]) }}" class="form-control" placeholder="Local Size"></td>
-                    <td><input type="number" name="diaspora_size[]" value="{{ @(explode(',', $team->diaspora_size)[$i]) }}" class="form-control" placeholder="Diaspora Size"></td>
+                    <td><input type="date" name="start_date[]" value="" class="form-control"></td>
+                    <td><input type="number" name="local_size[]" value="0" class="form-control" placeholder="Local Size"></td>
+                    <td><input type="number" name="diaspora_size[]" value="0" class="form-control" placeholder="Diaspora Size"></td>
                 </tr>
             @endforeach
         </tbody>

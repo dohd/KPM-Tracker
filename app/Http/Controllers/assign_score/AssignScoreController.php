@@ -8,6 +8,7 @@ use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\rating_scale\RatingScale;
 use App\Models\team\Team;
+use App\Models\team\TeamSize;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,17 +52,18 @@ class AssignScoreController extends Controller
 
         try {          
             $metric_ids = explode(',', request('metric_ids'));
-            $input = $request->except('_token', 'metric_ids');
+            $team_sizes_ids = explode(',', request('team_sizes_ids'));
+            $input = $request->except('_token', 'metric_ids', 'team_sizes_ids');
 
             DB::beginTransaction();
 
             // overwrite previous scores
             AssignScore::where('programme_id', $request->programme_id[0])
-            ->when(isset($request->rating_scale_id[0]), fn($q) => $q->where('rating_scale_id', $request->rating_scale_id[0]))
-            ->whereDate('date_from', '>=', $request->date_from[0])
-            ->whereDate('date_to', '<=', $request->date_to[0])
-            ->whereIn('team_id', $request->team_id)
-            ->delete();
+                ->when(isset($request->rating_scale_id[0]), fn($q) => $q->where('rating_scale_id', $request->rating_scale_id[0]))
+                ->whereDate('date_from', '>=', $request->date_from[0])
+                ->whereDate('date_to', '<=', $request->date_to[0])
+                ->whereIn('team_id', $request->team_id)
+                ->delete();
 
             // save scores
             $input['user_id'] = array_fill(0, count($request->team_id), auth()->user()->id);
@@ -69,13 +71,15 @@ class AssignScoreController extends Controller
             $data_items = databaseArray($input);
             AssignScore::insert($data_items);
 
-            // mark metrics used for scoring
+            // mark metrics already scored
             Metric::whereIn('id', $metric_ids)->update(['in_score' => 1]);
+            // mark team sizes already scored
+            TeamSize::whereIn('id', $team_sizes_ids)->update(['in_score' => 1]);
 
             DB::commit();
-            return redirect(route('assign_scores.create'))->with(['success' => 'Assigned scores created successfully']);
+            return redirect(route('assign_scores.create'))->with(['success' => 'Scores created successfully']);
         } catch (\Throwable $th) {
-            return errorHandler('Error creating assigned scores!', $th);
+            return errorHandler('Error creating Scores!', $th);
         }
     }
 
@@ -218,11 +222,13 @@ class AssignScoreController extends Controller
                     $teams[$key] = $team;
                 }
                 break;
-            case 'Metric':
+            case 'Attendance':
                 if ($metrics->count()) {
                     $dates = array_unique($metrics->pluck('date')->toArray());
                     $days = count($dates);
                 }
+
+                $team_sizes_ids = [];
                 foreach ($teams as $key => $team) {
                     $team->days = @$days ?: 1;
                     $team->team_total_att = 0;
@@ -234,50 +240,49 @@ class AssignScoreController extends Controller
                         }
                     }
 
+                    // team sizes
                     $team_local_sizes = [];
                     $team_diasp_sizes = [];
-                    $date_from = Carbon::parse($input['date_from']);
-                    $date_to = Carbon::parse($input['date_to']);
-                    $start_date_vars = explode(',', $team->start_date);
-                    $local_size_vars = explode(',', $team->local_size);
-                    $diasp_size_vars = explode(',', $team->diaspora_size);
-                    $date_local_size_obj = array_combine($start_date_vars, $local_size_vars);
-                    $date_diasp_size_obj = array_combine($start_date_vars, $diasp_size_vars);
-                    sort($start_date_vars);
-                    foreach ($start_date_vars as $n => $date) {
-                        $tc_date = Carbon::parse($date);
-                        if ($tc_date->eq($date_from)) {
-                            $team_local_sizes[] = $date_local_size_obj[$date];
-                            $team_diasp_sizes[] = $date_diasp_size_obj[$date];
-                        }
-                        elseif ($tc_date->gte($date_from) && $tc_date->lte($date_to)) {
-                            $team_local_sizes[] = $date_local_size_obj[$date];
-                            $team_diasp_sizes[] = $date_diasp_size_obj[$date];
-                            $prev_date = @$start_date_vars[$n-1];
-                            if ($prev_date) {
-                                $tc_prev_date = Carbon::parse($prev_date);
-                                if ($tc_prev_date->lte($date_from)) {
-                                    $team_local_sizes[] = $date_local_size_obj[$prev_date];
-                                    $team_diasp_sizes[] = $date_diasp_size_obj[$date];
-                                }
+                    $team_sizes = $team->team_sizes->where('start_period', $input['date_from']);
+                    if ($team_sizes->count()) {
+                        $team_local_sizes = $team_sizes->pluck('local_size')->toArray();
+                        $team_diasp_sizes = $team_sizes->pluck('diaspora_size')->toArray();
+                        $team_sizes_ids  = array_merge($team_sizes_ids, $team_sizes->pluck('id')->toArray());
+                    } else {
+                        // team size in date range including the previous last team size
+                        $team_sizes = $team->team_sizes
+                        ->where('start_period', '>=', $input['date_from'])
+                        ->where('start_period', '<=', $input['date_to']);
+                        if ($team_sizes->count()) {
+                            $team_local_sizes = $team_sizes->pluck('local_size')->toArray();
+                            $team_diasp_sizes = $team_sizes->pluck('diaspora_size')->toArray();
+                            $team_sizes_ids  = array_merge($team_sizes_ids, $team_sizes->pluck('id')->toArray());
+                            // previous last team size
+                            $initial = $team->team_sizes->where('start_period', '<', $input['date_from'])->latest()->first();
+                            if ($initial) {
+                                $team_local_sizes[] = $initial->local_size;
+                                $team_diasp_sizes[] = $initial->diaspora_size;
+                                $team_sizes_ids[]  = $initial->id;
                             }
-                        } 
-                        $last_indx = count($start_date_vars) - 1;
-                        if (!$team_local_sizes && $n == $last_indx && $tc_date->lte($date_from)) {
-                            $team_local_sizes[] = $date_local_size_obj[$date];
-                            $team_diasp_sizes[] = $date_diasp_size_obj[$date];
+                        } else {
+                            // default team size
+                            $initial = $team->team_sizes->where('start_period', '<=', $input['date_from'])->latest()->first();
+                            if ($initial) {
+                                $team_local_sizes[] = $initial->local_size;
+                                $team_diasp_sizes[] = $initial->diaspora_size;
+                                $team_sizes_ids[]  = $initial->id;
+                            }
                         }
                     }
                     
+                    // check if is choir programme
                     if ($programme->include_choir) {
                         $team->total = $scale->choir_no;
                         if ($team->total == 0) continue;
-
                         $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                         $team->perc_score = 0;
                         $team->points = $team->team_avg_att;
-                    } 
-                    else {
+                    } else {
                         $team->total = 0;
                         $local_sizes_sum = array_reduce($team_local_sizes, fn($prev, $curr) => $prev+$curr, 0);
                         $diasp_sizes_sum = array_reduce($team_diasp_sizes, fn($prev, $curr) => $prev+$curr, 0);
@@ -482,8 +487,9 @@ class AssignScoreController extends Controller
             'programme_include_choir' => $programme->include_choir,
             'rating_scale_id' => $scale->id,
             'metric' => $programme->metric,
-            'metric_ids' => $metrics->pluck('id')->implode(','),
             'target_amount' => $programme->target_amount,
+            'metric_ids' => $metrics->pluck('id')->implode(','),
+            'team_sizes_ids' => @$team_sizes_ids? implode(',', $team_sizes_ids) : '',
         ]);
 
         return response()->json([
