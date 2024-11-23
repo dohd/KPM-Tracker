@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\tenant\Traits;
+namespace App\Models\company\Traits;
 
 use App\Models\User;
 
-trait TenantRelationship
+trait CompanyRelationship
 {
     public function users()
     {

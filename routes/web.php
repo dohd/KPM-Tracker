@@ -66,6 +66,8 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get('storage/download/{file_params}', [StorageController::class, 'file_download'])->name('storage.file_download');
 
     // Configuration
-    Route::get('clear-cache', [ConfigController::class, 'clear_cache'])->name('config.clear_cache');
-    Route::get('site-down', [ConfigController::class, 'site_down'])->name('config.site_down');
+    Route::post('general_settings', [ConfigController::class, 'generalSettings'])->name('config.general_settings.post');
+    Route::get('general_settings', [ConfigController::class, 'generalSettings'])->name('config.general_settings');
+    Route::get('clear-cache', [ConfigController::class, 'clearCache'])->name('config.clear_cache');
+    Route::get('site-down', [ConfigController::class, 'siteDown'])->name('config.site_down');
 });

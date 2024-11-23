@@ -49,6 +49,7 @@
 </div>
 <input type="hidden" id="load_score_status">
 <input type="hidden" name="metric_ids" id="metric_ids">
+<input type="hidden" name="team_sizes_ids" id="team_sizes_ids">
 
 @section('script')
 <script>
@@ -113,9 +114,11 @@
             },
             success: data => {
                 $('#metric_ids').val('');
+                $('#team_sizes_ids').val('');
                 if (data.flash_success) {
                     const payload = data.data;
                     $('#metric_ids').val(payload.req_input.metric_ids);
+                    $('#team_sizes_ids').val(payload.req_input.team_sizes_ids);
                     // set loaded scores
                     loadedScoresData = payload;
                     $('#load_score_status').change();

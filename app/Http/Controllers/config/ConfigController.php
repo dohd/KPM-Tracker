@@ -3,14 +3,28 @@
 namespace App\Http\Controllers\config;
 
 use App\Http\Controllers\Controller;
+use App\Models\company\Company;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\Request;
 
 class ConfigController extends Controller
 {
+    
+    public function generalSettings(Request $request)
+    {
+        $company = Company::findOrFail(auth()->user()->ins);
+        if ($request->post()) {
+            $input = $request->except('_token');
+            $company->update($input);
+            return redirect()->back();
+        }
+        return view('settings.general', compact('company'));
+    } 
+    
     /**
      * Clear Cache
      */
-    public function clear_cache() 
+    public function clearCache() 
     {   
         try {
             Artisan::call('cache:clear');
@@ -25,7 +39,7 @@ class ConfigController extends Controller
     /**
      * Maintenance Mode
      */
-    public function site_down() 
+    public function siteDown() 
     {
         Artisan::call('down');
         return redirect()->back();

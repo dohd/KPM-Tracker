@@ -2,7 +2,7 @@
 
 namespace App\Models\user_profile\Traits;
 
-use App\Models\tenant\Tenant;
+use App\Models\company\Company;
 use App\Models\User;
 
 trait UserProfileRelationship
@@ -12,8 +12,8 @@ trait UserProfileRelationship
         return $this->belongsTo(User::class, 'rel_id');
     }
 
-    public function tenant()
+    public function company()
     {
-        return $this->belongsTo(Tenant::class, 'ins');
+        return $this->belongsTo(Company::class, 'ins');
     }
 }

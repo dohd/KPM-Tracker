@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Models\tenant;
+namespace App\Models\company;
 
 use App\Models\ModelTrait;
-use App\Models\tenant\Traits\TenantAttribute;
-use App\Models\tenant\Traits\TenantRelationship;
+use App\Models\company\Traits\CompanyAttribute;
+use App\Models\company\Traits\CompanyRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class Tenant extends Model
+class Company extends Model
 {
-    use ModelTrait, TenantAttribute, TenantRelationship;    
+    use ModelTrait, CompanyAttribute, CompanyRelationship;    
 
     /**
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'tenants';
+    protected $table = 'companies';
 
     /**
      * Mass Assignable fields of model
