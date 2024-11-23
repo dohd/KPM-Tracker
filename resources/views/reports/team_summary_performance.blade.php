@@ -5,20 +5,20 @@
 <div class="pagetitle">
     <div class="row">
       <div class="col-6">
-        <h1>Team Performance</h1>
+        <h1>Team Summary Performance</h1>
       </div>
     </div>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Team Performance</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Team Summary Performance</a></li>
       </ol>
     </nav>
 </div>
 
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title mb-0">Team Performance</h5>
+        <h5 class="card-title mb-0">Team Summary Performance</h5>
         <div class="card-content p-2">
             <div class="row">
                 <div class="col-md-12 bg-light pt-3 mb-2">
@@ -26,7 +26,7 @@
                 </div>
                 <hr style="border: none; border-bottom: 2px solid black;">
             </div>
-            {{ Form::open(['route' => 'reports.generate_performance', 'method' => 'POST', 'target' => '_blank']) }}
+            {{ Form::open(['route' => 'reports.team_summary_performance.post', 'method' => 'POST', 'target' => '_blank']) }}
                 <div class="row mb-3">
                     <label for="date" class="col-md-2">From Date</label>
                     <div class="col-md-6 col-12">

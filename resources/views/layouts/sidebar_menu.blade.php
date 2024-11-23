@@ -26,25 +26,25 @@
       <!-- Reports -->
       <li class="nav-heading">Report Center</li>
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Overall Performance</span>
         </a>
-        <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Team Performance</span>
         </a>
-        <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Monthly Team Size</span>
         </a>
-        <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Program per Month Financial Report</span>
         </a>
-        <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Program per Team Financial Report</span>
         </a>
-        <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Team Pledge Vs. Actual Amount Report</span>
         </a>
-        <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Max Score Vs. Actual per Team-Program</span>
         </a>
       </li>
@@ -95,7 +95,7 @@
       <!-- Reports -->
       <li class="nav-heading">Reports</li>
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ route('reports.create_performance') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           {{-- <i class="bi bi-table"></i><span>Performance Report</span> --}}
           <i class="bi bi-circle"></i><span>Performance Report</span>
         </a>

@@ -11,20 +11,14 @@ use Illuminate\Http\Request;
 class ReportController extends Controller
 {
     /**
-     * Create performance report page
+     * Generate Team Summary Performance
      */
-    public function create_performance()
+    public function teamSummaryPerformance(Request $request)
     {
-        $programmes = Programme::get();
-        
-        return view('reports.performance', compact('programmes'));
-    }
+        if (!$request->post()) {
+            return view('reports.team_summary_performance');
+        }
 
-    /**
-     * Generate performance report
-     */
-    public function generate_performance(Request $request)
-    {
         $request->validate([
             'date_from' => 'required',
             'date_to' => 'required',
@@ -83,8 +77,8 @@ class ReportController extends Controller
         $teams = collect();
         $orderd_teams->each(fn($v) => $teams->add($v));
 
-        $filename = 'Team_Performance';
-        $meta['title'] = 'Team Performance';
+        $filename = 'Summary Team_Performance';
+        $meta['title'] = 'Summary Team Performance';
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
         $meta['programmes'] = Programme::whereIn('id', $assigned_scores->pluck('programme_id')->toArray())->get(['id', 'name']);
@@ -92,7 +86,7 @@ class ReportController extends Controller
 
         switch ($request->output) {
             case 'pdf_print':
-                $html = view('reports.pdf.team_performance', compact('records', 'meta'))->render();
+                $html = view('reports.pdf.print_team_summary_performance', compact('records', 'meta'))->render();
                 $headers = [
                     "Content-type" => "application/pdf",
                     "Pragma" => "no-cache",
@@ -103,7 +97,7 @@ class ReportController extends Controller
                 $pdf->WriteHTML($html);
                 return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
             case 'pdf':
-                $html = view('reports.pdf.team_performance', compact('records', 'meta'))->render();
+                $html = view('reports.pdf.print_team_summary_performance', compact('records', 'meta'))->render();
                 $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
