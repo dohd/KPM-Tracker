@@ -1,32 +1,26 @@
 @extends('layouts.core')
-@section('title', 'Team Performance')
+@section('title', 'Team Size Summary')
 
 @section('content')
 <div class="pagetitle">
     <div class="row">
       <div class="col-6">
-        <h1>Team Performance Summary</h1>
+        <h1>Team Size Summary</h1>
       </div>
     </div>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Team Performance Summary</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Team Size Summary</a></li>
       </ol>
     </nav>
 </div>
 
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title mb-0">Team Performance Summary</h5>
+        <h5 class="card-title mb-0">Team Size Summary</h5>
         <div class="card-content p-2">
-            <div class="row">
-                <div class="col-md-12 bg-light pt-3 mb-2">
-                    <p>Date range should cover full program period i.e Jan to Dec</p>
-                </div>
-                <hr style="border: none; border-bottom: 2px solid black;">
-            </div>
-            {{ Form::open(['route' => 'reports.team_summary_performance.post', 'method' => 'POST', 'target' => '_blank']) }}
+            {{ Form::open(['route' => 'reports.team_size_summary.post', 'method' => 'POST', 'target' => '_blank']) }}
                 <div class="row mb-3">
                     <label for="date" class="col-md-2">From Date</label>
                     <div class="col-md-6 col-12">

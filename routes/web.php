@@ -55,8 +55,13 @@ Route::group(['middleware' => 'auth'], function() {
     Route::resource('user_profiles', UserProfileController::class);
 
     // View Reports
-    Route::get('reports/team/summary_performance', [ReportController::class, 'teamSummaryPerformance'])->name('reports.team_summary_performance');
-    Route::post('reports/team/summary_performance', [ReportController::class, 'teamSummaryPerformance'])->name('reports.team_summary_performance.post');
+    Route::get('reports/team/summary_performance', [ReportController::class, 'teamPerformanceSummary'])->name('reports.team_summary_performance');
+    Route::get('reports/team/size_summary', [ReportController::class, 'teamSizeSummary'])->name('reports.team_size_summary');
+    // 
+    Route::post('reports/team/size_summary', [ReportController::class, 'teamSizeSummary'])->name('reports.team_size_summary.post');
+    Route::post('reports/team/summary_performance', [ReportController::class, 'teamPerformanceSummary'])->name('reports.team_summary_performance.post');
+
+
 
     // PDF Report
     Route::get('pdfs/agenda/{agenda}/{token}', [PdfController::class, 'print_agenda'])->name('pdfs.print_agenda');

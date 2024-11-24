@@ -11,9 +11,9 @@ use Illuminate\Http\Request;
 class ReportController extends Controller
 {
     /**
-     * Generate Team Summary Performance
+     * Generate Team Performance Summary
      */
-    public function teamSummaryPerformance(Request $request)
+    public function teamPerformanceSummary(Request $request)
     {
         if (!$request->post()) {
             return view('reports.team_summary_performance');
@@ -129,6 +129,97 @@ class ReportController extends Controller
                         fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
                     }
                     fclose($file);
+                };
+                return response()->stream($callback, 200, $headers);
+        }
+    }
+
+    /**
+     * Monthly Team Size
+     */
+    public function teamSizeSummary(Request $request)
+    {
+        if (!$request->post()) {
+            return view('reports.team_size_summary');
+        }
+
+        $filename = 'Team Size Summary';
+        $meta['title'] = 'Team Size Summary';
+        $meta['date_from'] = dateFormat($request->date_from);
+        $meta['date_to'] = dateFormat($request->date_to);
+        $meta['months'] = [
+            '01' => 'Jan',
+            '02' => 'Feb',
+            '03' => 'Mar',
+            '04' => 'Apr',
+            '05' => 'May',
+            '06' => 'Jun',
+            '07' => 'Jul',
+            '08' => 'Aug',
+            '09' => 'Sep',
+            '10' => 'Oct',
+            '11' => 'Nov',
+            '12' => 'Dec',
+        ];
+        $records = Team::whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [databaseDate($request->date_from), databaseDate($request->date_to)]))
+            ->with(['team_sizes' => fn($q) => $q->whereBetween('start_period', [databaseDate($request->date_from), databaseDate($request->date_to)])])
+            ->get()
+            ->map(function($v) {
+                $v->local_size = $v->team_sizes->sum('local_size');
+                $v->diaspora_size = $v->team_sizes->sum('diaspora_size');
+                $v->total = $v->local_size+$v->diaspora_size;
+                $v->team_sizes = $v->team_sizes->map(function($v1) {
+                    $v1->month = date('m', strtotime($v1->start_period));
+                    return $v1;
+                });
+                return $v;
+            });
+
+        switch ($request->output) {
+            case 'pdf_print':
+                $html = view('reports.pdf.print_team_size_summary', compact('records', 'meta'))->render();
+                $headers = [
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
+                $pdf->WriteHTML($html);
+                return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
+            case 'pdf':
+                $html = view('reports.pdf.print_team_size_summary', compact('records', 'meta'))->render();
+                $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
+                $pdf->WriteHTML($html);
+                return $pdf->Output($filename . '.pdf', 'D');
+            case 'csv':
+                $headers = [
+                    "Content-type" => "text/csv",
+                    "Content-Disposition" => "attachment; filename=$filename.csv",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $callback = function() use($records, $meta) {
+                    // $programme_names = $meta['programmes']->pluck('name')->toArray();
+                    // $programme_ids = $meta['programmes']->pluck('id')->toArray();
+                    
+                    // $file = fopen('php://output', 'w');
+                    // fputcsv($file, array_merge(['No.', 'Team Name'], $programme_names, ['Total', 'Position']));
+                    // foreach ($records as $i => $item) {
+                    //     $programme_scores = array_map(function($id) use($item) {
+                    //         $score_total = 0;
+                    //         foreach ($item->programme_scores as $score) {
+                    //             if ($score->programme_id == $id) {
+                    //                 $score_total = $score->total;
+                    //                 break;
+                    //             }
+                    //         }
+                    //         return $score_total;
+                    //     }, $programme_ids);
+                    //     fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
+                    // }
+                    // fclose($file);
                 };
                 return response()->stream($callback, 200, $headers);
         }
