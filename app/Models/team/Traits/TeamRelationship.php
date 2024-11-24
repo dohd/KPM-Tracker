@@ -3,6 +3,7 @@
 namespace App\Models\team\Traits;
 
 use App\Models\assign_score\AssignScore;
+use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\team\TeamSize;
 
@@ -21,5 +22,10 @@ trait TeamRelationship
     public function team_sizes()
     {
         return $this->hasMany(TeamSize::class);
+    }
+
+    public function metrics()
+    {
+        return $this->hasMany(Metric::class);
     }
 }

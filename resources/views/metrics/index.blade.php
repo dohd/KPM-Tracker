@@ -14,6 +14,7 @@
                                 <th>#No</th>
                                 <th>Date</th>
                                 <th>Program</th>
+                                <th>Metric</th>
                                 {{-- <th>Amount</th> --}}
                                 <th>Team</th>
                                 <th>Status</th>
@@ -27,6 +28,7 @@
                                     <th style="height: {{ count($metrics) == 1? '80px': '' }}">{{ $i+1 }}</th>
                                     <td style="width:10%">{{ dateFormat($row->date) }}</td>
                                     <td>{{ @$row->programme->name }}</td>
+                                    <td>{{ @$row->programme->metric }}</td>
                                     {{-- @php $metric = @$row->programme->metric @endphp
                                     @if (in_array($metric, ['Finance', 'Team-Mission']))
                                         <td>{{ $metric == 'Finance'? numberFormat($row->grant_amount) : numberFormat($row->team_mission_amount) }}</td>

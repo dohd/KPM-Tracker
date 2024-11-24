@@ -4,6 +4,7 @@ namespace App\Http\Controllers\report;
 
 use App\Http\Controllers\Controller;
 use App\Models\assign_score\AssignScore;
+use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\team\Team;
 use Illuminate\Http\Request;
@@ -190,6 +191,76 @@ class ReportController extends Controller
             case 'pdf':
                 $html = view('reports.pdf.print_team_size_summary', compact('records', 'meta'))->render();
                 $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
+                $pdf->WriteHTML($html);
+                return $pdf->Output($filename . '.pdf', 'D');
+            case 'csv':
+                $headers = [
+                    "Content-type" => "text/csv",
+                    "Content-Disposition" => "attachment; filename=$filename.csv",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $callback = function() use($records, $meta) {
+                    // $programme_names = $meta['programmes']->pluck('name')->toArray();
+                    // $programme_ids = $meta['programmes']->pluck('id')->toArray();
+                    
+                    // $file = fopen('php://output', 'w');
+                    // fputcsv($file, array_merge(['No.', 'Team Name'], $programme_names, ['Total', 'Position']));
+                    // foreach ($records as $i => $item) {
+                    //     $programme_scores = array_map(function($id) use($item) {
+                    //         $score_total = 0;
+                    //         foreach ($item->programme_scores as $score) {
+                    //             if ($score->programme_id == $id) {
+                    //                 $score_total = $score->total;
+                    //                 break;
+                    //             }
+                    //         }
+                    //         return $score_total;
+                    //     }, $programme_ids);
+                    //     fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
+                    // }
+                    // fclose($file);
+                };
+                return response()->stream($callback, 200, $headers);
+        }
+    }
+
+    /**
+     * Metric Summary
+     */
+    public function metricSummary(Request $request)
+    {
+        if (!$request->post()) {
+            $programmes = Programme::whereHas('metrics')->get();
+            return view('reports.metric_summary', compact('programmes'));
+        }
+        
+        $filename = 'Metric Summary';
+        $meta['title'] = 'Metric Summary';
+        $meta['date_from'] = dateFormat($request->date_from);
+        $meta['date_to'] = dateFormat($request->date_to);
+        $meta['programme'] = Programme::findOrFail($request->programme_id);
+        $records = Metric::where('programme_id', request('programme_id'))
+            ->whereBetween('date', [databaseDate(request('date_from')), databaseDate(request('date_to'))])
+            ->with('team')
+            ->get();
+
+        switch ($request->output) {
+            case 'pdf_print':
+                $html = view('reports.pdf.print_metric_summary', compact('records', 'meta'))->render();
+                $headers = [
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf->WriteHTML($html);
+                return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
+            case 'pdf':
+                $html = view('reports.pdf.print_metric_summary', compact('records', 'meta'))->render();
+                $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
             case 'csv':

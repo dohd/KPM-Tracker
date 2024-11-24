@@ -57,7 +57,9 @@ Route::group(['middleware' => 'auth'], function() {
     // View Reports
     Route::get('reports/team/summary_performance', [ReportController::class, 'teamPerformanceSummary'])->name('reports.team_summary_performance');
     Route::get('reports/team/size_summary', [ReportController::class, 'teamSizeSummary'])->name('reports.team_size_summary');
+    Route::get('reports/team/metric_summary', [ReportController::class, 'metricSummary'])->name('reports.metric_summary');
     // 
+    Route::post('reports/team/metric_summary', [ReportController::class, 'metricSummary'])->name('reports.metric_summary.post');
     Route::post('reports/team/size_summary', [ReportController::class, 'teamSizeSummary'])->name('reports.team_size_summary.post');
     Route::post('reports/team/summary_performance', [ReportController::class, 'teamPerformanceSummary'])->name('reports.team_summary_performance.post');
 
