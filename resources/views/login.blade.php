@@ -39,7 +39,7 @@
               <div class="d-flex justify-content-center py-4">
                 <a href="{{ route('home') }}html" class="logo d-flex align-items-center w-auto">
                   <img src="{{ asset('img/kaih-logo.png') }}" alt="logo">
-                  <span class="d-lg-block">KPM-Tracker</span>
+                  <span class="d-lg-block">KPI-Tracker</span>
                 </a>
               </div>
               <!-- End Logo -->
