@@ -98,12 +98,13 @@
                 </thead>
                 <tbody>
                     @foreach ($records as $i => $metric)
+                        @php $attendTotal = $metric->team_total+$metric->guest_total @endphp
                         <tr class="dotted">
                             <td><b>{{ @$metric->team->name }}</b></td>
                             <td>{{ dateFormat(@$metric->date) }}</td>
                             <td>{{ $metric->team_total }}</td>
                             <td>{{ $metric->guest_total }}</td>
-                            <td><b>{{ $metric->team_total+$metric->guest_total }}</b></td>
+                            <td><b>{{ $attendTotal }}</b></td>
                             <td>{{ $metric->memo }}</td>
                         </tr>
                     @endforeach
@@ -192,14 +193,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($records as $i => $team)
-                        @php $metric = $team->metrics->first() @endphp
+                    @foreach ($records as $i => $metric)
                         <tr class="dotted">
-                            <td><b>{{ $team->name }}</b></td>
-                            <td>{{ dateFormat(@$metric->date) }}</td>
-                            <td>{{ @$metric->team_mission_total }}</td>
-                            <td>{{ numberFormat(@$metric->team_mission_amount) }}</td>
-                            <td>{{ @$metric->memo }}</td>
+                            <td><b>{{ @$metric->team->name }}</b></td>
+                            <td>{{ dateFormat($metric->date) }}</td>
+                            <td>{{ $metric->team_mission_total }}</td>
+                            <td>{{ numberFormat($metric->team_mission_amount) }}</td>
+                            <td>{{ $metric->memo }}</td>
                         </tr>
                     @endforeach
                 </tbody>
