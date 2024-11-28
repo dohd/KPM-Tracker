@@ -19,7 +19,7 @@
       <!-- assign scores -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{ route('assign_scores.create') }}">
-          <i class="bi bi-calculator"></i><span>Compute Scores</span>
+          <i class="bi bi-calculator"></i><span>Scores</span>
         </a>
       </li>
       <!-- key programmes -->
