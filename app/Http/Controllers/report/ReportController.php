@@ -136,7 +136,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Monthly Team Size
+     * Team Size Summary
      */
     public function teamSizeSummary(Request $request)
     {
@@ -260,6 +260,86 @@ class ReportController extends Controller
                 return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
             case 'pdf':
                 $html = view('reports.pdf.print_metric_summary', compact('records', 'meta'))->render();
+                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf->WriteHTML($html);
+                return $pdf->Output($filename . '.pdf', 'D');
+            case 'csv':
+                $headers = [
+                    "Content-type" => "text/csv",
+                    "Content-Disposition" => "attachment; filename=$filename.csv",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $callback = function() use($records, $meta) {
+                    // $programme_names = $meta['programmes']->pluck('name')->toArray();
+                    // $programme_ids = $meta['programmes']->pluck('id')->toArray();
+                    
+                    // $file = fopen('php://output', 'w');
+                    // fputcsv($file, array_merge(['No.', 'Team Name'], $programme_names, ['Total', 'Position']));
+                    // foreach ($records as $i => $item) {
+                    //     $programme_scores = array_map(function($id) use($item) {
+                    //         $score_total = 0;
+                    //         foreach ($item->programme_scores as $score) {
+                    //             if ($score->programme_id == $id) {
+                    //                 $score_total = $score->total;
+                    //                 break;
+                    //             }
+                    //         }
+                    //         return $score_total;
+                    //     }, $programme_ids);
+                    //     fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
+                    // }
+                    // fclose($file);
+                };
+                return response()->stream($callback, 200, $headers);
+        }
+    }
+
+    /**
+     * Monthly Pledge VS Mission
+     */
+    public function monthlyPledgeVsMission(Request $request)
+    {
+        if (!$request->post()) {
+            return view('reports.monthly_pledge_vs_mission');
+        }
+        
+        $filename = 'Monthly Pledge Vs Mission Summary';
+        $meta['title'] = 'Monthly Pledge Vs Mission Summary';
+        $meta['date_from'] = dateFormat($request->date_from);
+        $meta['date_to'] = dateFormat($request->date_to);
+        $meta['programmes'] = Programme::whereHas('metrics', fn($q) => $q->where('team_mission_amount', '>', 0))
+            ->where('metric', 'Team-Mission')
+            ->get();
+        // team mission expense metrics
+        $meta['expense_metrics'] = Metric::whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
+            ->selectRaw("programme_id, DATE_FORMAT(date, '%Y-%m') month, SUM(team_mission_amount) amount")
+            ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), programme_id"))
+            ->having('amount', '>', 0)
+            ->orderBy('month', 'ASC')
+            ->get();
+        // finance pledged metrics
+        $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
+            ->selectRaw("DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) pledge")
+            ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m')"))
+            ->orderBy('month', 'ASC')
+            ->get();
+
+        switch ($request->output) {
+            case 'pdf_print':
+                $html = view('reports.pdf.print_monthly_pledge_vs_mission', compact('records', 'meta'))->render();
+                $headers = [
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf->WriteHTML($html);
+                return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
+            case 'pdf':
+                $html = view('reports.pdf.print_monthly_pledge_vs_mission', compact('records', 'meta'))->render();
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
