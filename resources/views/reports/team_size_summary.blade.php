@@ -38,8 +38,8 @@
                     <div class="col-md-4 col-12">
                         <select name="output" id="output" class="form-control">
                             <option value="pdf_print">PDF Preview</option>
-                            <option value="pdf">PDF Download</option>
-                            <option value="csv">CSV / Excel</option>
+                            {{-- <option value="pdf">PDF Download</option> --}}
+                            {{-- <option value="csv">CSV / Excel</option> --}}
                         </select>  
                     </div>
                     <div class="col-md-2 col-12">
