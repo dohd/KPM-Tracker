@@ -22,15 +22,21 @@
         <div class="card-content p-2">
             {{ Form::open(['route' => 'reports.monthly_pledge_vs_mission.post', 'method' => 'POST', 'target' => '_blank']) }}
                 <div class="row mb-3">
+                    <label for="has_team" class="col-md-2">Include Teams</label>
+                    <div class="col-md-6 col-12">
+                        {{ Form::checkbox('has_team', null) }}
+                    </div>
+                </div>
+                <div class="row mb-3">
                     <label for="date" class="col-md-2">From Date</label>
                     <div class="col-md-6 col-12">
-                        {{ Form::date('date_from', null, ['class' => 'form-control']) }}
+                        {{ Form::date('date_from', null, ['class' => 'form-control', 'required' => 'required']) }}
                     </div>
                 </div>
                 <div class="row mb-3">
                     <label for="date" class="col-md-2">To Date</label>
                     <div class="col-md-6 col-12">
-                        {{ Form::date('date_to', null, ['class' => 'form-control']) }}
+                        {{ Form::date('date_to', null, ['class' => 'form-control', 'required' => 'required']) }}
                     </div>
                 </div>
                 <div class="row mb-3 g-0">

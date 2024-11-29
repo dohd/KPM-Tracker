@@ -81,57 +81,119 @@
         <p style="margin-top:0; margin-bottom:0; font-size:10pt; text-align:center;">Generated On: {{ date('d-M-Y') }}</p>
         <p style="margin-bottom:0; font-size:10pt;">Between {{ $meta['date_from'] }} And {{ $meta['date_to'] }}</p>
 
-        <table class="items items-table" cellpadding=8 width="100%">
-            <thead>
-                <tr class="heading">
-                    <th>Month</th>
-                    <th>Pledge</th>
-                    @foreach ($meta['programmes'] as $programme)
-                        <th>{{ $programme->name }}</th>
+        <!-- Team Monthly Pledge Vs Mission -->
+        @if (request('has_team'))
+            <table class="items items-table" cellpadding=8 width="100%">
+                <thead>
+                    <tr class="heading">
+                        <th>Team</th>
+                        <th>Month</th>
+                        <th>Pledge</th>
+                        @foreach ($meta['programmes'] as $programme)
+                            <th>{{ $programme->name }}</th>
+                        @endforeach
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($records as $i => $metric)
+                        @php $rowTotal = +$metric->pledge @endphp
+                        <tr class="dotted">
+                            <td><b>{{ @$metric->team->name }}</b></td>
+                            <td>{{ dateFormat($metric->month . '-01', 'm-Y') }}</td>
+                            <td>{{ numberFormat($metric->pledge) }}</td>
+                            @foreach ($meta['programmes'] as $programme)
+                                @php 
+                                    $amount = $meta['expense_metrics']
+                                        ->where('programme_id', $programme->id)
+                                        ->where('month', $metric->month)
+                                        ->where('team_id', $metric->team_id)
+                                        ->sum('amount');
+                                    $rowTotal += floatval($amount);
+                                @endphp
+                                <td>{{ numberFormat($amount) }}</td>  
+                            @endforeach
+                            <td><b>{{ numberFormat($rowTotal) }}</b></td>
+                        </tr>
                     @endforeach
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($records as $i => $metric)
-                    @php $rowTotal = +$metric->pledge @endphp
-                    <tr class="dotted">
-                        <td><b>{{ dateFormat($metric->month . '-01', 'm-Y') }}</b></td>
-                        <td>{{ numberFormat($metric->pledge) }}</td>
+                    <tr>
+                        @php $total = floatval($records->sum('pledge')) @endphp
+                        <td><b>Total</b></td>
+                        <td></td>
+                        <td><b>{{ numberFormat($total) }}</b></td>
                         @foreach ($meta['programmes'] as $programme)
                             @php 
-                                $amount = $meta['expense_metrics']
-                                    ->where('programme_id', $programme->id)
-                                    ->where('month', $metric->month)
-                                    ->sum('amount');
-                                $rowTotal += floatval($amount);
+                                $colTotal = 0;
+                                foreach ($records as $metric) {
+                                    $amount = $meta['expense_metrics']
+                                        ->where('programme_id', $programme->id)
+                                        ->where('month', $metric->month)
+                                        ->where('team_id', $metric->team_id)
+                                        ->sum('amount');
+                                    $colTotal += floatval($amount);
+                                }
+                                $total += $colTotal;
                             @endphp
-                            <td>{{ numberFormat($amount) }}</td>  
+                            <td><b>{{ numberFormat($colTotal) }}</b></td>
                         @endforeach
-                        <td><b>{{ numberFormat($rowTotal) }}</b></td>
+                        <td><b>{{ numberFormat($total) }}</b></td>
                     </tr>
-                @endforeach
-                <tr>
-                    @php $total = floatval($records->sum('pledge')) @endphp
-                    <td><b>Total</b></td>
-                    <td><b>{{ numberFormat($total) }}</b></td>
-                    @foreach ($meta['programmes'] as $programme)
-                        @php 
-                            $colTotal = 0;
-                            foreach ($records as $metric) {
-                                $amount = $meta['expense_metrics']
-                                    ->where('programme_id', $programme->id)
-                                    ->where('month', $metric->month)
-                                    ->sum('amount');
-                                $colTotal += floatval($amount);
-                            }
-                            $total += $colTotal;
-                        @endphp
-                        <td><b>{{ numberFormat($colTotal) }}</b></td>
+                </tbody>
+            </table>
+        @else
+            <!-- Monthly Pledge Vs Mission -->
+            <table class="items items-table" cellpadding=8 width="100%">
+                <thead>
+                    <tr class="heading">
+                        <th>Month</th>
+                        <th>Pledge</th>
+                        @foreach ($meta['programmes'] as $programme)
+                            <th>{{ $programme->name }}</th>
+                        @endforeach
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($records as $i => $metric)
+                        @php $rowTotal = +$metric->pledge @endphp
+                        <tr class="dotted">
+                            <td><b>{{ dateFormat($metric->month . '-01', 'm-Y') }}</b></td>
+                            <td>{{ numberFormat($metric->pledge) }}</td>
+                            @foreach ($meta['programmes'] as $programme)
+                                @php 
+                                    $amount = $meta['expense_metrics']
+                                        ->where('programme_id', $programme->id)
+                                        ->where('month', $metric->month)
+                                        ->sum('amount');
+                                    $rowTotal += floatval($amount);
+                                @endphp
+                                <td>{{ numberFormat($amount) }}</td>  
+                            @endforeach
+                            <td><b>{{ numberFormat($rowTotal) }}</b></td>
+                        </tr>
                     @endforeach
-                    <td><b>{{ numberFormat($total) }}</b></td>
-                </tr>
-            </tbody>
-        </table>
+                    <tr>
+                        @php $total = floatval($records->sum('pledge')) @endphp
+                        <td><b>Total</b></td>
+                        <td><b>{{ numberFormat($total) }}</b></td>
+                        @foreach ($meta['programmes'] as $programme)
+                            @php 
+                                $colTotal = 0;
+                                foreach ($records as $metric) {
+                                    $amount = $meta['expense_metrics']
+                                        ->where('programme_id', $programme->id)
+                                        ->where('month', $metric->month)
+                                        ->sum('amount');
+                                    $colTotal += floatval($amount);
+                                }
+                                $total += $colTotal;
+                            @endphp
+                            <td><b>{{ numberFormat($colTotal) }}</b></td>
+                        @endforeach
+                        <td><b>{{ numberFormat($total) }}</b></td>
+                    </tr>
+                </tbody>
+            </table>
+        @endif
     </body>
 </html>
