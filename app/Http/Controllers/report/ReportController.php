@@ -322,6 +322,11 @@ class ReportController extends Controller
         $meta['programmes'] = Programme::whereHas('metrics', fn($q) => $q->where('team_mission_amount', '>', 0))
             ->where('metric', 'Team-Mission')
             ->get(['id', 'name']); 
+        $meta['pledge'] = Programme::where('metric', 'Finance')
+            ->whereHas('metrics')
+            ->limit(1)
+            ->get()
+            ->sum('target_amount');
 
         if (request('has_team')) {
             $filename = 'Team Monthly Pledge Vs Mission Summary';
@@ -336,7 +341,7 @@ class ReportController extends Controller
                 ->get();
             // finance pledged metrics
             $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
-                ->selectRaw("team_id, DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) pledge")
+                ->selectRaw("team_id, DATE_FORMAT(date, '%Y-%m') month")
                 ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), team_id"))
                 ->orderBy('month', 'ASC')
                 ->with('team')
