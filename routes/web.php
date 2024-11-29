@@ -59,7 +59,9 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get('reports/team/size_summary', [ReportController::class, 'teamSizeSummary'])->name('reports.team_size_summary');
     Route::get('reports/team/metric_summary', [ReportController::class, 'metricSummary'])->name('reports.metric_summary');
     Route::get('reports/monthly_pledge_vs_mission', [ReportController::class, 'monthlyPledgeVsMission'])->name('reports.monthly_pledge_vs_mission');
+    Route::get('reports/team_report_card', [ReportController::class, 'teamReportCard'])->name('reports.team_report_card');
     // 
+    Route::post('reports/team_report_card', [ReportController::class, 'teamReportCard'])->name('reports.team_report_card.post');
     Route::post('reports/monthly_pledge_vs_mission', [ReportController::class, 'monthlyPledgeVsMission'])->name('reports.monthly_pledge_vs_mission.post');
     Route::post('reports/team/metric_summary', [ReportController::class, 'metricSummary'])->name('reports.metric_summary.post');
     Route::post('reports/team/size_summary', [ReportController::class, 'teamSizeSummary'])->name('reports.team_size_summary.post');

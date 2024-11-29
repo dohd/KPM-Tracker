@@ -47,12 +47,6 @@
         <a class="nav-link collapsed" href="{{ route('reports.metric_summary') }}">
           <i class="bi bi-circle"></i><span>Metric Summary</span>
         </a>
-        {{-- <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
-          <i class="bi bi-circle"></i><span>Team Performance Report Card</span>
-        </a> --}}
-        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
-          <i class="bi bi-circle"></i><span>Performance Summary</span>
-        </a>
         <a class="nav-link collapsed" href="{{ route('reports.team_size_summary') }}">
           <i class="bi bi-circle"></i><span>Team Size Summary</span>
         </a>
@@ -68,6 +62,12 @@
         {{-- <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Max Score Vs. Actual per Team-Program</span>
         </a> --}}
+        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
+          <i class="bi bi-circle"></i><span>Performance Summary</span>
+        </a>
+        <a class="nav-link collapsed" href="{{ route('reports.team_report_card') }}">
+          <i class="bi bi-circle"></i><span>Team Report Card</span>
+        </a>
       </li>
       
       <li class="nav-heading">Settings</li>

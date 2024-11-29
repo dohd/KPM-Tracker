@@ -51,7 +51,7 @@
             .items-table {
                 font-size: 10pt; 
                 border-collapse: collapse;
-                height: 700px;
+                height: 400px;
                 width: 100%;
             }
         </style>
@@ -81,28 +81,38 @@
         <p style="margin-top:0; margin-bottom:0; font-size:10pt; text-align:center;">Generated On: {{ date('d-M-Y') }}</p>
         <p style="margin-bottom:0; font-size:10pt;">Between {{ $meta['date_from'] }} And {{ $meta['date_to'] }}</p>
 
-        <!-- Report Body -->
+        <table cellpadding="8" width="100%" style="border-collapse:collapse;">
+            <tbody>
+               <tr>
+                    <td width="50%" style="border: 1px solid #888888">
+                        <span style="font-size: 7pt; color: #555555; font-family: sans;">TEAM DETAILS:</span><br>
+                        <b>Team Name:</b> {{ $meta['team']->name }} <br>
+                        <b>Members:</b> {{ $meta['team']->member_list }} <br>
+                        <b>Max. Guest Size:</b> {{ $meta['team']->max_guest }} <br>
+                    </td>
+                    <td width="2%">&nbsp;</td>
+                    <td style="border: 1px solid #888888">
+                        <span style="font-size: 7pt; color: #555555; font-family: sans;">PERFORMANCE DETAILS:</span><br>
+                        <b>Total Programmes: </b> {{ $records->count() }} <br>
+                        <b>Total Points Earned: </b> {{ $meta['rankedTeam']->programme_score_total }} <br><br>
+                        <b>Overall Rank: </b> {{ $meta['rankedTeam']->position }} <br>
+                    </td>
+               </tr>
+            </tbody>
+        </table><br>
+    
         <table class="items items-table" cellpadding=8 width="100%">
             <thead>
                 <tr class="heading">
-                    <th>Team</th>
-                    @foreach ($meta['programmes'] as $item)
-                        <th>{{ $item->name }}</th>
-                    @endforeach
-                    <th>Total</th>
-                    <th>Pos.</th>
+                    <th width="60%">Programme</th>
+                    <th>Points Earned</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($records as $i => $team)
+                @foreach ($records as $i => $programme)
                     <tr class="dotted">
-                        <td><b>{{ $team->name }}</b></td>
-                        @foreach ($meta['programmes'] as $j => $programme)
-                            @php $score_total = $team->programme_scores->where('programme_id', $programme->id)->sum('total') @endphp
-                            <td>{{ $score_total }}</td>
-                        @endforeach
-                        <td><b>{{ +$team->programme_score_total }}</b></td>
-                        <td><b>{{ +$team->position }}</b></td>
+                        <td style="padding-bottom: 3px"><b>{{ $programme->name }}</b></td>
+                        <td style="padding-bottom: 3px">{{ $meta['rankedTeam']->programme_scores->where('programme_id', $programme->id)->sum('total') }}</td>
                     </tr>
                 @endforeach
             </tbody>
