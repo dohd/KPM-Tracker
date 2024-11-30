@@ -103,11 +103,11 @@
                             @if (@$team_size->local_size | @$team_size->diaspora_size)
                                 <td>{{ @$team_size->local_size }} || {{ @$team_size->diaspora_size }}</td>
                             @else
-                                <td></td>
+                                <td>_</td>
                             @endif
                         @endforeach
                         <td>{{ $team->local_size }}</td>
-                        <td>{{ $team->diaspora_size }}</td>
+                        <td>{{ $team->diaspora_size ?: '_' }}</td>
                         <td><b>{{ $team->total }}</b></td>
                     </tr>
                 @endforeach
