@@ -82,70 +82,41 @@
         <p style="margin-bottom:0; font-size:10pt;">Between {{ $meta['date_from'] }} And {{ $meta['date_to'] }}</p>
 
         <!-- Team Monthly Pledge Vs Mission -->
-        @if (request('has_team'))
-            <table class="items items-table" cellpadding=8 width="100%">
-                <thead>
-                    <tr class="heading">
-                        <th>Team</th>
-                        <th>Month</th>
-                        <th>Pledge</th>
-                        <th>Actual</th>
-                        <th>Variance</th>
-                        <th>Percentage</th>
+        <table class="items items-table" cellpadding=8 width="100%">
+            <thead>
+                <tr class="heading">
+                    <th>Team</th>
+                    <th>Month</th>
+                    <th>Pledge</th>
+                    <th>Actual</th>
+                    <th>Variance</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($records as $i => $metric)
+                    @php 
+                        $variance = $metric->amount-$metric->pledge;
+                        $pcentage = $variance/$metric->pledge*100
+                    @endphp
+                    <tr class="dotted">
+                        <td><b>{{ @$metric->team->name }}</b></td>
+                        <td>{{ dateFormat($metric->month . '-01', 'm-Y') }}</td>
+                        <td>{{ numberFormat($metric->pledge) }}</td>
+                        <td>{{ numberFormat($metric->amount) }}</td>
+                        <td>{{ numberFormat($variance) }}</td>
+                        <td>{{ numberFormat($pcentage) }}%</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach ($records as $i => $metric)
-                        @php 
-                            $variance = $metric->amount-$metric->pledge;
-                            $pcentage = $variance/$metric->pledge*100
-                        @endphp
-                        <tr class="dotted">
-                            <td><b>{{ @$metric->team->name }}</b></td>
-                            <td>{{ dateFormat($metric->month . '-01', 'm-Y') }}</td>
-                            <td>{{ numberFormat($metric->pledge) }}</td>
-                            <td>{{ numberFormat($metric->amount) }}</td>
-                            <td>{{ numberFormat($variance) }}</td>
-                            <td>{{ numberFormat($pcentage) }}%</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <!-- Monthly Pledge -->
-            <table class="items items-table" cellpadding=8 width="100%">
-                <thead>
-                    <tr class="heading">
-                        <th>Month</th>
-                        <th>Pledge</th>
-                        <th>Actual</th>
-                        <th>Variance</th>
-                        <th>Percentage</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($records as $i => $metric)
-                        @php 
-                            $variance = $metric->amount-$metric->pledge;
-                            $pcentage = $variance/$metric->pledge*100
-                        @endphp
-                        <tr class="dotted">
-                            <td><b>{{ dateFormat($metric->month . '-01', 'm-Y') }}</b></td>
-                            <td>{{ numberFormat($metric->pledge) }}</td>
-                            <td>{{ numberFormat($metric->amount) }}</td>
-                            <td>{{ numberFormat($variance) }}</td>
-                            <td>{{ numberFormat($pcentage) }}%</td>
-                        </tr>
-                    @endforeach
-                    <tr>
-                        <td><b>Total</b></td>
-                        <td></td>
-                        <td><b>{{ numberFormat($records->sum('amount')) }}</b></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
-        @endif
+                @endforeach
+                <tr>
+                    <td><b>Total</b></td>
+                    <td></td>
+                    <td></td>
+                    <td><b>{{ numberFormat($records->sum('amount')) }}</b></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
     </body>
 </html>

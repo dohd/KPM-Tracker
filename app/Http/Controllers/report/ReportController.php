@@ -318,57 +318,34 @@ class ReportController extends Controller
 
         $input = inputClean($request->except('_token'));
         
-        $filename = 'Monthly Pledge';
-        $meta['title'] = 'Monthly Pledge';
+        $filename = 'Team Monthly Pledge';
+        $meta['title'] = 'Team Monthly Pledge';
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
 
-        $programmes = Programme::where('metric', 'Finance')
+        $pledgeProgrammes = Programme::where('metric', 'Finance')
             ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
             ->orderBy('amount_perc_by', 'ASC')
             ->get();
 
-        if (request('has_team')) {
-            $filename = 'Team Monthly Pledge';
-            $meta['title'] = 'Team Monthly Pledge';
-            
-            // finance pledged metrics
-            $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
-                ->selectRaw("team_id, DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) amount")
-                ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), team_id"))
-                ->orderBy('month', 'ASC')
-                ->with('team')
-                ->get()
-                ->map(function($v) use($programmes) {
-                    $endDate = Carbon::parse("{$v->month}-01")->endOfMonth()->format('Y-m-d');
-                    $programme = $programmes->where('amount_perc_by', '>=', $endDate)->first();
-                    if ($programme) {
-                        $v->pledge = round($programme->target_amount*$programme->amount_perc*0.01, 2);
-                    } else {
-                        $programme = $programmes->first();
-                        if ($programme) $v->pledge = $programme->target_amount;
-                    }
-                    return $v;
-                });
-        } else {
-            // finance pledged metrics
-            $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
-                ->selectRaw("DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) amount")
-                ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m')"))
-                ->orderBy('month', 'ASC')
-                ->get()
-                ->map(function($v) use($programmes) {
-                    $endDate = Carbon::parse("{$v->month}-01")->endOfMonth()->format('Y-m-d');
-                    $programme = $programmes->where('amount_perc_by', '>=', $endDate)->first();
-                    if ($programme) {
-                        $v->pledge = round($programme->target_amount*$programme->amount_perc*0.01, 2);
-                    } else {
-                        $programme = $programmes->first();
-                        if ($programme) $v->pledge = $programme->target_amount;
-                    }
-                    return $v;
-                });
-        }
+        // finance pledged metrics
+        $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
+            ->selectRaw("team_id, DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) amount")
+            ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), team_id"))
+            ->orderBy('month', 'ASC')
+            ->with('team')
+            ->get()
+            ->map(function($v) use($pledgeProgrammes) {
+                $endDate = Carbon::parse("{$v->month}-01")->endOfMonth()->format('Y-m-d');
+                $programme = $pledgeProgrammes->where('amount_perc_by', '>=', $endDate)->first();
+                if ($programme) {
+                    $v->pledge = round($programme->target_amount*$programme->amount_perc*0.01, 2);
+                } else {
+                    $programme = $pledgeProgrammes->first();
+                    if ($programme) $v->pledge = $programme->target_amount;
+                }
+                return $v;
+            });
         
         switch ($request->output) {
             case 'pdf_print':
