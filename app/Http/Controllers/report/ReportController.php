@@ -415,12 +415,13 @@ class ReportController extends Controller
         $meta['programmes'] = Programme::whereHas('metrics', fn($q) => $q->where('team_mission_amount', '>', 0))
             ->where('metric', 'Team-Mission')
             ->get(['id', 'name']); 
-        $meta['pledge'] = Programme::where('metric', 'Finance')
-            ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
-            ->limit(1)
-            ->get()
-            ->sum('target_amount');
 
+        $pledgeProgrammes = Programme::where('metric', 'Finance')
+            ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
+            ->orderBy('amount_perc_by', 'ASC')
+            ->get();
+
+        // Report includes teams
         if (request('has_team')) {
             $filename = 'Team Monthly Pledge Vs Mission Summary';
             $meta['title'] = 'Team Monthly Pledge Vs Mission Summary';
@@ -432,29 +433,51 @@ class ReportController extends Controller
                 ->having('amount', '>', 0)
                 ->orderBy('month', 'ASC')
                 ->get();
+                
             // finance pledged metrics
             $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
                 ->selectRaw("team_id, DATE_FORMAT(date, '%Y-%m') month")
                 ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), team_id"))
                 ->orderBy('month', 'ASC')
-                ->with('team')
-                ->get();
+                ->get()
+                ->map(function($v) use($pledgeProgrammes) {
+                    $endDate = Carbon::parse("{$v->month}-01")->endOfMonth()->format('Y-m-d');
+                    $programme = $pledgeProgrammes->where('amount_perc_by', '>=', $endDate)->first();
+                    if ($programme) {
+                        $v->pledge = round($programme->target_amount*$programme->amount_perc*0.01, 2);
+                    } else {
+                        $programme = $pledgeProgrammes->first();
+                        if ($programme) $v->pledge = $programme->target_amount;
+                    }
+                    return $v;
+                });
         } else {
             // team mission expense metrics
             $meta['expense_metrics'] = Metric::whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
-            ->selectRaw("programme_id, DATE_FORMAT(date, '%Y-%m') month, SUM(team_mission_amount) amount")
-            ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), programme_id"))
-            ->having('amount', '>', 0)
-            ->orderBy('month', 'ASC')
-            ->get();
+                ->selectRaw("programme_id, DATE_FORMAT(date, '%Y-%m') month, SUM(team_mission_amount) amount")
+                ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), programme_id"))
+                ->having('amount', '>', 0)
+                ->orderBy('month', 'ASC')
+                ->get();
+
             // finance pledged metrics
             $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
                 ->selectRaw("DATE_FORMAT(date, '%Y-%m') month")
                 ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m')"))
                 ->orderBy('month', 'ASC')
-                ->get();
+                ->get()
+                ->map(function($v) use($pledgeProgrammes) {
+                    $endDate = Carbon::parse("{$v->month}-01")->endOfMonth()->format('Y-m-d');
+                    $programme = $pledgeProgrammes->where('amount_perc_by', '>=', $endDate)->first();
+                    if ($programme) {
+                        $v->pledge = round($programme->target_amount*$programme->amount_perc*0.01, 2);
+                    } else {
+                        $programme = $pledgeProgrammes->first();
+                        if ($programme) $v->pledge = $programme->target_amount;
+                    }
+                    return $v;
+                });
         }
-        
         
         switch ($request->output) {
             case 'pdf_print':
@@ -473,36 +496,7 @@ class ReportController extends Controller
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
-            case 'csv':
-                $headers = [
-                    "Content-type" => "text/csv",
-                    "Content-Disposition" => "attachment; filename=$filename.csv",
-                    "Pragma" => "no-cache",
-                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                    "Expires" => "0"
-                ];
-                $callback = function() use($records, $meta) {
-                    // $programme_names = $meta['programmes']->pluck('name')->toArray();
-                    // $programme_ids = $meta['programmes']->pluck('id')->toArray();
-                    
-                    // $file = fopen('php://output', 'w');
-                    // fputcsv($file, array_merge(['No.', 'Team Name'], $programme_names, ['Total', 'Position']));
-                    // foreach ($records as $i => $item) {
-                    //     $programme_scores = array_map(function($id) use($item) {
-                    //         $score_total = 0;
-                    //         foreach ($item->programme_scores as $score) {
-                    //             if ($score->programme_id == $id) {
-                    //                 $score_total = $score->total;
-                    //                 break;
-                    //             }
-                    //         }
-                    //         return $score_total;
-                    //     }, $programme_ids);
-                    //     fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
-                    // }
-                    // fclose($file);
-                };
-                return response()->stream($callback, 200, $headers);
+            
         }
     }
 
@@ -546,36 +540,6 @@ class ReportController extends Controller
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
-            case 'csv':
-                $headers = [
-                    "Content-type" => "text/csv",
-                    "Content-Disposition" => "attachment; filename=$filename.csv",
-                    "Pragma" => "no-cache",
-                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                    "Expires" => "0"
-                ];
-                $callback = function() use($records, $meta) {
-                    // $programme_names = $meta['programmes']->pluck('name')->toArray();
-                    // $programme_ids = $meta['programmes']->pluck('id')->toArray();
-                    
-                    // $file = fopen('php://output', 'w');
-                    // fputcsv($file, array_merge(['No.', 'Team Name'], $programme_names, ['Total', 'Position']));
-                    // foreach ($records as $i => $item) {
-                    //     $programme_scores = array_map(function($id) use($item) {
-                    //         $score_total = 0;
-                    //         foreach ($item->programme_scores as $score) {
-                    //             if ($score->programme_id == $id) {
-                    //                 $score_total = $score->total;
-                    //                 break;
-                    //             }
-                    //         }
-                    //         return $score_total;
-                    //     }, $programme_ids);
-                    //     fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
-                    // }
-                    // fclose($file);
-                };
-                return response()->stream($callback, 200, $headers);
         }
     }
 }

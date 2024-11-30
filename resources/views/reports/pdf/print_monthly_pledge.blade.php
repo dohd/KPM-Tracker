@@ -109,14 +109,6 @@
                             <td>{{ numberFormat($pcentage) }}%</td>
                         </tr>
                     @endforeach
-                    <tr>
-                        <td><b>Total</b></td>
-                        <td></td>
-                        <td></td>
-                        <td><b>{{ numberFormat($records->sum('amount')) }}</b></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
                 </tbody>
             </table>
         @else
