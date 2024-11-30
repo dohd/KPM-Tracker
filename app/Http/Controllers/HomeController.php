@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\programme\Programme;
+use App\Models\team\Team;
+use App\Models\User;
+
 class HomeController extends Controller
 {
     /**
@@ -21,7 +25,11 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $numProgrammes = Programme::count();
+        $numTeams = Team::count();
+        $numMembers = User::count();
+
+        return view('home', compact('numProgrammes', 'numTeams', 'numMembers'));
     }
 
     public function event_calendar()
