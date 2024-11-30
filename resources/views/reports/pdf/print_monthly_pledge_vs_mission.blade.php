@@ -88,7 +88,7 @@
                     <tr class="heading">
                         <th>Team</th>
                         <th>Month</th>
-                        <th>Yearly Pledge</th>
+                        <th>Pledge</th>
                         @foreach ($meta['programmes'] as $programme)
                             <th>{{ $programme->name }}</th>
                         @endforeach
@@ -158,7 +158,7 @@
                 <thead>
                     <tr class="heading">
                         <th>Month</th>
-                        <th>Yearly Pledge</th>
+                        <th>Pledge</th>
                         @foreach ($meta['programmes'] as $programme)
                             <th>{{ $programme->name }}</th>
                         @endforeach

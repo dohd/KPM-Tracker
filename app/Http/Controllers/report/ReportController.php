@@ -8,6 +8,7 @@ use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\team\Team;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -307,6 +308,96 @@ class ReportController extends Controller
     }
 
     /**
+     * Monthly Pledge
+     */
+    public function monthlyPledge(Request $request)
+    {
+        if (!$request->post()) {
+            return view('reports.monthly_pledge');
+        }
+
+        $input = inputClean($request->except('_token'));
+        
+        $filename = 'Monthly Pledge';
+        $meta['title'] = 'Monthly Pledge';
+        $meta['date_from'] = dateFormat($request->date_from);
+        $meta['date_to'] = dateFormat($request->date_to);
+        // $meta['pledge'] = Programme::where('metric', 'Finance')
+        //     ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
+        //     ->limit(1)
+        //     ->get()
+        //     ->sum('target_amount');
+
+        $programmes = Programme::where('metric', 'Finance')
+            ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
+            ->orderBy('amount_perc_by', 'ASC')
+            ->get();
+
+        if (request('has_team')) {
+            $filename = 'Team Monthly Pledge';
+            $meta['title'] = 'Team Monthly Pledge';
+            
+            // finance pledged metrics
+            $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
+                ->selectRaw("team_id, DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) amount")
+                ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), team_id"))
+                ->orderBy('month', 'ASC')
+                ->with('team')
+                ->get()
+                ->map(function($v) use($programmes) {
+                    $endDate = Carbon::parse("{$v->month}-01")->endOfMonth()->format('Y-m-d');
+                    $programme = $programmes->where('amount_perc_by', '>=', $endDate)->first();
+                    if ($programme) {
+                        $v->pledge = round($programme->target_amount*$programme->amount_perc*0.01, 2);
+                    } else {
+                        $programme = $programmes->first();
+                        if ($programme) $v->pledge = $programme->target_amount;
+                    }
+                    return $v;
+                });
+        } else {
+            // finance pledged metrics
+            $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
+                ->selectRaw("DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) amount")
+                ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m')"))
+                ->orderBy('month', 'ASC')
+                ->get()
+                ->map(function($v) use($programmes) {
+                    $endDate = Carbon::parse("{$v->month}-01")->endOfMonth()->format('Y-m-d');
+                    $programme = $programmes->where('amount_perc_by', '>=', $endDate)->first();
+                    if ($programme) {
+                        $v->pledge = round($programme->target_amount*$programme->amount_perc*0.01, 2);
+                    } else {
+                        $programme = $programmes->first();
+                        if ($programme) $v->pledge = $programme->target_amount;
+                    }
+                    return $v;
+                });
+        }
+        
+        
+        switch ($request->output) {
+            case 'pdf_print':
+                $html = view('reports.pdf.print_monthly_pledge', compact('records', 'meta'))->render();
+                $headers = [
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf->WriteHTML($html);
+                return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
+            case 'pdf':
+                $html = view('reports.pdf.print_monthly_pledge', compact('records', 'meta'))->render();
+                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf->WriteHTML($html);
+                return $pdf->Output($filename . '.pdf', 'D');
+            
+        }
+    }
+
+    /**
      * Monthly Pledge VS Mission
      */
     public function monthlyPledgeVsMission(Request $request)
@@ -314,6 +405,8 @@ class ReportController extends Controller
         if (!$request->post()) {
             return view('reports.monthly_pledge_vs_mission');
         }
+
+        $input = inputClean($request->except('_token'));
         
         $filename = 'Monthly Pledge Vs Mission Summary';
         $meta['title'] = 'Monthly Pledge Vs Mission Summary';
@@ -323,7 +416,7 @@ class ReportController extends Controller
             ->where('metric', 'Team-Mission')
             ->get(['id', 'name']); 
         $meta['pledge'] = Programme::where('metric', 'Finance')
-            ->whereHas('metrics')
+            ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
             ->limit(1)
             ->get()
             ->sum('target_amount');
@@ -356,7 +449,7 @@ class ReportController extends Controller
             ->get();
             // finance pledged metrics
             $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
-                ->selectRaw("DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) pledge")
+                ->selectRaw("DATE_FORMAT(date, '%Y-%m') month")
                 ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m')"))
                 ->orderBy('month', 'ASC')
                 ->get();

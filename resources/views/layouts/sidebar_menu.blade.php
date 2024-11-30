@@ -50,18 +50,15 @@
         <a class="nav-link collapsed" href="{{ route('reports.team_size_summary') }}">
           <i class="bi bi-circle"></i><span>Team Size Summary</span>
         </a>
-        <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge_vs_mission') }}">
-          <i class="bi bi-circle"></i><span>Monthly Pledge Vs Mission</span>
+        <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge') }}">
+          <i class="bi bi-circle"></i><span>Monthly Pledge</span>
         </a>
-        {{-- <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
-          <i class="bi bi-circle"></i><span>Program per Team Financial Report</span>
-        </a> --}}
-        {{-- <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
-          <i class="bi bi-circle"></i><span>Team Pledge Vs. Actual Amount Report</span>
-        </a> --}}
-        {{-- <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
-          <i class="bi bi-circle"></i><span>Max Score Vs. Actual per Team-Program</span>
-        </a> --}}
+        <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge_vs_mission') }}">
+          <i class="bi bi-circle"></i><span>Mission Monthly Pledge</span>
+        </a>
+        <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge_vs_mission') }}">
+          <i class="bi bi-circle"></i><span>Score Variance</span>
+        </a>
         <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
           <i class="bi bi-circle"></i><span>Performance Summary</span>
         </a>
