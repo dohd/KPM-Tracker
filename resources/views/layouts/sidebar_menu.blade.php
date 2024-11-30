@@ -56,7 +56,7 @@
         <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge_vs_mission') }}">
           <i class="bi bi-circle"></i><span>Mission Monthly Pledge</span>
         </a>
-        <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge_vs_mission') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.score_variance') }}">
           <i class="bi bi-circle"></i><span>Score Variance</span>
         </a>
         <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">

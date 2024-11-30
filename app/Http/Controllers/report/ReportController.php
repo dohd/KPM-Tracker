@@ -322,11 +322,6 @@ class ReportController extends Controller
         $meta['title'] = 'Monthly Pledge';
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
-        // $meta['pledge'] = Programme::where('metric', 'Finance')
-        //     ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
-        //     ->limit(1)
-        //     ->get()
-        //     ->sum('target_amount');
 
         $programmes = Programme::where('metric', 'Finance')
             ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
@@ -374,7 +369,6 @@ class ReportController extends Controller
                     return $v;
                 });
         }
-        
         
         switch ($request->output) {
             case 'pdf_print':
@@ -461,6 +455,62 @@ class ReportController extends Controller
                 return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
             case 'pdf':
                 $html = view('reports.pdf.print_monthly_pledge_vs_mission', compact('records', 'meta'))->render();
+                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf->WriteHTML($html);
+                return $pdf->Output($filename . '.pdf', 'D');
+            
+        }
+    }
+
+    /**
+     * Score Variance
+     */
+    public function scoreVariance(Request $request)
+    {
+        if (!$request->post()) {
+            $teams = Team::get();
+            return view('reports.score_variance', compact('teams'));
+        }
+
+        $input = inputClean($request->except('_token'));
+        
+        $filename = 'Score Variance Summary';
+        $meta['title'] = 'Score Variance Summary';
+        $meta['date_from'] = dateFormat($request->date_from);
+        $meta['date_to'] = dateFormat($request->date_to);
+
+        $meta['teams'] = Team::when(request('team_id'), fn($q) => $q->where('id', request('team_id')))
+        ->whereHas('assigned_scores', function($q) use($input) {
+            $q->whereDate('date_from', '>=', $input['date_from']);
+            $q->whereDate('date_to', '<=', $input['date_to']);
+        })
+        ->get();
+
+        $records = Programme::whereHas('assignScores', function($q) use($input) {
+            $q->whereDate('date_from', '>=', $input['date_from']);
+            $q->whereDate('date_to', '<=', $input['date_to']);
+        })
+        ->with(['assignScores' => function($q) use($input) {
+            $q->select('team_id', 'programme_id', 'net_points');
+            $q->whereDate('date_from', '>=', $input['date_from']);
+            $q->whereDate('date_to', '<=', $input['date_to']);
+        }])
+        ->get();
+        
+        switch ($request->output) {
+            case 'pdf_print':
+                $html = view('reports.pdf.print_score_variance', compact('records', 'meta'))->render();
+                $headers = [
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf->WriteHTML($html);
+                return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
+            case 'pdf':
+                $html = view('reports.pdf.print_score_variance', compact('records', 'meta'))->render();
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');

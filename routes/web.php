@@ -61,7 +61,9 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get('reports/monthly_pledge_vs_mission', [ReportController::class, 'monthlyPledgeVsMission'])->name('reports.monthly_pledge_vs_mission');
     Route::get('reports/team_report_card', [ReportController::class, 'teamReportCard'])->name('reports.team_report_card');
     Route::get('reports/monthly_pledge', [ReportController::class, 'monthlyPledge'])->name('reports.monthly_pledge');
+    Route::get('reports/score_variance', [ReportController::class, 'scoreVariance'])->name('reports.score_variance');
     // 
+    Route::post('reports/score_variance', [ReportController::class, 'scoreVariance'])->name('reports.score_variance.post');
     Route::post('reports/monthly_pledge', [ReportController::class, 'monthlyPledge'])->name('reports.monthly_pledge.post');
     Route::post('reports/team_report_card', [ReportController::class, 'teamReportCard'])->name('reports.team_report_card.post');
     Route::post('reports/monthly_pledge_vs_mission', [ReportController::class, 'monthlyPledgeVsMission'])->name('reports.monthly_pledge_vs_mission.post');
