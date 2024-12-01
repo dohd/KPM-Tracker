@@ -111,8 +111,8 @@
             <tbody>
                 @foreach ($records as $i => $programme)
                     <tr class="dotted">
-                        <td style="padding-bottom: 3px"><b>{{ $programme->name }}</b></td>
-                        <td style="padding-bottom: 3px">{{ $meta['rankedTeam']->programme_scores->where('programme_id', $programme->id)->sum('total') }}</td>
+                        <td><b>{{ $programme->name }}</b></td>
+                        <td>{{ $meta['rankedTeam']->programme_scores->where('programme_id', $programme->id)->sum('total') }}</td>
                     </tr>
                 @endforeach
             </tbody>
