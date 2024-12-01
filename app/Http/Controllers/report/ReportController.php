@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\report;
 
 use App\Http\Controllers\Controller;
-use App\Models\assign_score\AssignScore;
 use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\team\Team;
@@ -36,7 +35,7 @@ class ReportController extends Controller
             $q->whereDate('date_from', '>=', $input['date_from'])->whereDate('date_to', '<=', $input['date_to']);
         })
         ->get(['id', 'name']);
-        $rankedTeams = $this->rankTeamsFromScores([$input['date_from'], $input['date_to']]);
+        $rankedTeams = rankTeamsFromScores([$input['date_from'], $input['date_to']]);
         $records = $rankedTeams;
 
         switch ($request->output) {
@@ -56,94 +55,7 @@ class ReportController extends Controller
                 $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
-            case 'csv':
-                $headers = [
-                    "Content-type" => "text/csv",
-                    "Content-Disposition" => "attachment; filename=$filename.csv",
-                    "Pragma" => "no-cache",
-                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                    "Expires" => "0"
-                ];
-                $callback = function() use($records, $meta) {
-                    $programme_names = $meta['programmes']->pluck('name')->toArray();
-                    $programme_ids = $meta['programmes']->pluck('id')->toArray();
-                    
-                    $file = fopen('php://output', 'w');
-                    fputcsv($file, array_merge(['No.', 'Team Name'], $programme_names, ['Total', 'Position']));
-                    foreach ($records as $i => $item) {
-                        $programme_scores = array_map(function($id) use($item) {
-                            $score_total = 0;
-                            foreach ($item->programme_scores as $score) {
-                                if ($score->programme_id == $id) {
-                                    $score_total = $score->total;
-                                    break;
-                                }
-                            }
-                            return $score_total;
-                        }, $programme_ids);
-                        fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
-                    }
-                    fclose($file);
-                };
-                return response()->stream($callback, 200, $headers);
         }
-    }
-
-    /**
-     * Rank Teams from Computed Scores
-     */
-    public function rankTeamsFromScores($date_range=[])
-    {
-        $assigned_scores = AssignScore::whereDate('date_from', '>=', $date_range[0])
-            ->whereDate('date_to', '<=', $date_range[1])
-            ->get(['id', 'programme_id', 'team_id']);
-        $teams = Team::whereIn('id', $assigned_scores->pluck('team_id')->toArray())->get(['id', 'name']);
-        foreach ($teams as $key => $team) {
-            $team->programme_scores = $team->assigned_scores()
-                ->selectRaw('programme_id, SUM(net_points) as total')
-                ->whereIn('assign_scores.id', $assigned_scores->pluck('id')->toArray())
-                ->groupBy('programme_id')
-                ->get();
-            
-            foreach ($team->programme_scores as $i => $team_prog_score) {
-                $programme = Programme::find($team_prog_score->programme_id);
-                // apply max aggregate score limit
-                if ($programme->max_aggr_score && $team_prog_score->total > $programme->max_aggr_score) {
-                    $team->programme_scores[$i]['total'] = $programme->max_aggr_score;
-                }
-                // allow decimals for only choir programmes
-                if (!$programme->include_choir) $team->programme_scores[$i]['total'] = round($team_prog_score->total);
-            }
-            $team->programme_score_total = $team->programme_scores->sum('total');
-            $team->programme_score_total = round($team->programme_score_total);
-            $teams[$key] = $team;
-        }
-        
-        // assign position
-        $orderd_teams = $teams->sortByDesc('programme_score_total');
-        foreach ($orderd_teams->keys() as $i => $pos) {
-            $teams[$pos]['position'] = $i+1;
-        }
-        // resolve a tie
-        $marked_keys = [];
-        $marked_totals = [];
-        $orderd_teams = $teams->sortBy('position');
-        foreach ($orderd_teams->keys() as $i => $pos) {
-            $score_total = $teams[$pos]->programme_score_total;
-            if ($i && in_array($score_total, $marked_totals)) {
-                $score_index = array_search($score_total, $marked_totals);
-                $init_pos = $marked_keys[$score_index];
-                $teams[$pos]['position'] = $teams[$init_pos]['position'];
-                continue;
-            } 
-            $marked_keys[] = $pos;
-            $marked_totals[] = $score_total;
-        }
-        // order by position
-        $orderd_teams = $teams->sortBy('position');
-        $teams = collect();
-        $orderd_teams->each(fn($v) => $teams->add($v));
-        return $teams;
     }
 
     /**
@@ -154,6 +66,8 @@ class ReportController extends Controller
         if (!$request->post()) {
             return view('reports.team_size_summary');
         }
+
+        $input = inputClean($request->except('_token'));
 
         $filename = 'Team Size Summary';
         $meta['title'] = 'Team Size Summary';
@@ -173,9 +87,9 @@ class ReportController extends Controller
             '11' => 'Nov',
             '12' => 'Dec',
         ];
-        $records = Team::whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [databaseDate($request->date_from), databaseDate($request->date_to)]))
-            ->with(['team_sizes' => fn($q) => $q->whereBetween('start_period', [databaseDate($request->date_from), databaseDate($request->date_to)])])
-            ->get()
+        $records = Team::whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$input['date_from'], $input['date_to']]))
+            ->with(['team_sizes' => fn($q) => $q->whereBetween('start_period', [$input['date_from'], $input['date_to']])])
+            ->get(['id', 'name'])
             ->map(function($v) {
                 $v->local_size = $v->team_sizes->sum('local_size');
                 $v->diaspora_size = $v->team_sizes->sum('diaspora_size');
@@ -204,36 +118,6 @@ class ReportController extends Controller
                 $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
-            case 'csv':
-                $headers = [
-                    "Content-type" => "text/csv",
-                    "Content-Disposition" => "attachment; filename=$filename.csv",
-                    "Pragma" => "no-cache",
-                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                    "Expires" => "0"
-                ];
-                $callback = function() use($records, $meta) {
-                    // $programme_names = $meta['programmes']->pluck('name')->toArray();
-                    // $programme_ids = $meta['programmes']->pluck('id')->toArray();
-                    
-                    // $file = fopen('php://output', 'w');
-                    // fputcsv($file, array_merge(['No.', 'Team Name'], $programme_names, ['Total', 'Position']));
-                    // foreach ($records as $i => $item) {
-                    //     $programme_scores = array_map(function($id) use($item) {
-                    //         $score_total = 0;
-                    //         foreach ($item->programme_scores as $score) {
-                    //             if ($score->programme_id == $id) {
-                    //                 $score_total = $score->total;
-                    //                 break;
-                    //             }
-                    //         }
-                    //         return $score_total;
-                    //     }, $programme_ids);
-                    //     fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
-                    // }
-                    // fclose($file);
-                };
-                return response()->stream($callback, 200, $headers);
         }
     }
 
@@ -274,36 +158,6 @@ class ReportController extends Controller
                 $pdf = new \Mpdf\Mpdf(config('pdf'));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
-            case 'csv':
-                $headers = [
-                    "Content-type" => "text/csv",
-                    "Content-Disposition" => "attachment; filename=$filename.csv",
-                    "Pragma" => "no-cache",
-                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                    "Expires" => "0"
-                ];
-                $callback = function() use($records, $meta) {
-                    // $programme_names = $meta['programmes']->pluck('name')->toArray();
-                    // $programme_ids = $meta['programmes']->pluck('id')->toArray();
-                    
-                    // $file = fopen('php://output', 'w');
-                    // fputcsv($file, array_merge(['No.', 'Team Name'], $programme_names, ['Total', 'Position']));
-                    // foreach ($records as $i => $item) {
-                    //     $programme_scores = array_map(function($id) use($item) {
-                    //         $score_total = 0;
-                    //         foreach ($item->programme_scores as $score) {
-                    //             if ($score->programme_id == $id) {
-                    //                 $score_total = $score->total;
-                    //                 break;
-                    //             }
-                    //         }
-                    //         return $score_total;
-                    //     }, $programme_ids);
-                    //     fputcsv($file, array_merge([$i+1, $item->name], $programme_scores, [$item->programme_score_total, $item->position]));
-                    // }
-                    // fclose($file);
-                };
-                return response()->stream($callback, 200, $headers);
         }
     }
 
@@ -511,7 +365,7 @@ class ReportController extends Controller
         $meta['date_to'] = dateFormat($request->date_to);
         $meta['team'] = Team::findOrFail($request->team_id);
 
-        $rankedTeams = $this->rankTeamsFromScores([$request->date_from, $request->date_to]);
+        $rankedTeams = rankTeamsFromScores([$request->date_from, $request->date_to]);
         $meta['rankedTeam'] = $rankedTeams->where('id', $meta['team']->id)->first(); 
         if (!$meta['rankedTeam']) return errorHandler('Programme scores required to generate report!');
         

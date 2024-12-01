@@ -164,3 +164,60 @@ if (!function_exists('tidCode')) {
         return $prefix . sprintf('%0'.$count.'d', $num);
     }
 }
+
+if (!function_exists('rankTeamsFromScores')) {
+    function rankTeamsFromScores($date_range=[])
+    {
+        $assigned_scores = \App\Models\assign_score\AssignScore::whereDate('date_from', '>=', $date_range[0])
+            ->whereDate('date_to', '<=', $date_range[1])
+            ->get(['id', 'programme_id', 'team_id']);
+        $teams = \App\Models\team\Team::whereIn('id', $assigned_scores->pluck('team_id')->toArray())->get(['id', 'name']);
+        foreach ($teams as $key => $team) {
+            $team->programme_scores = $team->assigned_scores()
+                ->selectRaw('programme_id, SUM(net_points) as total')
+                ->whereIn('assign_scores.id', $assigned_scores->pluck('id')->toArray())
+                ->groupBy('programme_id')
+                ->with(['programme' => fn($q) => $q->select('id', 'name')])
+                ->get();
+            
+            foreach ($team->programme_scores as $i => $team_prog_score) {
+                $programme = \App\Models\programme\Programme::find($team_prog_score->programme_id);
+                // apply max aggregate score limit
+                if ($programme->max_aggr_score && $team_prog_score->total > $programme->max_aggr_score) {
+                    $team->programme_scores[$i]['total'] = $programme->max_aggr_score;
+                }
+                // allow decimals for only choir programmes
+                if (!$programme->include_choir) $team->programme_scores[$i]['total'] = round($team_prog_score->total);
+            }
+            $team->programme_score_total = $team->programme_scores->sum('total');
+            $team->programme_score_total = round($team->programme_score_total);
+            $teams[$key] = $team;
+        }
+        
+        // assign position
+        $orderd_teams = $teams->sortByDesc('programme_score_total');
+        foreach ($orderd_teams->keys() as $i => $pos) {
+            $teams[$pos]['position'] = $i+1;
+        }
+        // resolve a tie
+        $marked_keys = [];
+        $marked_totals = [];
+        $orderd_teams = $teams->sortBy('position');
+        foreach ($orderd_teams->keys() as $i => $pos) {
+            $score_total = $teams[$pos]->programme_score_total;
+            if ($i && in_array($score_total, $marked_totals)) {
+                $score_index = array_search($score_total, $marked_totals);
+                $init_pos = $marked_keys[$score_index];
+                $teams[$pos]['position'] = $teams[$init_pos]['position'];
+                continue;
+            } 
+            $marked_keys[] = $pos;
+            $marked_totals[] = $score_total;
+        }
+        // order by position
+        $orderd_teams = $teams->sortBy('position');
+        $teams = collect();
+        $orderd_teams->each(fn($v) => $teams->add($v));
+        return $teams;
+    }
+}
