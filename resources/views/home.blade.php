@@ -17,6 +17,22 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="row">
+          <!-- Welcome Card -->
+          {{-- <div class="col-md-12 col-12">
+            <div class="card info-card sales-card">
+              <div class="filter">
+                <a class="icon" href="#" data-bs-toggle="dropdown" ><i class="bi bi-three-dots"></i></a>
+              </div>
+              <div class="card-body">
+                <div class="m-5 text-center">
+                  <h1>Welcome {{ auth()->user()->name }}</h1>
+                  <h1 style="color: #4154f1">~ Key Performance Metric Dashboard ~</h1>
+                </div>
+              </div>
+            </div>
+          </div> --}}
+          <!-- End Welcome Card -->
+
           <!-- Programmes Card -->
           <div class="col-md-4 col-12">
             <div class="card info-card sales-card">
@@ -25,7 +41,7 @@
               </div>
               <div class="card-body">
                 <h5 class="card-title">Programs <span></span></h5>
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center" style="height:50px">
                   <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <a href="{{ route('programmes.index') }}" style="color:inherit"><i class="bi bi-tag"></i></a>
                   </div>
@@ -47,7 +63,7 @@
               </div>
               <div class="card-body">
                 <h5 class="card-title">Teams <span></span></h5>
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center" style="height:50px">
                   <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <a href="{{ route('teams.index') }}" style="color:inherit"><i class="bi bi-people"></i></a>
                   </div>
@@ -69,7 +85,7 @@
               </div>
               <div class="card-body">
                 <h5 class="card-title">Members <span></span></h5>
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center" style="height:50px">
                   <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <a href="{{ route('teams.index') }}" style="color:inherit"><i class="bi bi-people"></i></a>
                   </div>
@@ -82,23 +98,235 @@
             </div>
           </div>
           <!-- End Members Card -->
+        </div>
 
-          <!-- Welcome Card -->
-          <div class="col-md-12 col-12">
-            <div class="card info-card sales-card">
-              <div class="filter">
-                <a class="icon" href="#" data-bs-toggle="dropdown" ><i class="bi bi-three-dots"></i></a>
-              </div>
+        <div class="row">
+          <!-- Total Scores Per Team -->
+          <div class="col-md-6 col-12">
+            <div class="card">
               <div class="card-body">
-                <div class="m-5 text-center">
-                  <h1>Welcome {{ auth()->user()->name }}</h1>
-                  <h1 style="color: #4154f1">~ Key Performance Metric Dashboard ~</h1>
-                </div>
+                <h5 class="card-title">Scores per Team<span></span></h5>
+                <!-- Column Chart -->
+                <div id="totalScoresPerTeam"></div>
+                <script>
+                  document.addEventListener("DOMContentLoaded", () => {
+                    const rankedTeams = @json($rankedTeams);
+
+                    const categories = rankedTeams.map(v => v.name);
+                    const seriesData = rankedTeams.map(v => ({x: v.name, y: v.programme_score_total}));
+  
+                    const options = {
+                      series: [
+                        {
+                          data: seriesData,
+                        }
+                      ],
+                      chart: {
+                        type: 'bar',
+                        height: 500,
+                      },
+                      plotOptions: {
+                        bar: {
+                          horizontal: false,
+                          columnWidth: '70%',
+                          endingShape: 'rounded',
+                          distributed: true, // varying colour columns
+                        },
+                      },
+                      dataLabels: {
+                        enabled: false
+                      },
+                      stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                      },
+                      xaxis: {
+                        categories: categories,
+                      },
+                      yaxis: {
+                        title: {
+                          text: 'Score',
+                        }
+                      },
+                      fill: {
+                        opacity: 1
+                      },
+                      tooltip: {
+                        y: {
+                          formatter: function(val) {
+                            return val + " Points"
+                          }
+                        }
+                      }
+                    };
+                    new ApexCharts(document.querySelector("#totalScoresPerTeam"), options).render();
+                  });
+                </script>
+                <!-- End Column Chart -->
               </div>
             </div>
           </div>
-          <!-- End Welcome Card -->
+          <!-- End Scores Per Team -->
 
+          <!-- Scores Per Program-->
+          <div class="col-md-6 col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Scores per Program<span></span></h5>
+                <!-- Column Chart -->
+                <div id="scoresPerProgramme"></div>
+                <script>
+                  document.addEventListener("DOMContentLoaded", () => {
+                    const rankedTeams = @json($rankedTeams);
+
+                    let programmes = {};
+                    rankedTeams.forEach(({programme_scores}) => {
+                      programme_scores.forEach(scoreItem => {
+                        const key = scoreItem.programme_id;
+                        const value = +scoreItem.total;
+                        if (programmes[key]) {
+                          programmes[key]['total'] += value;
+                        } else {
+                          programmes[key] = {id: key, name: scoreItem.programme.name, total: value};
+                        }
+                      });
+                    });
+                    programmes = Object.values(programmes);
+                    const categories = programmes.map(v => v.name);
+                    const seriesData = programmes.map(v => ({x: v.name, y: v.total}));
+  
+                    const options = {
+                      series: [{
+                          data: seriesData,
+                      }],
+                      chart: {
+                        type: 'bar',
+                        height: 500
+                      },
+                      plotOptions: {
+                        bar: {
+                          horizontal: true,
+                          columnWidth: '70%',
+                          endingShape: 'rounded',
+                          distributed: true, // varying colour columns
+                        },
+                      },
+                      dataLabels: {
+                        enabled: false
+                      },
+                      stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                      },
+                      xaxis: {
+                        categories: categories,
+                      },
+                      yaxis: {
+                        title: {
+                          text: 'Program',
+                        }
+                      },
+                      fill: {
+                        opacity: 1
+                      },
+                      tooltip: {
+                        y: {
+                          formatter: function(val) {
+                            return val + " Points"
+                          }
+                        }
+                      }
+                    };
+                    new ApexCharts(document.querySelector("#scoresPerProgramme"), options).render();
+                  });
+                </script>
+                <!-- End Column Chart -->
+              </div>
+            </div>
+          </div>
+          <!-- End Scores Per Program by Team -->
+        </div>
+
+        <div class="row">
+          <!-- Team Size Per Month -->
+          <div class="col-md-6 col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Team Composition<span></span></h5>
+                <!-- Column Chart -->
+                <div id="teamComposition"></div>
+                <script>
+                  document.addEventListener("DOMContentLoaded", () => {
+                    const teams = @json($teams);
+
+                    const localData = teams.map(v => v.local_size);
+                    const diasporaData = teams.map(v => v.diaspora_size);
+                    const totalData = teams.map(v => v.total);
+                    const categories = teams.map(v => v.name);
+  
+                    const options = {
+                      series: [
+                        {
+                          name: 'Local',
+                          data: localData,
+                        },
+                        {
+                          name: 'Diaspora',
+                          data: diasporaData,
+                        },
+                        {
+                          name: 'Total',
+                          data: totalData,
+                        },
+                      ],
+                      chart: {
+                        type: 'bar',
+                        height: 350,
+                      },
+                      plotOptions: {
+                        bar: {
+                          horizontal: false,
+                          columnWidth: '70%',
+                          endingShape: 'rounded',
+                        },
+                      },
+                      dataLabels: {
+                        enabled: false
+                      },
+                      stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                      },
+                      xaxis: {
+                        categories: categories,
+                      },
+                      yaxis: {
+                        title: {
+                          text: 'Size',
+                        }
+                      },
+                      fill: {
+                        opacity: 1
+                      },
+                      tooltip: {
+                        y: {
+                          formatter: function(val) {
+                            return val + " Members"
+                          }
+                        }
+                      }
+                    };
+                    new ApexCharts(document.querySelector("#teamComposition"), options).render();
+                  });
+                </script>
+                <!-- End Column Chart -->
+              </div>
+            </div>
+          </div>
+          <!-- End Team Size Per Month -->
         </div>
       </div>
     </div>
