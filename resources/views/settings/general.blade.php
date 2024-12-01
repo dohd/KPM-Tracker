@@ -49,15 +49,12 @@
                 <div class="card-content p-2">
                     <div class="row mb-3">
                         <div class="col-md-12 col-12">
-                            <label for="performance-report-limit" class="col">
-                                Performance Report Period for Team Captains
-                            </label>
                             <div class="row">
-                                <div class="col-2">
-                                    From {{ Form::date('pfmance_report_start', @$company->pfmance_report_start, ['class' => 'form-control']) }}
-                                </div>
-                                <div class="col-2">
-                                    To {{ Form::date('pfmance_report_end', @$company->pfmance_report_end, ['class' => 'form-control']) }}
+                                <label for="performance-report-limit" class="col-md-2">
+                                    Team Captains Performance Summary Access From Month
+                                </label>
+                                <div class="col-md-8 col-12">
+                                    {{ Form::date('pfmance_report_start', @$company->pfmance_report_start, ['class' => 'form-control']) }}
                                 </div>
                             </div>
                         </div>

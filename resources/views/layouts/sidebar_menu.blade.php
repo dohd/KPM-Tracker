@@ -102,12 +102,39 @@
       @endif
 
       <!-- Reports -->
-      {{-- <li class="nav-heading">Reports</li>
+      <li class="nav-heading">Report Center</li>
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
-          <i class="bi bi-circle"></i><span>Team Performance Summary</span>
+        <a class="nav-link collapsed" href="{{ route('reports.metric_summary') }}">
+          <i class="bi bi-circle"></i><span>Metric Summary</span>
         </a>
-      </li> --}}
+        <a class="nav-link collapsed" href="{{ route('reports.team_size_summary') }}">
+          <i class="bi bi-circle"></i><span>Team Size Summary</span>
+        </a>
+        {{-- <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge') }}">
+          <i class="bi bi-circle"></i><span>Monthly Pledge</span>
+        </a>
+        <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge_vs_mission') }}">
+          <i class="bi bi-circle"></i><span>Mission Monthly Pledge</span>
+        </a>
+        <a class="nav-link collapsed" href="{{ route('reports.score_variance') }}">
+          <i class="bi bi-circle"></i><span>Score Variance</span>
+        </a> --}}
+
+        <!-- Team Captain Performance Summary Access -->
+        @php
+          $currMonth = date('m', strtotime(date('Y-m-d')));
+          $accessMonth = date('m', strtotime(auth()->user()->company->pfmance_report_start));
+        @endphp
+        @if (auth()->user()->user_type == 'captain' && intval($accessMonth) <= intval($currMonth))
+          <a class="nav-link collapsed" href="{{ route('reports.team_summary_performance') }}">
+            <i class="bi bi-circle"></i><span>Performance Summary</span>
+          </a>
+        @endif
+        
+        {{-- <a class="nav-link collapsed" href="{{ route('reports.team_report_card') }}">
+          <i class="bi bi-circle"></i><span>Team Report Card</span>
+        </a> --}}
+      </li>
     @endif
   </ul>
 </aside>
