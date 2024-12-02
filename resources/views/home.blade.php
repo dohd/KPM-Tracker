@@ -261,10 +261,10 @@
                   document.addEventListener("DOMContentLoaded", () => {
                     const teams = @json($teams);
 
+                    const categories = teams.map(v => v.name);
                     const localData = teams.map(v => v.local_size);
                     const diasporaData = teams.map(v => v.diaspora_size);
                     const totalData = teams.map(v => v.total);
-                    const categories = teams.map(v => v.name);
   
                     const options = {
                       series: [

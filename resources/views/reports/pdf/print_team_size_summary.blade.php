@@ -106,9 +106,10 @@
                                 <td>_</td>
                             @endif
                         @endforeach
-                        <td>{{ $team->local_size }}</td>
-                        <td>{{ $team->diaspora_size ?: '_' }}</td>
-                        <td><b>{{ $team->total }}</b></td>
+                        @php $teamSize = $team->team_sizes->last() @endphp
+                        <td>{{ $teamSize->local_size }}</td>
+                        <td>{{ $teamSize->diaspora_size ?: '_' }}</td>
+                        <td>{{ $teamSize->local_size+$teamSize->diaspora_size }}</td>
                     </tr>
                 @endforeach
             </tbody>

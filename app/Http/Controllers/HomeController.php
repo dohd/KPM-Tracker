@@ -39,9 +39,14 @@ class HomeController extends Controller
             ->with(['team_sizes' => fn($q) => $q->whereBetween('start_period', [$startDate, $endDate])])
             ->get(['id', 'name'])
             ->map(function($v) {
-                $v->local_size = $v->team_sizes->sum('local_size');
-                $v->diaspora_size = $v->team_sizes->sum('diaspora_size');
-                $v->total = $v->local_size+$v->diaspora_size;
+                $v->local_size = 0;
+                $v->diaspora_size = 0;
+                $v->total = 0;
+                if ($v->team_sizes->last()) {
+                    $v->local_size = $v->team_sizes->last()->local_size;
+                    $v->diaspora_size = $v->team_sizes->last()->diaspora_size;
+                    $v->total = $v->local_size + $v->diaspora_size;
+                }
                 $v->team_sizes = $v->team_sizes->map(function($v1) {
                     $v1->month = date('m', strtotime($v1->start_period));
                     return $v1;
