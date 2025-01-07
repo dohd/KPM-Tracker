@@ -30,7 +30,7 @@
                 border-right: 0.1mm solid #000000;
             }
             .dotted td {
-                border-bottom: none;
+                border-bottom: dotted 1px black;
             }
             .dottedt th {
                 border-bottom: dotted 1px black;
@@ -74,7 +74,7 @@
         <table width="100%" style="font-size:10pt;margin-top:10px;">
             <tr>
                 <td style="text-align: center;" width="100%" class="headerData">
-                    <span style="font-size:16pt; color:#0f4d9b; text-transform:uppercase;"><b>{{ $meta['title'] }}</b></span>
+                    <span style="font-size:16pt; color:#0f4d9b; text-transform:uppercase;"><b>{{ $meta['title'] }} <br> {{ $meta['team']->name }} </b></span>
                 </td>
             </tr>
         </table>
@@ -86,7 +86,6 @@
                <tr>
                     <td width="50%" style="border: 1px solid #888888">
                         <span style="font-size: 7pt; color: #555555; font-family: sans;">TEAM DETAILS:</span><br>
-                        <b>Team Name:</b> {{ $meta['team']->name }} <br>
                         <b>Members:</b> {{ $meta['team']->member_list }} <br>
                         <b>Max. Guest Size:</b> {{ $meta['team']->max_guest }} <br>
                     </td>
@@ -104,15 +103,27 @@
         <table class="items items-table" cellpadding=8 width="100%">
             <thead>
                 <tr class="heading">
-                    <th width="60%">Programme</th>
+                    <th width="6%">#</th>
+                    <th width="55%">Programme</th>
                     <th>Points Earned</th>
+                    <th>Max Aggr. Points</th>
+                    <th>% Score</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($records as $i => $programme)
+                    @php
+                        $aggrPoints = $meta['rankedTeam']->programme_scores->where('programme_id', $programme->id)->sum('total');
+                        $maxPoints = +$programme->max_aggr_score;
+                        if ($maxPoints) $percScore = round($aggrPoints/$maxPoints*100,2);
+                        else $percScore = '_';
+                    @endphp
                     <tr class="dotted">
+                        <td>{{ $loop->iteration }}</td>
                         <td><b>{{ $programme->name }}</b></td>
-                        <td>{{ $meta['rankedTeam']->programme_scores->where('programme_id', $programme->id)->sum('total') }}</td>
+                        <td>{{ $aggrPoints }}</td>
+                        <td>{{ $maxPoints ?: '_' }}</td>
+                        <td>{{ $percScore }}</td>
                     </tr>
                 @endforeach
             </tbody>
