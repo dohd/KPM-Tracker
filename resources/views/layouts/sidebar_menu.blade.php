@@ -51,10 +51,10 @@
           <i class="bi bi-circle"></i><span>Team Size Summary</span>
         </a>
         <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge') }}">
-          <i class="bi bi-circle"></i><span>Monthly Pledge</span>
+          <i class="bi bi-circle"></i><span>Monthly Pledge Vs Actual</span>
         </a>
         <a class="nav-link collapsed" href="{{ route('reports.monthly_pledge_vs_mission') }}">
-          <i class="bi bi-circle"></i><span>Mission Monthly Pledge</span>
+          <i class="bi bi-circle"></i><span>Monthly Pledge & Mission</span>
         </a>
         <a class="nav-link collapsed" href="{{ route('reports.score_variance') }}">
           <i class="bi bi-circle"></i><span>Score Variance</span>

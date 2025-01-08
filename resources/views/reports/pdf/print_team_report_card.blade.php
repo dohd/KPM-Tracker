@@ -106,7 +106,7 @@
                     <th width="6%">#</th>
                     <th width="55%">Programme</th>
                     <th>Points Earned</th>
-                    <th>Max Aggr. Points</th>
+                    <th>Max Points</th>
                     <th>% Score</th>
                 </tr>
             </thead>

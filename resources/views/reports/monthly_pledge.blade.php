@@ -5,20 +5,20 @@
 <div class="pagetitle">
     <div class="row">
       <div class="col-6">
-        <h1>Monthly Pledge</h1>
+        <h1>Monthly Pledge Vs Actual</h1>
       </div>
     </div>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active"><a href="{{ route('reports.monthly_pledge') }}">Monthly Pledge</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('reports.monthly_pledge') }}">Monthly Pledge Vs Actual</a></li>
       </ol>
     </nav>
 </div>
 
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title mb-0">Monthly Pledge</h5>
+        <h5 class="card-title mb-0">Monthly Pledge Vs Actual</h5>
         <div class="card-content p-2">
             {{ Form::open(['route' => 'reports.monthly_pledge.post', 'method' => 'POST', 'target' => '_blank']) }}
                 <div class="row mb-3">

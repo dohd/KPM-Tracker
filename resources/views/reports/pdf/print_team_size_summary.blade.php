@@ -30,7 +30,7 @@
                 border-right: 0.1mm solid #000000;
             }
             .dotted td {
-                border-bottom: none;
+                border-bottom: dotted 1px black;
             }
             .dottedt th {
                 border-bottom: dotted 1px black;
@@ -85,6 +85,7 @@
         <table class="items items-table" cellpadding=8 width="100%">
             <thead>
                 <tr class="heading">
+                    <th>#</th>
                     <th>Team</th>
                     @foreach ($meta['months'] as $month)
                         <th width="6%">{{ $month }}</th>
@@ -97,6 +98,7 @@
             <tbody>
                 @foreach ($records as $i => $team)
                     <tr class="dotted">
+                        <td>{{ $loop->iteration }}</td>
                         <td><b>{{ $team->name }}</b></td>
                         @foreach ($meta['months'] as $key => $month)
                             @php $team_size = $team->team_sizes->where('month', $key)->first() @endphp

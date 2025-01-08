@@ -30,7 +30,7 @@
                 border-right: 0.1mm solid #000000;
             }
             .dotted td {
-                border-bottom: none;
+                border-bottom: dotted 1px black;
             }
             .dottedt th {
                 border-bottom: dotted 1px black;
@@ -88,6 +88,7 @@
             <table class="items items-table" cellpadding=8 width="100%">
                 <thead>
                     <tr class="heading">
+                        <th>#</th>
                         <th>Team</th>
                         <th>Date</th>
                         <th>Team Att.</th>
@@ -100,6 +101,7 @@
                     @foreach ($records as $i => $metric)
                         @php $attendTotal = $metric->team_total+$metric->guest_total @endphp
                         <tr class="dotted">
+                            <td>{{ $loop->iteration }}</td>
                             <td><b>{{ @$metric->team->name }}</b></td>
                             <td>{{ dateFormat(@$metric->date) }}</td>
                             <td>{{ $metric->team_total }}</td>
@@ -114,6 +116,7 @@
             <table class="items items-table" cellpadding=8 width="100%">
                 <thead>
                     <tr class="heading">
+                        <th>#</th>
                         <th>Team</th>
                         <th>Date</th>
                         <th>Amount</th>
@@ -123,6 +126,7 @@
                 <tbody>
                     @foreach ($records as $i => $metric)
                         <tr class="dotted">
+                            <td>{{ $loop->iteration }}</td>
                             <td><b>{{ @$metric->team->name }}</b></td>
                             <td>{{ dateFormat($metric->date) }}</td>
                             <td>{{ numberFormat($metric->grant_amount) }}</td>
@@ -135,6 +139,7 @@
             <table class="items items-table" cellpadding=8 width="100%">
                 <thead>
                     <tr class="heading">
+                        <th>#</th>
                         <th>Team</th>
                         <th>Date</th>
                         @php 
@@ -173,6 +178,7 @@
                             if ($metricType == 'Other-Activities') $attendance = $metric->other_activities_total;
                         @endphp
                         <tr class="dotted">
+                            <td>{{ $loop->iteration }}</td>
                             <td><b>{{ @$metric->team->name }}</b></td>
                             <td>{{ dateFormat($metric->date) }}</td>
                             <td>{{ $attendance }}</td>
@@ -185,6 +191,7 @@
             <table class="items items-table" cellpadding=8 width="100%">
                 <thead>
                     <tr class="heading">
+                        <th>#</th>
                         <th>Team</th>
                         <th>Date</th>
                         <th>No. Missions</th>
@@ -195,6 +202,7 @@
                 <tbody>
                     @foreach ($records as $i => $metric)
                         <tr class="dotted">
+                            <td>{{ $loop->iteration }}</td>
                             <td><b>{{ @$metric->team->name }}</b></td>
                             <td>{{ dateFormat($metric->date) }}</td>
                             <td>{{ $metric->team_mission_total }}</td>

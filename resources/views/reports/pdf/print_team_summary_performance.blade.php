@@ -30,7 +30,7 @@
                 border-right: 0.1mm solid #000000;
             }
             .dotted td {
-                border-bottom: none;
+                border-bottom: dotted 1px black;
             }
             .dottedt th {
                 border-bottom: dotted 1px black;

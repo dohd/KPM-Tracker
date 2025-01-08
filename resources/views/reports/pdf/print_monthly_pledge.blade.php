@@ -30,7 +30,7 @@
                 border-right: 0.1mm solid #000000;
             }
             .dotted td {
-                border-bottom: none;
+                border-bottom: dotted 1px black;
             }
             .dottedt th {
                 border-bottom: dotted 1px black;
@@ -85,6 +85,7 @@
         <table class="items items-table" cellpadding=8 width="100%">
             <thead>
                 <tr class="heading">
+                    <th>#</th>
                     <th>Team</th>
                     <th>Month</th>
                     <th>Pledge</th>
@@ -100,6 +101,7 @@
                         $pcentage = $variance/$metric->pledge*100
                     @endphp
                     <tr class="dotted">
+                        <td>{{ $loop->iteration }}</td>
                         <td><b>{{ @$metric->team->name }}</b></td>
                         <td>{{ dateFormat($metric->month . '-01', 'm-Y') }}</td>
                         <td>{{ numberFormat($metric->pledge) }}</td>
@@ -109,7 +111,8 @@
                     </tr>
                 @endforeach
                 <tr>
-                    <td><b>Total</b></td>
+                    <td></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td><b>{{ numberFormat($records->sum('amount')) }}</b></td>

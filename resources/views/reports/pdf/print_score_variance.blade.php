@@ -30,7 +30,7 @@
                 border-right: 0.1mm solid #000000;
             }
             .dotted td {
-                border-bottom: none;
+                border-bottom: dotted 1px black;
             }
             .dottedt th {
                 border-bottom: dotted 1px black;
@@ -78,40 +78,39 @@
         <table width="100%" style="font-size:10pt;margin-top:10px;">
             <tr>
                 <td style="text-align: center;" width="100%" class="headerData">
-                    <span style="font-size:16pt; color:#0f4d9b; text-transform:uppercase;"><b>{{ $meta['title'] }}</b></span>
+                    <span style="font-size:16pt; color:#0f4d9b; text-transform:uppercase;"><b>{{ $meta['title'] }} <br> {{ $meta['team']->name }} </b></span>
                 </td>
             </tr>
         </table>
         <p style="margin-top:0; margin-bottom:0; font-size:10pt; text-align:center;">Generated On: {{ date('d-M-Y') }}</p>
         <p style="margin-bottom:0; font-size:10pt;">Between {{ $meta['date_from'] }} And {{ $meta['date_to'] }}</p>
 
-        @foreach ($meta['teams'] as $team)
-            <label for="team"><b>{{ $team->name }}</b></label>
-            <table class="items items-table" style="margin-bottom:1em" cellpadding=8 width="100%">
-                <thead>
-                    <tr class="heading">
-                        <th>Programme</th>
-                        <th>Max. Score</th>
-                        <th>Score Awarded</th>
-                        <th>Variance</th>
+        <table class="items items-table" style="margin-bottom:1em" cellpadding=8 width="100%">
+            <thead>
+                <tr class="heading">
+                    <th>#</th>
+                    <th>Programme</th>
+                    <th>Max. Score</th>
+                    <th>Score Awarded</th>
+                    <th>Variance</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($records as $programme)
+                    @php 
+                        $maxScore = +$programme->max_aggr_score;
+                        $programmeScore = $programme->assignScores->where('team_id', $meta['team']->id)->sum('net_points');
+                        $variance = $maxScore-$programmeScore;
+                    @endphp 
+                    <tr class="dotted">
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $programme->name }}</td>
+                        <td>{{ $maxScore ?: '_' }}</td>
+                        <td>{{ $programmeScore }}</td>
+                        <td>{{ $maxScore ? $variance : '_' }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach ($records as $programme)
-                        @php 
-                            $maxScore = +$programme->max_aggr_score;
-                            $programmeScore = $programme->assignScores->where('team_id', $team->id)->sum('net_points');
-                            $variance = $maxScore-$programmeScore;
-                        @endphp 
-                        <tr>
-                            <td>{{ tidCode('', $programme->tid) }} - {{ $programme->name }}</td>
-                            <td>{{ $maxScore ?: '_' }}</td>
-                            <td>{{ $programmeScore }}</td>
-                            <td>{{ $maxScore ? $variance : '_' }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endforeach
+                @endforeach
+            </tbody>
+        </table>
     </body>
 </html>

@@ -173,7 +173,7 @@ class ReportController extends Controller
         $input = inputClean($request->except('_token'));
         
         $filename = 'Team Monthly Pledge';
-        $meta['title'] = 'Team Monthly Pledge';
+        $meta['title'] = 'Team Monthly Pledge Vs Actual';
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
 
@@ -233,21 +233,37 @@ class ReportController extends Controller
 
         $input = inputClean($request->except('_token'));
         
-        $filename = 'Monthly Pledge Vs Mission Summary';
-        $meta['title'] = 'Monthly Pledge Vs Mission Summary';
+        $filename = 'Monthly Pledge And Mission Report';
+        $meta['title'] = 'Monthly Pledge And Mission Report';
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
-        $meta['programmes'] = Programme::whereHas('metrics', fn($q) => $q->where('team_mission_amount', '>', 0))
-            ->where('metric', 'Team-Mission')
-            ->get(['id', 'name']); 
+        $meta['programmes'] = Programme::whereHas('metrics', function($q) {
+            $q->where('grant_amount', '>', 0);
+            $q->orWhere('team_mission_amount', '>', 0);
+        })
+        ->whereIn('metric', ['Finance', 'Team-Mission'])
+        ->get(['id', 'name', 'metric'])
+        ->sortBy(function($v) {
+            return array_search($v->metric, [
+                'Finance', 'Team-Mission'
+            ]);
+        });
 
         $pledgeProgrammes = Programme::where('metric', 'Finance')
             ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
             ->orderBy('amount_perc_by', 'ASC')
             ->get();
 
-        // team mission expense metrics
-        $meta['expense_metrics'] = Metric::whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
+        // team finance contribution metrics
+        $meta['finance_contrib_metrics'] = Metric::whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
+            ->selectRaw("team_id, programme_id, DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) amount")
+            ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), programme_id, team_id"))
+            ->having('amount', '>', 0)
+            ->orderBy('month', 'ASC')
+            ->get();
+
+        // team mission contribution metrics
+        $meta['mission_contrib_metrics'] = Metric::whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
             ->selectRaw("team_id, programme_id, DATE_FORMAT(date, '%Y-%m') month, SUM(team_mission_amount) amount")
             ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), programme_id, team_id"))
             ->having('amount', '>', 0)
@@ -255,22 +271,15 @@ class ReportController extends Controller
             ->get();
             
         // finance pledged metrics
-        $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
-            ->selectRaw("team_id, DATE_FORMAT(date, '%Y-%m') month")
+        $records = Metric::whereHas('programme', fn($q) => $q->whereIn('metric', ['Finance', 'Team-Mission']))
+            ->where(function($q) {
+                $q->where('grant_amount', '>', 0);
+                $q->orWhere('team_mission_amount', '>', 0);
+            })
+            ->selectRaw("DATE_FORMAT(date, '%Y-%m') month, team_id")
             ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), team_id"))
             ->orderBy('month', 'ASC')
-            ->get()
-            ->map(function($v) use($pledgeProgrammes) {
-                $endDate = Carbon::parse("{$v->month}-01")->endOfMonth()->format('Y-m-d');
-                $programme = $pledgeProgrammes->where('amount_perc_by', '>=', $endDate)->first();
-                if ($programme) {
-                    $v->pledge = round($programme->target_amount*$programme->amount_perc*0.01, 2);
-                } else {
-                    $programme = $pledgeProgrammes->first();
-                    if ($programme) $v->pledge = $programme->target_amount;
-                }
-                return $v;
-            });
+            ->get();
         
         switch ($request->output) {
             case 'pdf_print':
@@ -281,12 +290,12 @@ class ReportController extends Controller
                     "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
                     "Expires" => "0"
                 ];
-                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
                 $pdf->WriteHTML($html);
                 return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
             case 'pdf':
                 $html = view('reports.pdf.print_monthly_pledge_vs_mission', compact('records', 'meta'))->render();
-                $pdf = new \Mpdf\Mpdf(config('pdf'));
+                $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
                 $pdf->WriteHTML($html);
                 return $pdf->Output($filename . '.pdf', 'D');
             
@@ -310,12 +319,12 @@ class ReportController extends Controller
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
 
-        $meta['teams'] = Team::when(request('team_id'), fn($q) => $q->where('id', request('team_id')))
-        ->whereHas('assigned_scores', function($q) use($input) {
-            $q->whereDate('date_from', '>=', $input['date_from']);
-            $q->whereDate('date_to', '<=', $input['date_to']);
-        })
-        ->get();
+        $meta['team'] = Team::where('id', request('team_id'))
+            ->whereHas('assigned_scores', function($q) use($input) {
+                $q->whereDate('date_from', '>=', $input['date_from']);
+                $q->whereDate('date_to', '<=', $input['date_to']);
+            })
+            ->first();
 
         $records = Programme::whereHas('assignScores', function($q) use($input) {
             $q->whereDate('date_from', '>=', $input['date_from']);
