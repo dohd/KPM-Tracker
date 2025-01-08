@@ -77,27 +77,27 @@
           </div>
           <!-- End Teams Card -->
 
-          <!-- Members Card -->
+          <!-- Finance Contribution Card -->
           <div class="col-md-4 col-12">
             <div class="card info-card sales-card">
               <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown" ><i class="bi bi-three-dots"></i></a>
               </div>
               <div class="card-body">
-                <h5 class="card-title">Members <span></span></h5>
+                <h5 class="card-title">Contributions<span></span></h5>
                 <div class="d-flex align-items-center" style="height:50px">
                   <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                     <a href="{{ route('teams.index') }}" style="color:inherit"><i class="bi bi-people"></i></a>
                   </div>
                   <div class="ps-3">
-                    <h6>{{ $numMembers }}</h6>
-                    <span class="text-muted small pt-2 ps-1">Members</span>
+                    <h6>{{ numberFormat($sumContributions) }}</h6>
+                    <span class="text-muted small pt-2 ps-1">Contributions</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- End Members Card -->
+          <!-- End Finance Contribution Card -->
         </div>
 
         <div class="row">
