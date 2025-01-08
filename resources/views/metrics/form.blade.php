@@ -50,7 +50,7 @@
     <div class="row mb-3">
         <label for="amount" class="col-md-2">Grant Amount</label>
         <div class="col-md-8 col-12">
-            {{ Form::number('grant_amount', null, ['class' => 'form-control', 'placeholder' => 'Amount contributed', 'autocomplete' => 'false']) }}
+            {{ Form::text('grant_amount', null, ['id' => 'grant_amount', 'class' => 'form-control', 'placeholder' => 'Amount contributed', 'autocomplete' => 'false']) }}
         </div>
     </div>
 </div>
@@ -118,7 +118,7 @@
     <div class="row mb-3">
         <label for="team_mission_amount" class="col-md-2">Amount Allocated</label>
         <div class="col-md-8 col-12">
-            {{ Form::number('team_mission_amount', null, ['class' => 'form-control', 'placeholder' => 'Amount Allocated', 'autocomplete' => 'false']) }}
+            {{ Form::text('team_mission_amount', null, ['id' => 'team_mission_amount', 'class' => 'form-control', 'placeholder' => 'Amount Allocated', 'autocomplete' => 'false']) }}
         </div>
     </div>
 </div>
@@ -157,6 +157,11 @@
         });
     });
     $('#programme').change();
+
+    $('form').on('change', '#grant_amount,#team_mission_amount', function() {
+        const val = accounting.unformat($(this).val());
+        $(this).val(accounting.formatNumber(val));
+    });
 
     // on editing
     const metric = @json(@$metric);

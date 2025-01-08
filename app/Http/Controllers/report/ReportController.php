@@ -122,7 +122,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Metric Summary
+     *  Program Metrics Summary
      */
     public function metricSummary(Request $request)
     {
@@ -131,8 +131,8 @@ class ReportController extends Controller
             return view('reports.metric_summary', compact('programmes'));
         }
         
-        $filename = 'Metric Summary';
-        $meta['title'] = 'Metric Summary';
+        $filename = 'Program Metrics Summary';
+        $meta['title'] = 'Program Metrics Summary';
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
         $meta['programme'] = Programme::findOrFail($request->programme_id);
@@ -183,7 +183,8 @@ class ReportController extends Controller
             ->get();
 
         // finance pledged metrics
-        $records = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
+        $records = Metric::whereBetween('date', [$input['date_from'], $input['date_to']])
+            ->whereHas('programme', fn($q) => $q->where('metric', 'Finance'))
             ->selectRaw("team_id, DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) amount")
             ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), team_id"))
             ->orderBy('month', 'ASC')
@@ -237,9 +238,9 @@ class ReportController extends Controller
         $meta['title'] = 'Monthly Pledge And Mission Report';
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
-        $meta['programmes'] = Programme::whereHas('metrics', function($q) {
-            $q->where('grant_amount', '>', 0);
-            $q->orWhere('team_mission_amount', '>', 0);
+        $meta['programmes'] = Programme::whereHas('metrics', function($q) use($input) {
+            $q->whereBetween('date', [$input['date_from'], $input['date_to']]);
+            $q->where(fn($q) => $q->where('grant_amount', '>', 0)->orWhere('team_mission_amount', '>', 0));
         })
         ->whereIn('metric', ['Finance', 'Team-Mission'])
         ->get(['id', 'name', 'metric'])
@@ -249,13 +250,9 @@ class ReportController extends Controller
             ]);
         });
 
-        $pledgeProgrammes = Programme::where('metric', 'Finance')
-            ->whereHas('metrics', fn($q) => $q->whereBetween('date', [$input['date_from'], $input['date_to']]))
-            ->orderBy('amount_perc_by', 'ASC')
-            ->get();
-
         // team finance contribution metrics
-        $meta['finance_contrib_metrics'] = Metric::whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
+        $meta['finance_contrib_metrics'] = Metric::whereBetween('date', [$input['date_from'], $input['date_to']])
+            ->whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
             ->selectRaw("team_id, programme_id, DATE_FORMAT(date, '%Y-%m') month, SUM(grant_amount) amount")
             ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), programme_id, team_id"))
             ->having('amount', '>', 0)
@@ -263,7 +260,8 @@ class ReportController extends Controller
             ->get();
 
         // team mission contribution metrics
-        $meta['mission_contrib_metrics'] = Metric::whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
+        $meta['mission_contrib_metrics'] = Metric::whereBetween('date', [$input['date_from'], $input['date_to']])
+            ->whereIn('programme_id', $meta['programmes']->pluck('id')->toArray())
             ->selectRaw("team_id, programme_id, DATE_FORMAT(date, '%Y-%m') month, SUM(team_mission_amount) amount")
             ->groupBY(\DB::raw("DATE_FORMAT(date, '%Y-%m'), programme_id, team_id"))
             ->having('amount', '>', 0)
@@ -271,7 +269,8 @@ class ReportController extends Controller
             ->get();
             
         // finance pledged metrics
-        $records = Metric::whereHas('programme', fn($q) => $q->whereIn('metric', ['Finance', 'Team-Mission']))
+        $records = Metric::whereBetween('date', [$input['date_from'], $input['date_to']])
+            ->whereHas('programme', fn($q) => $q->whereIn('metric', ['Finance', 'Team-Mission']))
             ->where(function($q) {
                 $q->where('grant_amount', '>', 0);
                 $q->orWhere('team_mission_amount', '>', 0);

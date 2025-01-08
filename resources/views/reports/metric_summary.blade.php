@@ -1,24 +1,24 @@
 @extends('layouts.core')
-@section('title', 'Metric Summary')
+@section('title', 'Program Metrics Summary')
 
 @section('content')
 <div class="pagetitle">
     <div class="row">
       <div class="col-6">
-        <h1>Metric Summary</h1>
+        <h1>Program Metrics Summary</h1>
       </div>
     </div>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Metric Summary</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Program Metrics Summary</a></li>
       </ol>
     </nav>
 </div>
 
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title mb-0">Metric Summary</h5>
+        <h5 class="card-title mb-0">Program Metrics Summary</h5>
         <div class="card-content p-2">
             {{ Form::open(['route' => 'reports.metric_summary.post', 'method' => 'POST', 'target' => '_blank']) }}
                 <div class="row mb-3">

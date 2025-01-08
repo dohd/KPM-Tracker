@@ -74,8 +74,7 @@
         <table width="100%" style="font-size:10pt;margin-top:10px;">
             <tr>
                 <td style="text-align: center;" width="100%" class="headerData">
-                    <span style="font-size:16pt; color:#0f4d9b; text-transform:uppercase;"><b>{{ $meta['programme']['name'] }}</b></span><br>
-                    <span style="font-size:16pt; color:#0f4d9b; text-transform:uppercase;"><b>{{ $meta['title'] }}</b></span>
+                    <span style="font-size:16pt; color:#0f4d9b; text-transform:uppercase;"><b>{{ $meta['title'] }} <br> {{ $meta['programme']['name'] }}</b></span><br>
                 </td>
             </tr>
         </table>
