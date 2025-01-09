@@ -162,7 +162,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Monthly Pledge
+     * Monthly Pledge Vs Actual
      */
     public function monthlyPledge(Request $request)
     {
@@ -224,7 +224,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Monthly Pledge VS Mission
+     * Monthly Pledge And Mission
      */
     public function monthlyPledgeVsMission(Request $request)
     {

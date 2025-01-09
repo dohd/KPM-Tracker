@@ -255,6 +255,7 @@
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Team Composition<span></span></h5>
+                <div class="mb-2">&nbsp;</div>
                 <!-- Column Chart -->
                 <div id="teamComposition"></div>
                 <script>
@@ -327,6 +328,120 @@
             </div>
           </div>
           <!-- End Team Size Per Month -->
+
+          <!-- Pledge & Mission Distribution -->
+          <div class="col-md-6 col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Finance Actual & Mission<span></span></h5>
+                <div class="row">
+                  <div class="col-2">
+                    <select id="financialMonth">
+                      @foreach (range(1,12) as $n)
+                        <option value="{{ $n }}">{{ dateFormat(date('Y-'.$n.'-1'), 'M') }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+                <!-- Column Chart -->
+                <div id="financePledgeAndMission"></div>
+                <script>
+                  document.addEventListener("DOMContentLoaded", () => {
+
+                    const options = {
+                      series: [],
+                      chart: {
+                        type: 'bar',
+                        height: 350,
+                      },
+                      plotOptions: {
+                        bar: {
+                          horizontal: false,
+                          columnWidth: '70%',
+                          endingShape: 'rounded',
+                        },
+                      },
+                      dataLabels: {
+                        enabled: false
+                      },
+                      stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                      },
+                      colors: ['#FF5733', '#33FF57', '#3357FF'], // Custom color palette
+                      xaxis: {
+                        categories: [],
+                      },
+                      yaxis: {
+                        title: {
+                          text: 'Contribution',
+                        }
+                      },
+                      fill: {
+                        opacity: 1
+                      },
+                      tooltip: {
+                        y: {
+                          formatter: function(val) {
+                            return 'KES ' + accounting.formatNumber(val);
+                          }
+                        }
+                      }
+                    };
+                    const chart = new ApexCharts(document.querySelector("#financePledgeAndMission"), options);
+                    chart.render();
+
+                    function renderGraph(teams=[]) {
+                      const categories = teams.map(v => v.name);
+                      const financeData = teams.map(v => v.finance);
+                      const missionData = teams.map(v => v.mission);
+                      const totalData = teams.map(v => v.total);
+  
+                      setTimeout(() => {
+                        chart.render(); 
+                        chart.updateSeries([
+                          {
+                            name: 'Finance',
+                            data: financeData,
+                          },
+                          {
+                            name: 'Mission',
+                            data: missionData,
+                          },
+                          {
+                            name: 'Total',
+                            data: totalData,
+                          },
+                        ]);
+                        chart.updateOptions({
+                          xaxis: {
+                            categories: categories,
+                          },
+                        });
+                      }, 500);
+                    }
+
+                    $('#financialMonth').change(function() {
+                      const url = "{{ route('graphs.actual_and_mission') }}";
+                      const params = {
+                        month: $('#financialMonth').val(),
+                        date_from: "{{ $startDate }}",
+                        date_to: "{{ $endDate }}",
+                      };
+                      $.post(url, params)
+                      .done((data) => renderGraph(data))
+                      .catch((xhr, status, error) => console.log(error));
+                    });
+                    $('#financialMonth').change();
+                  });
+
+                </script>
+                <!-- End Column Chart -->
+              </div>
+            </div>
+          </div>
+          <!-- End Pledge & Mission Distribution -->
         </div>
       </div>
     </div>
