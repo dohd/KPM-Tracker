@@ -255,7 +255,6 @@
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Team Composition<span></span></h5>
-                <div class="mb-2">&nbsp;</div>
                 <!-- Column Chart -->
                 <div id="teamComposition"></div>
                 <script>
@@ -334,15 +333,6 @@
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Finance Actual & Mission<span></span></h5>
-                <div class="row">
-                  <div class="col-2">
-                    <select id="financialMonth">
-                      @foreach (range(1,12) as $n)
-                        <option value="{{ $n }}">{{ dateFormat(date('Y-'.$n.'-1'), 'M') }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                </div>
                 <!-- Column Chart -->
                 <div id="financePledgeAndMission"></div>
                 <script>
@@ -393,7 +383,7 @@
                     chart.render();
 
                     function renderGraph(teams=[]) {
-                      const categories = teams.map(v => v.name);
+                      const categories = teams.map(v => v.month);
                       const financeData = teams.map(v => v.finance);
                       const missionData = teams.map(v => v.mission);
                       const totalData = teams.map(v => v.total);
@@ -422,18 +412,15 @@
                       }, 500);
                     }
 
-                    $('#financialMonth').change(function() {
-                      const url = "{{ route('graphs.actual_and_mission') }}";
-                      const params = {
-                        month: $('#financialMonth').val(),
-                        date_from: "{{ $startDate }}",
-                        date_to: "{{ $endDate }}",
-                      };
-                      $.post(url, params)
-                      .done((data) => renderGraph(data))
-                      .catch((xhr, status, error) => console.log(error));
-                    });
-                    $('#financialMonth').change();
+                    const url = "{{ route('graphs.actual_and_mission') }}";
+                    const params = {
+                      date_from: "{{ $startDate }}",
+                      date_to: "{{ $endDate }}",
+                    };
+                    $.post(url, params)
+                    .done((data) => renderGraph(data))
+                    .catch((xhr, status, error) => console.log(error));
+                    
                   });
 
                 </script>
