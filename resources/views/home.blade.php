@@ -337,9 +337,27 @@
                 <div id="financePledgeAndMission"></div>
                 <script>
                   document.addEventListener("DOMContentLoaded", () => {
+                    const contributions = @json($contributions);
+                    const categories = contributions.map(v => v.name);
+                    const financeData = contributions.map(v => v.finance);
+                    const missionData = contributions.map(v => v.mission);
+                    const totalData = contributions.map(v => v.total);
 
                     const options = {
-                      series: [],
+                      series: [
+                        {
+                          name: 'Finance',
+                          data: financeData,
+                        },
+                        {
+                          name: 'Mission',
+                          data: missionData,
+                        },
+                        {
+                          name: 'Total',
+                          data: totalData,
+                        },
+                      ],
                       chart: {
                         type: 'bar',
                         height: 350,
@@ -361,7 +379,7 @@
                       },
                       colors: ['#FF5733', '#33FF57', '#3357FF'], // Custom color palette
                       xaxis: {
-                        categories: [],
+                        categories
                       },
                       yaxis: {
                         title: {
@@ -381,46 +399,6 @@
                     };
                     const chart = new ApexCharts(document.querySelector("#financePledgeAndMission"), options);
                     chart.render();
-
-                    function renderGraph(teams=[]) {
-                      const categories = teams.map(v => v.month);
-                      const financeData = teams.map(v => v.finance);
-                      const missionData = teams.map(v => v.mission);
-                      const totalData = teams.map(v => v.total);
-  
-                      setTimeout(() => {
-                        chart.render(); 
-                        chart.updateSeries([
-                          {
-                            name: 'Finance',
-                            data: financeData,
-                          },
-                          {
-                            name: 'Mission',
-                            data: missionData,
-                          },
-                          {
-                            name: 'Total',
-                            data: totalData,
-                          },
-                        ]);
-                        chart.updateOptions({
-                          xaxis: {
-                            categories: categories,
-                          },
-                        });
-                      }, 500);
-                    }
-
-                    const url = "{{ route('graphs.actual_and_mission') }}";
-                    const params = {
-                      date_from: "{{ $startDate }}",
-                      date_to: "{{ $endDate }}",
-                    };
-                    $.post(url, params)
-                    .done((data) => renderGraph(data))
-                    .catch((xhr, status, error) => console.log(error));
-                    
                   });
 
                 </script>

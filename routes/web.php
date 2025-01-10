@@ -33,7 +33,6 @@ Route::get('logout', [LoginController::class, 'logout']);
 Route::group(['middleware' => 'auth'], function() {
     // Dashboard
     Route::get('home', [HomeController::class, 'index'])->name('home');
-    Route::post('graphs/actual_and_mission', [HomeController::class, 'actualAndMissionGraphData'])->name('graphs.actual_and_mission');
 
     // Metrics
     Route::resource('metrics', MetricController::class);

@@ -29,8 +29,7 @@ class HomeController extends Controller
         // counts
         $numProgrammes = Programme::count();
         $numTeams = Team::count();
-        $sumContributions = Metric::sum(\DB::raw('grant_amount+team_mission_amount'));
-
+        
         // charts
         $startDate = date('Y-m-d', strtotime(date('Y-01-01')));
         $endDate = date('Y-m-d', strtotime(date('Y-12-31')));
@@ -62,81 +61,53 @@ class HomeController extends Controller
                 return $v;
             });
 
+        // finance and mission contributions
+        $sumContributions = Metric::whereBetween('date', [$startDate, $endDate])
+            ->sum(\DB::raw('grant_amount+team_mission_amount'));
+        $metrics = Metric::whereBetween('date', [$startDate, $endDate])
+            ->where(fn($q) => $q->where('grant_amount', '>', 0)->orWhere('team_mission_amount', '>', 0))
+            ->selectRaw("team_id, programme_id, SUM(grant_amount) finance, SUM(team_mission_amount) mission")
+            ->groupBY(\DB::raw("team_id, programme_id"))
+            ->with([
+                'team' => fn($q) => $q->select('id', 'name'),
+                'programme' => fn($q) => $q->select('id', 'metric'),
+            ])
+            ->get()
+            ->reduce(function($init, $curr) {
+                $key = $curr->team_id;
+                $mod = @$init[$key];
+                if ($mod) {
+                    if ($mod['team_id'] == $key) {
+                        if ($curr->programme->metric == 'Finance') {
+                            $mod['finance'] += floatval($curr->finance);
+                        } else {
+                            $mod['mission'] += floatval($curr->mission);
+                        }
+                        $mod['total'] = $mod['finance'] + $mod['mission'];
+                        $init[$key] = $mod;
+                    }
+                } else {
+                    $init[$key] = [
+                        'team_id' => $curr->team_id,
+                        'name' =>  $curr->team->name,
+                        'metric' => $curr->programme->metric,
+                        'finance' => +$curr->finance,
+                        'mission' => +$curr->mission,
+                        'total' => 0,
+                    ];
+                }
+                return $init;
+            }, []);        
+        $contributions = array_values($metrics);
+
         return view('home', compact(
             // other
             'startDate', 'endDate',
             // counts
             'numProgrammes', 'numTeams', 'sumContributions',
             // charts
-            'rankedTeams',
-            'teams'
+            'rankedTeams', 'teams', 'contributions',
         ));
-    }
-
-    public function actualAndMissionGraphData(Request $request)
-    {
-        $input = $request->only('date_from', 'date_to');
-
-        // team finance contribution metrics
-        $financeMetrics = Metric::whereBetween('date', [$input['date_from'], $input['date_to']])
-            ->where(fn($q) => $q->where('grant_amount', '>', 0)->orWhere('team_mission_amount', '>', 0))
-            ->selectRaw("team_id, programme_id, DATE_FORMAT(date, '%m') month, SUM(grant_amount) amount")
-            ->groupBY(\DB::raw("DATE_FORMAT(date, '%m'), programme_id, team_id"))
-            ->having('amount', '>', 0)
-            ->orderBy('month', 'ASC')
-            ->with([
-                'team' => fn($q) => $q->select('id', 'name'),
-                'programme' => fn($q) => $q->select('id', 'metric'),
-            ])
-            ->get();
-
-        // team mission contribution metrics
-        $missionMetrics = Metric::whereBetween('date', [$input['date_from'], $input['date_to']])
-            ->where(fn($q) => $q->where('grant_amount', '>', 0)->orWhere('team_mission_amount', '>', 0))
-            ->selectRaw("team_id, programme_id, DATE_FORMAT(date, '%m') month, SUM(team_mission_amount) amount")
-            ->groupBY(\DB::raw("DATE_FORMAT(date, '%m'), programme_id, team_id"))
-            ->having('amount', '>', 0)
-            ->orderBy('month', 'ASC')
-            ->with([
-                'team' => fn($q) => $q->select('id', 'name'),
-                'programme' => fn($q) => $q->select('id', 'metric'),
-            ])
-            ->get();
-            
-        $metrics = collect()->merge($financeMetrics)->merge($missionMetrics);
-        $metrics = $metrics->reduce(function($init, $curr) use($input) {
-            $year = dateFormat($input['date_from'], 'Y');
-            $month = +$curr->month;
-            $key = dateFormat(date($year.'-'.$month.'-1'), 'M');
-            $mod = @$init[$key];
-            if ($mod) {
-                if ($mod['month'] == $key) {
-                    if ($curr->programme->metric == 'Finance') {
-                        $mod['finance'] += floatval($curr->amount);
-                    } else {
-                        $mod['mission'] += floatval($curr->amount);
-                    }
-                    $mod['total'] = $mod['finance'] + $mod['mission'];
-                    $init[$key] = $mod;
-                }
-            } else {
-                $init[$key] = [
-                    'month' =>  $key,
-                    'metric' => $curr->programme->metric,
-                    'finance' => 0,
-                    'mission' => 0,
-                    'total' => 0,
-                ];
-                if ($init[$key]['metric'] == 'Finance') {
-                    $init[$key] = array_replace($init[$key], ['finance' => +$curr->amount, 'total' => +$curr->amount,]);
-                } else {
-                    $init[$key] = array_replace($init[$key], ['mission' => +$curr->amount, 'total' => +$curr->amount,]);
-                }
-            }
-            return $init;
-        }, []);
-        
-        return response()->json(array_values($metrics));
     }
 
 
