@@ -26,10 +26,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // counts
-        $numProgrammes = Programme::count();
-        $numTeams = Team::count();
-        
         // charts
         $startDate = date('Y-m-d', strtotime(date('Y-01-01')));
         $endDate = date('Y-m-d', strtotime(date('Y-12-31')));
@@ -41,6 +37,10 @@ class HomeController extends Controller
             $endDate = date($yr . '-m-d', strtotime(date($yr . '-12-31')));
         }
 
+        // counts
+        $numProgrammes = Programme::whereBetween('created_at', [$startDate, $endDate])->count();
+        $numTeams = Team::whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))->count();
+        
         $rankedTeams = rankTeamsFromScores([$startDate, $endDate]);
         $teams = Team::whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))
             ->with(['team_sizes' => fn($q) => $q->whereBetween('start_period', [$startDate, $endDate])])
