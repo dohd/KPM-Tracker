@@ -343,6 +343,10 @@
                     const missionData = contributions.map(v => v.mission);
                     const totalData = contributions.map(v => v.total);
 
+
+                    const metrics1 = @json([@$metrics1, @$startDate, @$endDate]);
+                    console.log(metrics1);
+
                     const options = {
                       series: [
                         {

@@ -30,7 +30,7 @@ class MetricController extends Controller
     public function create()
     {        
         $teams = Team::get();
-        $programmes = Programme::get();
+        $programmes = Programme::where('is_active', 1)->get();
 
         return view('metrics.create', compact('teams', 'programmes'));
     }

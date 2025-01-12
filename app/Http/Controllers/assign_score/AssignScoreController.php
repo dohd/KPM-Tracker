@@ -34,7 +34,8 @@ class AssignScoreController extends Controller
      */
     public function create()
     {
-        $programmes = Programme::get();
+        $programmes = Programme::where('is_active', 1)->get();
+        
         return view('assign_scores.create', compact('programmes'));
     }
 

@@ -13,8 +13,8 @@
                         <tr>
                             <th>#No.</th>
                             <th>Code</th>
-                            <th>Program Name</th>
-                            {{-- <th>Status</th> --}}
+                            <th>Program</th>
+                            <th>Status</th>
                             <th>Metric</th>
                             <th>Action</th>
                         </tr>
@@ -25,7 +25,7 @@
                                     <th scope="row">{{ $i+1 }}</th>
                                     <th>{{ tidCode('',$programme->tid) }}</th>
                                     <td>{{ $programme->name }}</td>
-                                    {{-- <td>{!! $programme->is_active_status_budge !!}</td> --}}
+                                    <td>{!! $programme->is_active_status_budge !!}</td>
                                     <td>{{ $programme->metric }}</td>
                                     <td>{!! $programme->action_buttons !!}</td>
                                 </tr>

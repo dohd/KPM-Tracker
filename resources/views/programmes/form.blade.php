@@ -1,4 +1,10 @@
 <div class="row mb-3">
+    <label for="is_active" class="col-md-2">Is Active</label>
+    <div class="col-md-8 col-12">
+        {{ Form::checkbox('is_active', @$programme->is_active ?: 1, true, ['id' => 'is_active']) }}
+    </div>
+</div>
+<div class="row mb-3">
     <label for="name" class="col-md-2">Program Name</label>
     <div class="col-md-8 col-12">
         {{ Form::text('name', null, ['class' => 'form-control', 'required' => 'required']) }}
@@ -147,10 +153,17 @@
     });
     $('#metric').change();
 
+    $('#is_active').change(function() {
+        if ($(this).prop('checked')) $(this).attr('value', 1);
+        else $(this).attr('value', 0);
+    });
+
     // edit mode
     const programme = @json(@$programme);
     if (programme && programme.id) {
         $('#metric').val(programme.metric).change();
+        if (programme.is_active) $('#is_active').prop('checked', true).change();
+        else $('#is_active').prop('checked', false).change();
     }
 </script>
 @stop

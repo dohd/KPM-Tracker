@@ -61,6 +61,16 @@ class HomeController extends Controller
                 return $v;
             });
 
+            $metrics1 = Metric::whereBetween('date', [$startDate, $endDate])
+            ->where(fn($q) => $q->where('grant_amount', '>', 0)->orWhere('team_mission_amount', '>', 0))
+            ->selectRaw("team_id, programme_id, SUM(grant_amount) finance, SUM(team_mission_amount) mission")
+            ->groupBY(\DB::raw("team_id, programme_id"))
+            ->with([
+                'team' => fn($q) => $q->select('id', 'name'),
+                'programme' => fn($q) => $q->select('id', 'metric'),
+            ])
+            ->get();
+
         // finance and mission contributions
         $sumContributions = Metric::whereBetween('date', [$startDate, $endDate])
             ->sum(\DB::raw('grant_amount+team_mission_amount'));
@@ -106,7 +116,7 @@ class HomeController extends Controller
             // counts
             'numProgrammes', 'numTeams', 'sumContributions',
             // charts
-            'rankedTeams', 'teams', 'contributions',
+            'rankedTeams', 'teams', 'contributions', 'metrics1'
         ));
     }
 

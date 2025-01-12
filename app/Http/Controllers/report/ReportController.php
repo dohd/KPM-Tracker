@@ -127,7 +127,7 @@ class ReportController extends Controller
     public function metricSummary(Request $request)
     {
         if (!$request->post()) {
-            $programmes = Programme::whereHas('metrics')->get();
+            $programmes = Programme::whereHas('metrics')->where('is_active', 1)->get();
             return view('reports.metric_summary', compact('programmes'));
         }
         
