@@ -14,7 +14,7 @@
                                 <th>#No</th>
                                 <th>Date</th>
                                 <th>Program</th>
-                                <th>Metric</th>
+                                <th>Type</th>
                                 {{-- <th>Amount</th> --}}
                                 <th>Team</th>
                                 <th>Status</th>

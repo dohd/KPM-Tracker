@@ -15,7 +15,7 @@
                             <th>Code</th>
                             <th>Program</th>
                             <th>Status</th>
-                            <th>Metric</th>
+                            <th>Metric Type</th>
                             <th>Action</th>
                         </tr>
                         </thead>
