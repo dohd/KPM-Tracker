@@ -131,9 +131,9 @@
           </a>
         @endif
         
-        {{-- <a class="nav-link collapsed" href="{{ route('reports.team_report_card') }}">
+        <a class="nav-link collapsed" href="{{ route('reports.team_report_card') }}">
           <i class="bi bi-circle"></i><span>Team Report Card</span>
-        </a> --}}
+        </a>
       </li>
     @endif
   </ul>
