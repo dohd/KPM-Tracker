@@ -9,7 +9,7 @@ trait MetricRelationship
 {
     public function team()
     {
-        return $this->belongsTo(Team::class, 'team_id');
+        return $this->belongsTo(Team::class, 'team_id')->withoutGlobalScopes();
     }
 
     public function programme()

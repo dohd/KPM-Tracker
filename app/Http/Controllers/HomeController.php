@@ -30,7 +30,7 @@ class HomeController extends Controller
         $startDate = date('Y-m-d', strtotime(date('Y-01-01')));
         $endDate = date('Y-m-d', strtotime(date('Y-12-31')));
 
-        $teamExists = Team::whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))->exists();
+        $teamExists = Team::withoutGlobalScopes()->whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))->exists();
         if (!$teamExists) {
             $yr = date('Y')-1;
             $startDate = date($yr . '-m-d', strtotime(date($yr . '-01-01')));
@@ -39,10 +39,10 @@ class HomeController extends Controller
 
         // counts
         $numProgrammes = Programme::whereBetween('created_at', [$startDate, $endDate])->count();
-        $numTeams = Team::whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))->count();
+        $numTeams = Team::withoutGlobalScopes()->whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))->count();
         
         $rankedTeams = rankTeamsFromScores([$startDate, $endDate]);
-        $teams = Team::whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))
+        $teams = Team::withoutGlobalScopes()->whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))
             ->with(['team_sizes' => fn($q) => $q->whereBetween('start_period', [$startDate, $endDate])])
             ->get(['id', 'name'])
             ->map(function($v) {
@@ -62,7 +62,10 @@ class HomeController extends Controller
             });
 
         // finance and mission contributions
-        $metrics = Metric::whereBetween('date', [$startDate, $endDate])
+        $metrics = Metric::withoutGlobalScopes()
+            ->whereHas('team')
+            ->whereHas('programme')
+            ->whereBetween('date', [$startDate, $endDate])
             ->where(fn($q) => $q->where('grant_amount', '>', 0)->orWhere('team_mission_amount', '>', 0))
             ->selectRaw("team_id, programme_id, SUM(grant_amount) finance, SUM(team_mission_amount) mission")
             ->groupBY(\DB::raw("team_id, programme_id"))
