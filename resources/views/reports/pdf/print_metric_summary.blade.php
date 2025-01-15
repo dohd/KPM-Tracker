@@ -134,7 +134,7 @@
                     @endforeach
                 </tbody>
             </table>
-        @elseif (in_array($metricType, ['Leader-Retreat', 'Summit-Meeting', 'Online-Meeting', 'Member-Recruitment', 'Choir-Member', 'Other-Activities']))
+        @elseif (in_array($metricType, ['Leader-Retreat', 'Summit-Meeting', 'Member-Recruitment', 'New-Initiative', 'Team-Bonding', 'Choir-Member', 'Other-Activities', 'Online-Meeting',]))
             <table class="items items-table" cellpadding=8 width="100%">
                 <thead>
                     <tr class="heading">
