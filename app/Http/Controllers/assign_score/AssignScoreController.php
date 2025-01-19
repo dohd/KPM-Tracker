@@ -259,7 +259,7 @@ class AssignScoreController extends Controller
                             $team_diasp_sizes = $team_sizes->pluck('diaspora_size')->toArray();
                             $team_sizes_ids  = array_merge($team_sizes_ids, $team_sizes->pluck('id')->toArray());
                             // previous last team size
-                            $initial = $team->team_sizes->where('start_period', '<', $input['date_from'])->latest()->first();
+                            $initial = $team->team_sizes()->where('start_period', '<', $input['date_from'])->latest()->first();
                             if ($initial) {
                                 $team_local_sizes[] = $initial->local_size;
                                 $team_diasp_sizes[] = $initial->diaspora_size;
@@ -267,7 +267,7 @@ class AssignScoreController extends Controller
                             }
                         } else {
                             // default team size
-                            $initial = $team->team_sizes->where('start_period', '<=', $input['date_from'])->latest()->first();
+                            $initial = $team->team_sizes()->where('start_period', '<=', $input['date_from'])->latest()->first();
                             if ($initial) {
                                 $team_local_sizes[] = $initial->local_size;
                                 $team_diasp_sizes[] = $initial->diaspora_size;
