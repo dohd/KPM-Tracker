@@ -206,7 +206,7 @@ class AssignScoreController extends Controller
                     }
                     // points
                     $conditional_amount = round(0.01 * $programme->amount_perc * $programme->target_amount);
-                    $team->points = round($team->accrued_amount / $conditional_amount * $programme->score);
+                    $team->points = round($team->accrued_amount / $conditional_amount * $programme->score, 2);
                     if ($team->points > $programme->score) $team->points = $programme->score;
 
                     // extra points
@@ -481,7 +481,7 @@ class AssignScoreController extends Controller
         // throw error if no points computed
         $valid_teams = $teams->filter(fn($v) => $v->points > 0);
         if (!count($valid_teams)) {
-            return response()->json(['flash_error' => 'Computation Error! Please verify rating scale and metric data']);
+            return response()->json(['flash_error' => 'Zero Points Computed! Please verify rating scale and metric data']);
         }
 
         $input = array_replace($input, [
