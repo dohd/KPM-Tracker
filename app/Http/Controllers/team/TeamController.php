@@ -17,24 +17,7 @@ class TeamController extends Controller
      */
     public function index()
     {
-        $teams = Team::latest()->get();
-
-        // DB::beginTransaction();
-        // foreach (Team::get() as $team) {
-        //     $dates = explode(',', $team->start_date);
-        //     $sizes1 = explode(',', $team->local_size);
-        //     $sizes2 = explode(',', $team->diaspora_size);
-        //     foreach ($dates as $i => $date) {
-        //         if (TeamSize::where('team_id', $team->id)->where('start_period', $date)->first()) continue;
-        //         TeamSize::create([
-        //             'team_id' => $team->id,
-        //             'start_period' => $date,
-        //             'local_size' => @$sizes1[$i],
-        //             'diaspora_size' => @$sizes2[$i],
-        //         ]);
-        //     }
-        // }
-        // DB::commit();
+        $teams = Team::latest()->with('team_sizes')->get();
 
         return view('teams.index', compact('teams'));
     }

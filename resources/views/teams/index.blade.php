@@ -24,8 +24,9 @@
                                     <th scope="row">{{ $i+1 }}</th>
                                     <th>{{ tidCode('', $team->tid) }}</th>
                                     <td>{{ $team->name }}</td>
-                                    <td>{{ last(explode(',', $team->local_size)) }}</td>
-                                    <td>{{ last(explode(',', $team->diaspora_size)) }}</td>
+                                    @php $teamSize = $team->team_sizes->sortByDesc('start_period')->first() @endphp
+                                    <td>{{ @$teamSize->local_size }}</td>
+                                    <td>{{ @$teamSize->diaspora_size }}</td>
                                     <td>{!! $team->action_buttons !!}</td>
                                 </tr>
                             @endforeach
