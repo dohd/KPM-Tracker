@@ -194,7 +194,7 @@
                         <th>Team</th>
                         <th>Date</th>
                         <th>No. Missions</th>
-                        <th>Amount</th>
+                        <th>Pledged Amount</th>
                         <th>Memo</th>
                     </tr>
                 </thead>

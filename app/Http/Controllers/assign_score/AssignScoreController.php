@@ -72,9 +72,8 @@ class AssignScoreController extends Controller
             $data_items = databaseArray($input);
             AssignScore::insert($data_items);
 
-            // mark metrics already scored
+            // mark as scored
             Metric::whereIn('id', $metric_ids)->update(['in_score' => 1]);
-            // mark team sizes already scored
             TeamSize::whereIn('id', $team_sizes_ids)->update(['in_score' => 1]);
 
             DB::commit();
@@ -140,14 +139,14 @@ class AssignScoreController extends Controller
     }
 
     /**
-     * Reset saved scores
+     * Reset Programme Scores for that year
      */
     public function reset_scores(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'programme_id' => 'required'
         ]);
-        if ($validator->fails()) return response()->json(['flash_error' => 'Fields required! programme']);
+        if ($validator->fails()) return response()->json(['flash_error' => 'programme is required']);
 
         try {            
             $programme = Programme::find(request('programme_id'));
@@ -157,6 +156,13 @@ class AssignScoreController extends Controller
             ->whereYear('date_from', $year)
             ->whereYear('date_to', $year)
             ->delete();
+
+            // mark as unscored
+            Metric::where('programme_id', $programme->id)->update(['in_score' => null]);
+            TeamSize::whereHas('team', function($q) {
+                $q->whereHas('metrics', fn($q) => $q->where('programme_id', request('programme_id')));
+            })
+            ->update(['in_score' => null]);
             
             return response()->json(['flash_success' => 'Computed Scores reset successfully']);
         } catch (\Throwable $th) {
@@ -431,9 +437,11 @@ class AssignScoreController extends Controller
             case 'Team-Mission': 
                 foreach ($teams as $key => $team) {
                     $team->missions_total = 0;
+                    $team->pledged_total = 0;
                     foreach ($metrics as $i => $metric) {
                         if ($metric->team_id == $team->id) {
                             $team->missions_total += $metric->team_mission_total;
+                            $team->pledged_total += $metric->team_mission_amount;
                         }
                     }
                     $team->points = 0;

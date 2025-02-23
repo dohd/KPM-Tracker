@@ -278,6 +278,7 @@
                 <th>No.</th>
                 <th>Team Name</th>
                 <th>No. of Missions</th>
+                <th>Pledged Amount</th>
                 <th>Points</th>
             </tr>
         </thead>
@@ -287,6 +288,7 @@
                     <td>{{ $i+1 }}</td>
                     <td>{{ $team->name }}</td>
                     <td>{{ $team->missions_total }}</td>
+                    <td>{{ numberFormat($team->pledged_total) }}</td>
                     <td>{{ $team->points }}</td>
                     <input type="hidden" name="programme_id[]" value="{{ $input['programme_id'] }}">
                     <input type="hidden" name="team_id[]" value="{{ $team->id }}">

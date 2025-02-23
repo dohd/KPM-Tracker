@@ -116,7 +116,7 @@
         </div>
     </div>
     <div class="row mb-3">
-        <label for="team_mission_amount" class="col-md-2">Amount Allocated</label>
+        <label for="team_mission_amount" class="col-md-2">Pledge Amount</label>
         <div class="col-md-8 col-12">
             {{ Form::text('team_mission_amount', null, ['id' => 'team_mission_amount', 'class' => 'form-control', 'placeholder' => 'Amount Allocated', 'autocomplete' => 'false']) }}
         </div>
