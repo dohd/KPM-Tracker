@@ -179,13 +179,13 @@
             <div class="row mb-3">
                 <label for="mission_amount" class="col-md-2">Pledge Amount</label>
                 <div class="col-md-8 col-12">
-                    {{ Form::number('mission_amount', null, ['class' => 'form-control', 'placeholder' => 'Mission Amount']) }}
+                    {{ Form::number('mission_pledge', null, ['class' => 'form-control', 'placeholder' => 'Pledge Amount']) }}
                 </div>
             </div>
             <div class="row mb-3">
                 <label for="mission_amount_score" class="col-md-2">Score Points</label>
                 <div class="col-md-8 col-12">
-                    {{ Form::number('mission_amount_score', null, ['class' => 'form-control']) }}
+                    {{ Form::number('mission_pledge_score', null, ['class' => 'form-control']) }}
                 </div>
             </div>
         </div>
