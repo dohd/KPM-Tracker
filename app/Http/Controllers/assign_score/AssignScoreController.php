@@ -379,17 +379,22 @@ class AssignScoreController extends Controller
                 break;
             case 'Summit-Meeting': 
                 foreach ($teams as $key => $team) {
-                    $team->summit_meetings_total = 0;
-                    foreach ($metrics as $i => $metric) {
+                    $meetingsByMonth = [];
+                    foreach ($metrics as $metric) {
                         if ($metric->team_id == $team->id) {
-                            if ($metric->summit_leader_total >= $scale->summit_leaders_no) {
-                                $team->summit_meetings_total++;
-                            }
+                            $month = dateFormat($metric->date, 'm-Y');
+                            $meetingsByMonth[$month] = 1;
                         }
                     }
+                    $team->summit_meetings_total = array_sum(array_values($meetingsByMonth));
+
                     $team->points = 0;
                     if ($scale->summit_meeting_no && $scale->summit_meeting_score) {
-                        $team->points = floor(($team->summit_meetings_total/$scale->summit_meeting_no) * $scale->summit_meeting_score);
+                        if ($scale->summit_meeting_no <= $team->summit_meetings_total) {
+                            $team->points = $scale->summit_meeting_no;
+                        } else {
+                            $team->points = $team->summit_meetings_total;
+                        }
                     }
                     $team->net_points = $team->points;
                     $teams[$key] = $team;
