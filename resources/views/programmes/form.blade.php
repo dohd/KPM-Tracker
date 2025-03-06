@@ -11,9 +11,15 @@
     </div>
 </div>
 <div class="row mb-3">
-    <label for="name" class="col-md-2">Max Aggregate Score</label>
+    <label for="name" class="col-md-2">Max Aggr. Score</label>
     <div class="col-md-8 col-12">
         {{ Form::number('max_aggr_score', null, ['class' => 'form-control', 'placeholder' => 'Maximum aggregate score']) }}
+    </div>
+</div>
+<div class="row mb-3">
+    <label for="name" class="col-md-2">Max Guest Size</label>
+    <div class="col-md-8 col-12">
+        {{ Form::number('max_guest_size', null, ['class' => 'form-control', 'placeholder' => 'Maximum scorable guest size']) }}
     </div>
 </div>
 <div class="row mb-3">

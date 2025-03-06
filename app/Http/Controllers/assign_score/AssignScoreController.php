@@ -240,11 +240,17 @@ class AssignScoreController extends Controller
                     $team->days = @$days ?: 1;
                     $team->team_total_att = 0;
                     $team->guest_total_att = 0;
+                    $max_guest_size = 0;
                     foreach ($metrics as $i => $metric) {
                         if ($metric->team_id == $team->id) {
                             $team->team_total_att += $metric->team_total;
                             $team->guest_total_att += $metric->guest_total;
+                            $max_guest_size = $metric->programme->max_guest_size;
                         }
+                    }
+                    // limit guest total
+                    if ($max_guest_size && $team->guest_total_att > $max_guest_size) {
+                        $team->guest_total_att = $max_guest_size;
                     }
 
                     // team sizes
