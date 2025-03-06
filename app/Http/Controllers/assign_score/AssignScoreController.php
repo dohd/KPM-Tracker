@@ -153,19 +153,19 @@ class AssignScoreController extends Controller
             $year = date('Y', strtotime($programme->period_from));
 
             AssignScore::where('programme_id', $programme->id)
-            ->whereYear('date_from', $year)
-            ->whereYear('date_to', $year)
-            ->delete();
+                ->whereYear('date_from', $year)
+                ->whereYear('date_to', $year)
+                ->delete();
 
-            // mark as unscored
+            // update unscored status on metrics and team-sizes 
             Metric::where('programme_id', $programme->id)->update(['in_score' => null]);
             TeamSize::whereHas('team', function($q) {
                 $q->whereHas('metrics', fn($q) => $q->where('programme_id', request('programme_id')));
-            })
-            ->update(['in_score' => null]);
+            })->update(['in_score' => null]);
             
             return response()->json(['flash_success' => 'Computed Scores reset successfully']);
         } catch (\Throwable $th) {
+            \Log::error($th->getMessage());
             return response()->json(['flash_error' => 'Something went wrong. Error reseting computed scores!']);
         }
     }

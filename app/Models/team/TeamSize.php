@@ -3,11 +3,12 @@
 namespace App\Models\team;
 
 use App\Models\ModelTrait;
+use App\Models\team\Traits\TeamSizeRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class TeamSize extends Model
 {
-    use ModelTrait;
+    use ModelTrait, TeamSizeRelationship;
 
     /**
      * The database table used by the model.
