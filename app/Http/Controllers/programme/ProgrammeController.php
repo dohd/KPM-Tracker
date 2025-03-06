@@ -52,8 +52,8 @@ class ProgrammeController extends Controller
 
         try {     
             $input = $request->except('_token');
-            $date_num_vars = $request->except('name', 'metric', 'memo', 'compute_type', 'include_choir', 'team_size');
-            foreach ($date_num_vars as $key => $value) {
+            $date_and_num_fields = $request->except('name', 'metric', 'memo', 'compute_type', 'include_choir', 'team_size');
+            foreach ($date_and_num_fields as $key => $value) {
                 if (in_array($key, ['period_from', 'period_to', 'amount_perc_by'])) $input[$key] = databaseDate($value);
                 else $input[$key] = numberClean($value);
             }
@@ -123,8 +123,8 @@ class ProgrammeController extends Controller
 
         try {    
             $input = $request->except('_token');
-            $date_num_vars = $request->except('name', 'metric', 'memo', 'compute_type', 'include_choir', 'team_size');
-            foreach ($date_num_vars as $key => $value) {
+            $date_and_num_fields = $request->except('name', 'metric', 'memo', 'compute_type', 'include_choir', 'team_size');
+            foreach ($date_and_num_fields as $key => $value) {
                 if (in_array($key, ['period_from', 'period_to', 'amount_perc_by'])) $input[$key] = databaseDate($value);
                 else $input[$key] = numberClean($value);
             }
