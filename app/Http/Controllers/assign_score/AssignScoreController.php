@@ -192,6 +192,7 @@ class AssignScoreController extends Controller
         $metrics = Metric::where('programme_id', $programme->id)
             ->whereBetween('date', [$input['date_from'], $input['date_to']])
             ->orderBy('date', 'ASC')
+            ->with('programme')
             ->get();
         $teams = Team::whereIn('id', $metrics->pluck('team_id')->toArray())->get();   
         
@@ -238,19 +239,31 @@ class AssignScoreController extends Controller
                 $team_sizes_ids = [];
                 foreach ($teams as $key => $team) {
                     $team->days = @$days ?: 1;
-                    $team->team_total_att = 0;
+                    $team->team_total_att = $metrics->where('team_id', $team->id)->sum('team_total');
                     $team->guest_total_att = 0;
-                    $max_guest_size = 0;
-                    foreach ($metrics as $i => $metric) {
-                        if ($metric->team_id == $team->id) {
-                            $team->team_total_att += $metric->team_total;
-                            $team->guest_total_att += $metric->guest_total;
-                            $max_guest_size = $metric->programme->max_guest_size;
+
+                    // guest attendance
+                    $maxGuestScore = 0;
+                    $maxDailyGuestScore = 0;
+                    $maxDailyGuestSize = 0;
+                    $dailyGuestAtt = [];
+                    foreach ($metrics->where('team_id', $team->id) as $metric) {
+                        if (@$dailyGuestAtt[$metric->date]) {
+                            $dailyGuestAtt[$metric->date] += $metric->guest_total;
+                        } else {
+                            $dailyGuestAtt[$metric->date] = $metric->guest_total;
                         }
+                        $maxDailyGuestSize = $metric->programme->max_daily_guest_size;
+                        $maxDailyGuestScore = $metric->programme->max_daily_guest_score;
+                        $maxGuestScore = $metric->programme->max_guest_score;
                     }
-                    // limit guest total
-                    if ($max_guest_size && $team->guest_total_att > $max_guest_size) {
-                        $team->guest_total_att = $max_guest_size;
+                    // limit guest attendance scores
+                    foreach ($dailyGuestAtt as $guestCount) {
+                        if ($guestCount >= $maxDailyGuestSize) $team->guest_total_att += $maxDailyGuestScore;
+                        else $team->guest_total_att += $guestCount;
+                    }
+                    if ($maxGuestScore && $team->guest_total_att > $maxGuestScore) {
+                        $team->guest_total_att = $maxGuestScore;
                     }
 
                     // team sizes

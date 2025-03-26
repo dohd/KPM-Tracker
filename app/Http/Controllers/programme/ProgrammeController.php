@@ -137,7 +137,11 @@ class ProgrammeController extends Controller
                 }
             }
 
-            if (!@$input['is_active']) $input['is_active'] = 0; 
+            // activate programme if not set
+            if (!@$input['is_active']) {
+                $input['is_active'] = 0; 
+            }
+
             $programme->update($input); 
 
             return redirect(route('programmes.index'))->with(['success' => 'Programme updated successfully']);

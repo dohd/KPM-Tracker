@@ -17,9 +17,23 @@
     </div>
 </div>
 <div class="row mb-3">
-    <label for="name" class="col-md-2">Max Guest Size</label>
+    <label for="name" class="col-md-2">Max Aggr. Guest Score</label>
     <div class="col-md-8 col-12">
-        {{ Form::number('max_guest_size', null, ['class' => 'form-control', 'placeholder' => 'Maximum scorable guest size']) }}
+        {{ Form::number('max_guest_score', null, ['class' => 'form-control', 'placeholder' => 'Maximum scorable guest size']) }}
+    </div>
+</div>
+<div class="row mb-3">
+    <label for="name" class="col-md-2">Max Daily Guest Size</label>
+    <div class="col-md-8 col-12">
+        <div class="row">
+            <div class="col-md-5">
+                {{ Form::number('max_daily_guest_size', null, ['class' => 'form-control', 'placeholder' => 'Maximum daily guest size']) }}
+            </div>
+            <div class="col-md-3 text-end"><label for="guestScore">Max Daily Score</label></div>
+            <div class="col-md-4">
+                {{ Form::number('max_daily_guest_score', null, ['class' => 'form-control', 'placeholder' => 'Maximum daily score']) }}
+            </div>
+        </div>
     </div>
 </div>
 <div class="row mb-3">
@@ -75,10 +89,14 @@
 <div class="row mb-3">
     <label for="period_from" class="col-md-2">Computation From</label>
     <div class="col-md-8 col-12">
-        <div class="row g-1">
-            <div class="col-md-4" style="margin-right: 10px;">{{ Form::date('period_from', null, ['class' => 'form-control', 'id' => 'period_from', 'required' => 'required']) }}</div>
-            <div class="col-md-3"><label for="period_to">Computation To</label></div>
-            <div class="col-md-4">{{ Form::date('period_to', null, ['class' => 'form-control', 'id' => 'period_to', 'required' => 'required']) }}</div>
+        <div class="row">
+            <div class="col-md-5">
+                {{ Form::date('period_from', null, ['class' => 'form-control', 'id' => 'period_from', 'required' => 'required']) }}
+            </div>
+            <div class="col-md-3 text-end"><label for="period_to">Computation To</label></div>
+            <div class="col-md-4">
+                {{ Form::date('period_to', null, ['class' => 'form-control', 'id' => 'period_to', 'required' => 'required']) }}
+            </div>
         </div>
     </div>
 </div>
@@ -129,6 +147,7 @@
     </div>
 </div>
 <!-- end finance section -->
+
 <div class="row mb-3">
     <label for="name" class="col-md-2">Memo</label>
     <div class="col-md-8 col-12">
