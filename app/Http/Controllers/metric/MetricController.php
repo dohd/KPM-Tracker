@@ -41,8 +41,9 @@ class MetricController extends Controller
         $q->when(request('score_status'), function($q) {
             if (request('score_status') == 1) {
                 $q->whereNotNull('in_score');
+            } else {
+                $q->whereNull('in_score');
             }
-            $q->whereNull('in_score');
         });
 
         $q->orderBy('id', 'desc');
