@@ -61,6 +61,10 @@
         <div class="card-body">
             <div class="card-content p-2">
                 <div class="overflow-auto">
+                    <div class="mb-2">
+                        <span id="approveBtn" role="button" class="badge bg-success"><i class="bi bi-check2-all"></i> Approve</span>
+                        <span id="unapproveBtn" role="button" class="badge bg-danger"><i class="bi bi-x-octagon"></i> Unapprove</span>
+                    </div>
                     <table id="metricsTbl" class="table table-borderless">
                         <thead>
                             <tr>
@@ -69,7 +73,8 @@
                                 <th>Program</th>
                                 <th>Metric Type</th>
                                 <th>Team</th>
-                                <th>Status</th>
+                                <th>Appr. Status</th>
+                                <th>Score Status</th>
                                 <th>Memo</th>
                                 <th>Action</th>
                             </tr>
@@ -82,12 +87,48 @@
             </div>
         </div>
     </div>
+    {{ Form::open(['route' => 'metrics.approve', 'method' => 'POST', 'id' => 'approvalForm']) }}
+        <input type="hidden" name="action" id="approveActn">
+        <input type="hidden" name="metric_ids" id="metricIds">
+    {{ Form::close() }}
 @stop
 
 @section('script')
 <script>
-    const initRow = $('#metricsTbl tbody tr:first').clone(); 
     let dataTable;
+    const initRow = $('#metricsTbl tbody tr:first').clone(); 
+    let metricIds = [];
+
+    $('#checkAll').change(function () {
+        if ($(this).prop('checked')) {
+
+        } else {
+
+        }
+    });
+
+    $(document).on('change', '.check-row', function() {
+        if ($(this).attr('disabled')) return;
+        const id = $(this).attr('data-id');
+        if ($(this).prop('checked')) {
+            metricIds.push(id);
+        } else {
+            metricIds.splice(metricIds.indexOf(id), 1);
+        }
+        $('#metricIds').val(metricIds.join(','));
+    });
+
+    $('#approveBtn, #unapproveBtn').click(function() {
+        if (!$('#metricIds').val()) return alert('Select records to proceed!');
+        if (confirm('Are you sure?')) {
+            if ($(this).is('#approveBtn')) {
+                $('#approveActn').val('approve');
+            } else if ($(this).is('#unapproveBtn')) {
+                $('#approveActn').val('unapprove');
+            }
+            $('#approvalForm').submit();
+        }
+    });
 
     fetchData();
     $('#filterBtn').click(function () {
@@ -95,7 +136,6 @@
         $('#metricsTbl tbody').html(initRow);
         fetchData();
     });
-
     
     function fetchData() {
         $.post("{{ route('metrics.get_data') }}", {
@@ -107,7 +147,12 @@
         })
         .done(data => {
             $('#metricsTbl tbody').html(data);
-            dataTable = new simpleDatatables.DataTable('#metricsTbl');
+            dataTable = new simpleDatatables.DataTable('#metricsTbl', {
+                columns: [
+                    {select: 0, sortable: false},
+                    {select: 8, sortable: false},
+                ],
+            });
         })
         .fail((xhr, status, err) => {
             // flashMessage(data)

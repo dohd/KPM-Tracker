@@ -232,4 +232,27 @@ class MetricController extends Controller
             return errorHandler('Error deleting Metric Input! ', $th);
         }
     }
+
+    /** 
+     * Approve Unscored Metrics
+     * */
+    public function approveMetrics()
+    {
+        try {
+            $action = request('action');
+            $metricIds = request('metric_ids');
+            $metricIds = explode(',', $metricIds);
+            if ($action && $metricIds) {
+                if ($action == 'approve') {
+                    Metric::whereIn('id', $metricIds)->update(['is_approved' => 1]);
+                } else {
+                    Metric::whereIn('id', $metricIds)->update(['is_approved' => null]);
+                }
+            }
+            return redirect(route('metrics.index'))->with(['success' => 'Successfully processed approved metrics']);
+        } catch (\Throwable $th) {
+            \Log::error($th->getMessage());
+            return errorHandler('Error processing approved metrics', $th);
+        }
+    }
 }

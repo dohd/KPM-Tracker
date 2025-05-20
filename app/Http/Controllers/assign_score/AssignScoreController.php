@@ -189,7 +189,8 @@ class AssignScoreController extends Controller
         }
         
         $scale = RatingScale::where('is_active', 1)->first();
-        $metrics = Metric::where('programme_id', $programme->id)
+        $metrics = Metric::whereNotNull('is_approved')
+            ->where('programme_id', $programme->id)
             ->whereBetween('date', [$input['date_from'], $input['date_to']])
             ->orderBy('date', 'ASC')
             ->with('programme')
