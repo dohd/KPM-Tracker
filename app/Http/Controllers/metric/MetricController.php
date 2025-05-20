@@ -17,9 +17,37 @@ class MetricController extends Controller
      */
     public function index()
     {
-        $metrics = Metric::orderBy('id', 'desc')->get();
+        $programmes = Programme::where('is_active', 1)->get();
+        $teams = Team::where('is_active', 1)->get();
 
-        return view('metrics.index', compact('metrics'));
+        return view('metrics.index', compact('programmes', 'teams'));
+    }
+
+    /** 
+     * Metrics DataTable
+     * */
+    public function metricsDatatable()
+    {
+        $q = Metric::query();
+
+        $q->when(request('date_from') && request('date_to'), function($q) {
+            $q->whereBetween('date', [
+                databaseDate(request('date_from')),
+                databaseDate(request('date_to')),
+            ]);
+        });
+        $q->when(request('programme_id'), fn($q) => $q->where('programme_id', request('programme_id')));
+        $q->when(request('team_id'), fn($q) => $q->where('team_id', request('team_id')));
+        $q->when(request('score_status'), function($q) {
+            if (request('score_status') == 1) {
+                $q->whereNotNull('in_score');
+            }
+            $q->whereNull('in_score');
+        });
+
+        $q->orderBy('id', 'desc');
+
+        return view('metrics.partial.metrics_data', ['metrics' => $q->get()]);
     }
 
     /**

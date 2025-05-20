@@ -35,6 +35,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get('home', [HomeController::class, 'index'])->name('home');
 
     // Metrics
+    Route::post('metrics/datatable', [MetricController::class, 'metricsDatatable'])->name('metrics.get_data');
     Route::resource('metrics', MetricController::class);
 
     // Assign Scores
