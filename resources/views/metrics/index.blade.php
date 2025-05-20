@@ -99,11 +99,18 @@
     const initRow = $('#metricsTbl tbody tr:first').clone(); 
     let metricIds = [];
 
-    $('#checkAll').change(function () {
+    $(document).on('change', '#checkAll', function() {
         if ($(this).prop('checked')) {
-
+            $('#metricsTbl .check-row:not(:disabled)').each(function() {
+                $(this).prop('checked', true);
+                const id = $(this).attr('data-id');
+                metricIds.push(id);
+            });
+            $('#metricIds').val(metricIds.join(','));
         } else {
-
+            $('#metricsTbl .check-row:checked').prop('checked', false);
+            $('#metricIds').val('');
+            metricIds = [];
         }
     });
 
