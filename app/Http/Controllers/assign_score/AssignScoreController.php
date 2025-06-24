@@ -270,13 +270,14 @@ class AssignScoreController extends Controller
                     // team sizes
                     $team_local_sizes = [];
                     $team_diasp_sizes = [];
+                    // monthly team size
                     $team_sizes = $team->team_sizes->where('start_period', $input['date_from']);
-                    if ($team_sizes->count()) {
+                    if ($team_sizes->count() && $programme->compute_type == 'Monthly') {
                         $team_local_sizes = $team_sizes->pluck('local_size')->toArray();
                         $team_diasp_sizes = $team_sizes->pluck('diaspora_size')->toArray();
                         $team_sizes_ids  = array_merge($team_sizes_ids, $team_sizes->pluck('id')->toArray());
                     } else {
-                        // team size in date range including the previous last team size
+                        // team size within a date range (daily) including the previous last team size
                         $team_sizes = $team->team_sizes
                         ->where('start_period', '>=', $input['date_from'])
                         ->where('start_period', '<=', $input['date_to']);
@@ -311,14 +312,14 @@ class AssignScoreController extends Controller
                         $team->points = $team->team_avg_att;
                     } else {
                         $team->total = 0;
-                        $local_sizes_sum = array_reduce($team_local_sizes, fn($prev, $curr) => $prev+$curr, 0);
-                        $diasp_sizes_sum = array_reduce($team_diasp_sizes, fn($prev, $curr) => $prev+$curr, 0);
+                        $local_sizes_sum = array_sum($team_local_sizes);
+                        $diasp_sizes_sum = array_sum($team_diasp_sizes);
                         if ($programme->team_size == 'total_size' && $team_local_sizes && $team_diasp_sizes) {
-                            $team->total = ceil(($local_sizes_sum + $diasp_sizes_sum) / count($team_local_sizes));
+                            $team->total = round(($local_sizes_sum + $diasp_sizes_sum) / count($team_local_sizes),2);
                         } elseif ($programme->team_size == 'diaspora_size' && $team_diasp_sizes) {
-                            $team->total = ceil($diasp_sizes_sum / count($team_diasp_sizes));
+                            $team->total = round($diasp_sizes_sum / count($team_diasp_sizes),2);
                         } elseif ($team_local_sizes) {
-                            $team->total = ceil($local_sizes_sum / count($team_local_sizes));
+                            $team->total = round($local_sizes_sum / count($team_local_sizes),2);
                         }
                         
                         if ($team->total == 0) continue;
