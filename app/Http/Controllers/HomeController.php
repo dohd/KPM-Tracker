@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\team\Team;
-use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -49,9 +48,10 @@ class HomeController extends Controller
                 $v->local_size = 0;
                 $v->diaspora_size = 0;
                 $v->total = 0;
-                if ($v->team_sizes->last()) {
-                    $v->local_size = $v->team_sizes->last()->local_size;
-                    $v->diaspora_size = $v->team_sizes->last()->diaspora_size;
+                $teamSize = $v->team_sizes->sortByDesc('start_period')->first();
+                if ($teamSize) {
+                    $v->local_size = $teamSize->local_size;
+                    $v->diaspora_size = $teamSize->diaspora_size;
                     $v->total = $v->local_size + $v->diaspora_size;
                 }
                 $v->team_sizes = $v->team_sizes->map(function($v1) {
