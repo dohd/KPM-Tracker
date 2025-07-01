@@ -219,14 +219,15 @@ class AssignScoreController extends Controller
 
                     // extra points
                     $above_conditional_amount = $team->accrued_amount - $programme->above_amount;
-                    $every_conditional_amount = round(0.01 * $programme->every_amount_perc * $above_conditional_amount);
+                    $every_conditional_amount = round($programme->every_amount_perc/100 * $programme->above_amount);
                     if ($programme->above_amount && $every_conditional_amount > 0) {
                         $team->extra_points = floor($above_conditional_amount / $every_conditional_amount);
+                        if ($team->extra_points < 0) $team->extra_points = 0;
                         if ($programme->max_extra_score && $team->extra_points > $programme->max_extra_score) {
                             $team->extra_points = $programme->max_extra_score;
                         }
                     }
-                    
+
                     $team->net_points = $team->points + $team->extra_points;
                     $teams[$key] = $team;
                 }
