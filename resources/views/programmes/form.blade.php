@@ -1,13 +1,29 @@
 <div class="row mb-3">
     <label for="is_active" class="col-md-2">Is Active</label>
     <div class="col-md-8 col-12">
-        {{ Form::checkbox('is_active', @$programme->is_active ?: 1, true, ['id' => 'is_active']) }}
+        {{ Form::checkbox('is_active', isset($programme->is_active)? $programme->is_active : 1, true, ['id' => 'is_active']) }}
     </div>
 </div>
 <div class="row mb-3">
     <label for="name" class="col-md-2">Program Name</label>
     <div class="col-md-8 col-12">
         {{ Form::text('name', null, ['class' => 'form-control', 'required' => 'required']) }}
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-md-4">
+        <label for="isCumulative" class="col-md-6">Is Cumulative</label>
+        {{ Form::checkbox('is_cumulative', isset($programme->is_cumulative)? $programme->is_cumulative : 0, false, ['id' => 'isCumulative', 'class' => 'ms-2']) }}
+    </div>
+    <div class="col-md-6 d-none">
+        <select name="cumulative_programme_id" id="cumulativeProgramme" class="form-control select2" data-placeholder="Cumulative parent programme">
+            <option value=""></option>
+            @foreach ($cumulativeProgrammes as $row)
+                <option value="{{ $row->id }}" {{ @$programme && $programme->cumulative_programme_id == $row->cumulative_programme_id? 'selected' : '' }}>
+                    {{ $row->name }}
+                </option>
+            @endforeach
+        </select>  
     </div>
 </div>
 <div class="row mb-3">
@@ -151,14 +167,14 @@
 <div class="row mb-3">
     <label for="name" class="col-md-2">Memo</label>
     <div class="col-md-8 col-12">
-        {{ Form::textarea('memo', null, ['class' => 'form-control', 'rows' => '1']) }}
+        {{ Form::textarea('memo', null, ['class' => 'form-control', 'rows' => '2']) }}
     </div>
 </div>
 
 @section('script')
 <script>
     $('#metric').change(function() {
-        if ($(this).val() == 'Finance') {
+        if (this.value == 'Finance') {
             $('#fin-section').removeClass('d-none');
             ['#score', '#target_amount', '#amount_perc', '#amount_perc_by']
             .forEach(v => $(v).attr('required', true));
@@ -183,12 +199,28 @@
         else $(this).attr('value', 0);
     });
 
-    // edit mode
+    $('#isCumulative').change(function() {
+        $('#cumulativeProgramme').val('').change();
+        const div = $('#cumulativeProgramme').parents('div:first');
+        if ($(this).is(':checked')) {
+            $('#isCumulative').val(1);
+            div.removeClass('d-none');
+        } else {
+            $('#isCumulative').val(0);
+            div.addClass('d-none');
+        }
+    });
+
+    // Edit Mode
     const programme = @json(@$programme);
     if (programme && programme.id) {
         $('#metric').val(programme.metric).change();
         if (programme.is_active) $('#is_active').prop('checked', true).change();
         else $('#is_active').prop('checked', false).change();
+
+        if (programme.is_cumulative) $('#isCumulative').prop('checked', true).change();
+        else $('#isCumulative').prop('checked', false).change();
+        $('#cumulativeProgramme').val(programme.cumulative_programme_id).change();
     }
 </script>
 @stop

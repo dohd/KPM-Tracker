@@ -2,6 +2,8 @@
 
 namespace App\Models\programme\Traits;
 
+use App\Models\programme\Programme;
+
 trait ProgrammeAttribute
 {
     /**
@@ -15,6 +17,18 @@ trait ProgrammeAttribute
             $this->getEditButtonAttribute('programmes.edit', 'edit-programme'),
             $this->getDeleteButtonAttribute('programmes.destroy', 'delete-programme'),
         );
+    }
+
+
+    /**
+     * Cumulative Programme
+     */
+    public function getCumulativeProgramme()
+    {
+        if ($this->attributes['cumulative_programme_id'] && $this->attributes['is_cumulative']) {
+            return Programme::find($this->attributes['cumulative_programme_id']);
+        }
+        return;
     }
 
     /**

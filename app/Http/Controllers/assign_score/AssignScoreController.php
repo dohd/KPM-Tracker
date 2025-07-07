@@ -196,7 +196,22 @@ class AssignScoreController extends Controller
             ->with('programme')
             ->get();
         $teams = Team::whereIn('id', $metrics->pluck('team_id')->toArray())->get();   
-        
+
+        // get cumulated scores
+        $cumulativeScores = collect();
+        $cumulativeProgramme = $programme->getCumulativeProgramme();
+        if ($cumulativeProgramme) {
+            $cumulativeScores = AssignScore::where('programme_id', $cumulativeProgramme->id)
+            ->where('date_from', '>=', $input['date_from'])
+            ->where('date_to', '<=', $input['date_to'])
+            ->get(['id', 'programme_id', 'team_id', 'date_from', 'date_to', 'accrued_amount']);
+
+            $cumulativeTeams = Team::whereIn('id', $cumulativeScores->pluck('team_id')->toArray())
+            ->whereNotIn('id', $teams->pluck('id')->toArray())
+            ->get();  
+            $teams = collect()->merge($teams)->merge($cumulativeTeams);
+        }
+
         switch ($programme->metric) {
             case 'Finance':
                 foreach ($teams as $key => $team) {
@@ -212,6 +227,15 @@ class AssignScoreController extends Controller
                             }
                         }
                     }
+                    // cumulate accrued amount per team
+                    if ($cumulativeProgramme) {
+                        foreach ($cumulativeScores as $score) {
+                            if ($score->team_id == $team->id) {
+                                $team->accrued_amount += $score->accrued_amount;
+                            }
+                        }
+                    }
+
                     // points
                     $conditional_amount = round(0.01 * $programme->amount_perc * $programme->target_amount);
                     $team->points = round($team->accrued_amount / $conditional_amount * $programme->score, 2);

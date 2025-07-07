@@ -29,7 +29,9 @@ class ProgrammeController extends Controller
      */
     public function create()
     {
-        return view('programmes.create');
+        $cumulativeProgrammes = Programme::where('metric', 'Finance')->get();
+
+        return view('programmes.create', compact('cumulativeProgrammes'));
     }
 
     /**
@@ -99,7 +101,9 @@ class ProgrammeController extends Controller
             return errorHandler("You don't have the rights to edit this program");
         }
 
-        return view('programmes.edit', compact('programme'));
+        $cumulativeProgrammes = Programme::where('metric', 'Finance')->get();
+
+        return view('programmes.edit', compact('programme', 'cumulativeProgrammes'));
     }
 
     /**
@@ -136,11 +140,10 @@ class ProgrammeController extends Controller
                     throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
                 }
             }
-
-            // activate programme if not set
-            if (!@$input['is_active']) {
-                $input['is_active'] = 0; 
-            }
+            
+            // deactivate checkboxes if not set
+            if (!isset($input['is_active'])) $input['is_active'] = 0;
+            if (!isset($input['is_cumulative'])) $input['is_cumulative'] = 0;
 
             $programme->update($input); 
 
