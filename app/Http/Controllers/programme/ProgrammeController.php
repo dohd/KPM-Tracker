@@ -51,14 +51,18 @@ class ProgrammeController extends Controller
             'score' => request('metric') == 'Finance'? 'required' : '',
             'max_extra_score' => request('extra_score')? 'required' : '',
         ]);
+        $input = $request->except('_token');
+        $numDateFields = $request->except([
+            'name', 'is_cumulative', 'cumulative_programme_id', 'metric', 'team_size', 
+            'compute_type', 'bandjson', 'memo',  'include_choir',                        
+        ]);
 
         try {     
-            $input = $request->except('_token');
-            $date_and_num_fields = $request->except('name', 'metric', 'memo', 'compute_type', 'include_choir', 'team_size');
-            foreach ($date_and_num_fields as $key => $value) {
+            foreach ($numDateFields as $key => $value) {
                 if (in_array($key, ['period_from', 'period_to', 'amount_perc_by'])) $input[$key] = databaseDate($value);
                 else $input[$key] = numberClean($value);
             }
+
             // compare month for compute type monthly
             $period_from = Carbon::parse($input['period_from']);
             $period_to = Carbon::parse($input['period_to']);
@@ -67,7 +71,7 @@ class ProgrammeController extends Controller
                     throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
                 }
             }
-            
+
             Programme::create($input);
 
             return redirect(route('programmes.index'))->with(['success' => 'Programme created successfully']);
@@ -101,7 +105,10 @@ class ProgrammeController extends Controller
             return errorHandler("You don't have the rights to edit this program");
         }
 
-        $cumulativeProgrammes = Programme::where('metric', 'Finance')->get();
+        $cumulativeProgrammes = Programme::where('metric', 'Finance')
+        ->where('id', '!=', $programme->id)
+        ->whereNotNull('is_cumulative')
+        ->get();
 
         return view('programmes.edit', compact('programme', 'cumulativeProgrammes'));
     }
@@ -124,23 +131,25 @@ class ProgrammeController extends Controller
             'score' => request('metric') == 'Finance'? 'required' : '',
             'max_extra_score' => request('extra_score')? 'required' : '',
         ]);
+        $input = $request->except('_token');
+        $numDateFields = $request->except([
+            'name', 'is_cumulative', 'cumulative_programme_id', 'metric', 'team_size', 
+            'compute_type', 'bandjson', 'memo',  'include_choir',                        
+        ]);
 
         try {    
-            $input = $request->except('_token');
-            $date_and_num_fields = $request->except('name', 'metric', 'memo', 'compute_type', 'include_choir', 'team_size');
-            foreach ($date_and_num_fields as $key => $value) {
+            foreach ($numDateFields as $key => $value) {
                 if (in_array($key, ['period_from', 'period_to', 'amount_perc_by'])) $input[$key] = databaseDate($value);
                 else $input[$key] = numberClean($value);
             }
             // compare month for compute type monthly
             $period_from = Carbon::parse($input['period_from']);
             $period_to = Carbon::parse($input['period_to']);
-            if ($input['compute_type'] == 'Monthly') {
+            if ($input['compute_type'] === 'Monthly') {
                 if ($period_from->format('m') != $period_to->format('m')) {
                     throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
                 }
             }
-            
             // deactivate checkboxes if not set
             if (!isset($input['is_active'])) $input['is_active'] = 0;
             if (!isset($input['is_cumulative'])) $input['is_cumulative'] = 0;
