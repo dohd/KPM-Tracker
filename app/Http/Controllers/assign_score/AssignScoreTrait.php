@@ -88,7 +88,7 @@ trait AssignScoreTrait
                     $team->accrued_amount += $teamCumulatedAmount;
 
                     // scoring bands
-                    $bands = json_decode($programme->bandjson);
+                    $bands = json_decode($programme->bandjson) ?: [];
                     foreach ($bands as $key => $band) {
                     	$conditionalAmount = round($band->threshold / 100 * $programme->target_amount);
                     	if ($team->accrued_amount >= $conditionalAmount) {
