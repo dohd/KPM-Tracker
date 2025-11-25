@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\metric\Metric;
 use App\Models\programme\Programme;
 use App\Models\team\Team;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -68,7 +70,7 @@ class HomeController extends Controller
             ->whereBetween('date', [$startDate, $endDate])
             ->where(fn($q) => $q->where('grant_amount', '>', 0)->orWhere('team_mission_amount', '>', 0))
             ->selectRaw("team_id, programme_id, SUM(grant_amount) finance, SUM(team_mission_amount) mission")
-            ->groupBY(\DB::raw("team_id, programme_id"))
+            ->groupBY(DB::raw("team_id, programme_id"))
             ->with([
                 'team' => fn($q) => $q->select('id', 'name'),
                 'programme' => fn($q) => $q->select('id', 'metric'),
@@ -101,7 +103,12 @@ class HomeController extends Controller
             }, []);        
         $contributions = array_values($metrics);
         $sumContributions = collect($contributions)->sum('total');
-        
+
+        // captain team composition notice
+        if (auth()->user()->user_type === 'captain' && !confirmTeamCompositionUpdated()) {
+            session()->put('warning', 'Team composition requires update at start of every month');        
+        }
+
         return view('home', compact(
             // other
             'startDate', 'endDate',

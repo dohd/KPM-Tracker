@@ -22,10 +22,10 @@
     <table id="teamSizeTbl" class="table table-bordered table-sm">
         <thead>
             <tr>
-                <th>Beginning</th>
+                <th>Beginning Date</th>
                 <th>Local Size</th>
                 <th>Diaspora Size</th>
-                <th>Action</th>
+                <th width="20%">Action</th>
             </tr>
         </thead>
         <tbody>
@@ -38,8 +38,8 @@
                             <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control" readonly></td>
                             <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control" readonly></td>
                             <td>
-                                <button type="button" class="btn btn-primary add-row"><i class="bi bi-plus-circle"></i></button>
-                                <button type="button" class="btn btn-danger del-row" disabled><i class="bi bi-dash-circle"></i></button>
+                                <button type="button" class="btn btn-outline-primary add-row"><i class="bi bi-plus-circle"></i></button>
+                                <button type="button" class="btn btn-outline-danger del-row" disabled><i class="bi bi-dash-circle"></i></button>
                             </td>
                         </tr>
                     @else
@@ -48,8 +48,8 @@
                             <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control"></td>
                             <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control"></td>
                             <td>
-                                <button type="button" class="btn btn-primary add-row"><i class="bi bi-plus-circle"></i></button>
-                                <button type="button" class="btn btn-danger del-row"><i class="bi bi-dash-circle"></i></button>
+                                <button type="button" class="btn btn-outline-primary add-row"><i class="bi bi-plus-circle"></i></button>
+                                <button type="button" class="btn btn-outline-danger del-row"><i class="bi bi-dash-circle"></i></button>
                             </td>
                         </tr>
                     @endif
@@ -61,8 +61,8 @@
                 <td><input type="number" name="local_size[]" value="0" class="form-control" placeholder="Local Size"></td>
                 <td><input type="number" name="diaspora_size[]" value="0" class="form-control" placeholder="Diaspora Size"></td>
                 <td>
-                    <button type="button" class="btn btn-primary add-row"><i class="bi bi-plus-circle"></i></button>
-                    <button type="button" class="btn btn-danger del-row"><i class="bi bi-dash-circle"></i></button>
+                    <button type="button" class="btn btn-outline-primary add-row"><i class="bi bi-plus-circle"></i></button>
+                    <button type="button" class="btn btn-outline-danger del-row"><i class="bi bi-dash-circle"></i></button>
                 </td>
             </tr>
         </tbody>

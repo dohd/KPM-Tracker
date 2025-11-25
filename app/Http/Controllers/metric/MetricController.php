@@ -57,7 +57,13 @@ class MetricController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {        
+    {   
+        // captain team composition error
+        if (auth()->user()->user_type === 'captain' && !confirmTeamCompositionUpdated()) {
+            return redirect()->route('metrics.index')
+            ->with('error', 'Updated team composition is required!');
+        }
+
         $teams = Team::get();
         $programmes = Programme::where('is_active', 1)->get();
 
@@ -142,8 +148,15 @@ class MetricController extends Controller
     public function edit(Metric $metric)
     {
         // restric non-chair users from editing scored metrics
-        if ($metric->in_score && auth()->user()->user_type != 'chair') {
-            return errorHandler("You don't have rights to edit this metric!");
+        if ($metric->in_score && auth()->user()->user_type !== 'chair') {
+            return redirect()->route('metrics.index')
+            ->with('error', "You don't sufficient rights to perform this action!");
+        }
+
+        // captain team composition error
+        if (auth()->user()->user_type === 'captain' && !confirmTeamCompositionUpdated()) {
+            return redirect()->route('metrics.index')
+            ->with('error', 'Updated team composition is required!');
         }
 
         $teams = Team::get();
