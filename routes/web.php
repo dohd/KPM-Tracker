@@ -47,8 +47,12 @@ Route::group(['middleware' => 'auth'], function() {
 
     // key Parameters
     Route::resource('programmes', ProgrammeController::class);
-    Route::resource('teams', TeamController::class);
     Route::resource('score_cards', ScoreCardController::class);
+
+    // 
+    Route::post('verify_teams', [TeamController::class, 'verifyTeams'])->name('verify_teams');
+    Route::post('verification_teams', [TeamController::class, 'verificationTeams'])->name('verification_teams');
+    Route::resource('teams', TeamController::class);
 
     // User Profiles
     Route::post('user_profiles/delete_profile_pic/{user}', [UserProfileController::class, 'delete_profile_pic'])->name('user_profiles.delete_profile_pic');

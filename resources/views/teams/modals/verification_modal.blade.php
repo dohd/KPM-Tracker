@@ -5,8 +5,8 @@
         <h1 class="modal-title fs-5" id="verifxnModalLabel">Verify Team Composition</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <form>  
+      {{ Form::open(['route' => 'verify_teams', 'id' => 'verifxForm']) }}
+        <div class="modal-body">
           <div class="row mb-3">
             <div class="col-sm-8">
               <label for="colFormLabel" class="col-sm-2 col-form-label">Period</label>
@@ -23,12 +23,12 @@
                 ];
               @endphp
               <div class="d-flex gap-3">
-                <select name="month" id="month" class="form-control w-50">
+                <select id="month" class="form-control w-50">
                   @foreach ($months as $i => $month)
                     <option value="{{ $i+1 }}" {{ date('F') === $month? 'selected' : '' }}>{{ $month }}</option>
                   @endforeach
                 </select>
-                <select name="year" id="year" class="form-control w-50">
+                <select id="year" class="form-control w-50">
                   @foreach ($years as $year)
                     <option value="{{ $year }}" {{ date('Y') === $year? 'selected' : '' }} >{{ $year }}</option>
                   @endforeach
@@ -43,34 +43,38 @@
             <table id="teamSizeTbl" class="table table-bordered table-sm">
               <thead>
                   <tr>
-                      <th>Team</th>
-                      <th>Beginning Date</th>
+                      <th>Team Name</th>
+                      <th>As Of Date</th>
                       <th>Local Size</th>
-                      <th>Diasp. Size</th>
+                      <th>Diaspora Size</th>
+                      <th>Dormant Size</th>
                       <th>Verified</th>
                       <th>Note</th>
                   </tr>
               </thead>
               <tbody>
-                  <tr>
-                      <td>004 - Team John</td>
-                      <td>{{ date('d M Y') }}</td>
-                      <td>12</td>
-                      <td>1</td>
-                      <td class="d-flex justify-content-center align-items-center">
-                        <input type="checkbox" name="verified[]" value="1" class="form-check-input row-check">
-                      </td>                        
-                      <td><textarea name="note[]" class="form-control" rows="1"></textarea></td>
-                  </tr>
+                  <tr class="temp-row">
+                    <td class="name" width="20%"></td>
+                    <td class="date" width="15%"></td>
+                    <td class="local-size"></td>
+                    <td class="diasp-size"></td>
+                    <td class="dorm-size"></td>
+                    <td class="d-flex justify-content-center align-items-center">
+                      <input type="checkbox" class="form-check-input verified-check">
+                      <input type="hidden" name="verified[]" class="verified">
+                    </td>                        
+                    <td><textarea name="verified_note[]" class="form-control note" rows="1"></textarea></td>
+                    <input type="hidden" name="id[]" class="id">
+                  </tr> 
               </tbody>
             </table>
-          </div>    
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      {{ Form::close() }}
+      </div>    
     </div>
   </div>
 </div>

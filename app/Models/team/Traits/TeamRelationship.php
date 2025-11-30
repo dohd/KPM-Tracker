@@ -9,6 +9,14 @@ use App\Models\team\TeamSize;
 
 trait TeamRelationship
 {
+    public function teamSizesForPeriod($month, $year)
+    {
+        return $this->hasOne(TeamSize::class)
+            ->whereYear('start_period', $year)
+            ->whereMonth('start_period', $month)
+            ->orderBy('start_period', 'ASC');
+    }
+
     public function programmes()
     {
         return $this->hasManyThrough(Programme::class, AssignScore::class, 'team_id', 'id', 'id', 'programme_id');

@@ -5,8 +5,9 @@ namespace App\Http\Controllers\team;
 use App\Http\Controllers\Controller;
 use App\Models\team\Team;
 use App\Models\team\TeamSize;
+use Exception;
 use Illuminate\Http\Request;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class TeamController extends Controller
 {
@@ -58,18 +59,24 @@ class TeamController extends Controller
             foreach ($input['start_date'] as $key => $date) {
                 $size = @$input['local_size'][$key];
                 if ($date && $size > 0) $input['start_date'][$key] = databaseDate($date);
-                else unset($input['start_date'][$key], $input['local_size'][$key], $input['diaspora_size'][$key]);
+                else unset(
+                    $input['start_date'][$key], 
+                    $input['local_size'][$key], 
+                    $input['diaspora_size'][$key],
+                    $input['dormant_size'][$key],
+                );
             }
             $teamSizeArr = [
                 'start_period' => $input['start_date'],
                 'local_size' => $input['local_size'],
                 'diaspora_size' => $input['diaspora_size'],
+                'dormant_size' => $input['dormant_size'],
             ];
 
             // save Team
             // unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
             foreach ($input as $key => $value) {
-                if (in_array($key, ['start_date', 'local_size', 'diaspora_size'])) {
+                if (in_array($key, ['start_date', 'local_size', 'diaspora_size', 'dormant_size'])) {
                     $input[$key] = implode(',', $value);
                 }
             }
@@ -131,12 +138,18 @@ class TeamController extends Controller
             foreach ($input['start_date'] as $key => $date) {
                 $size = @$input['local_size'][$key];
                 if ($date && $size > 0) $input['start_date'][$key] = databaseDate($date);
-                else unset($input['start_date'][$key], $input['local_size'][$key], $input['diaspora_size'][$key]);
+                else unset(
+                    $input['start_date'][$key], 
+                    $input['local_size'][$key], 
+                    $input['diaspora_size'][$key],
+                    $input['dormant_size'][$key],
+                );
             }
             $teamSizeArr = [
                 'start_period' => $input['start_date'],
                 'local_size' => $input['local_size'],
                 'diaspora_size' => $input['diaspora_size'],
+                'dormant_size' => $input['dormant_size'],
             ];
 
             // update Team
@@ -185,6 +198,54 @@ class TeamController extends Controller
             return redirect(route('teams.index'))->with(['success' => 'Team deleted successfully']);
         } catch (\Throwable $th) {
             return errorHandler('Error deleting Team!', $th);
+        }
+    }
+
+    /**
+     * Fetch Teams for verification
+     * */
+    public function verificationTeams(Request $request)
+    {
+        $request->validate([
+            'month' => 'required',
+            'year' => 'required',
+        ]);
+
+        $teams = Team::whereHas('team_sizes', function($q) use($request) {
+            $q->whereYear('start_period', $request->year)->whereMonth('start_period', $request->month);
+        })
+        ->get(['id', 'name'])
+        ->map(function($team) use($request) {
+            $team->team_size = $team->teamSizesForPeriod($request->month, $request->year)->first();
+            return $team;
+        });
+
+        return response()->json($teams);
+    }
+
+    public function verifyTeams(Request $request)
+    {
+        $dataItems = $request->except('_token');
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($dataItems['id'] as $key => $id) {
+                $checked = $dataItems['verified'][$key];
+                $note = $dataItems['verified_note'][$key];
+                TeamSize::find($id)->update([
+                    'verified_at' => now(),
+                    'verified' => $checked,
+                    'verified_by' => auth()->id(),
+                    'verified_note' => $note,
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect(route('teams.index'))->with(['success' => 'Team verification successfully']);
+        } catch (Exception $e) {
+            return errorHandler('Error verifying teams', $e);
         }
     }
 }

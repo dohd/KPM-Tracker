@@ -7,7 +7,7 @@
 <div class="row mb-3">
     <label for="member_list" class="col-md-2">List of Members</label>
     <div class="col-md-8 col-12">
-        {{ Form::textarea('member_list', null, ['class' => 'form-control', 'rows' => '1', 'required' => 'required']) }}
+        {{ Form::textarea('member_list', null, ['class' => 'form-control', 'rows' => '1', 'placeholder' => 'Member1, Member2, Member3, ...', 'required' => 'required']) }}
     </div>
 </div>
 
@@ -25,6 +25,7 @@
                 <th>Beginning Date</th>
                 <th>Local Size</th>
                 <th>Diaspora Size</th>
+                <th>Dormant Size</th>
                 <th width="20%">Action</th>
             </tr>
         </thead>
@@ -37,6 +38,7 @@
                             <td><input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control" readonly></td>
                             <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control" readonly></td>
                             <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control" readonly></td>
+                            <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control" readonly></td>
                             <td>
                                 <button type="button" class="btn btn-outline-primary add-row"><i class="bi bi-plus-circle"></i></button>
                                 <button type="button" class="btn btn-outline-danger del-row" disabled><i class="bi bi-dash-circle"></i></button>
@@ -47,6 +49,7 @@
                             <td><input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control"></td>
                             <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control"></td>
                             <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control"></td>
+                            <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control"></td>
                             <td>
                                 <button type="button" class="btn btn-outline-primary add-row"><i class="bi bi-plus-circle"></i></button>
                                 <button type="button" class="btn btn-outline-danger del-row"><i class="bi bi-dash-circle"></i></button>
@@ -60,6 +63,7 @@
                 <td><input type="date" name="start_date[]" value="" class="form-control"></td>
                 <td><input type="number" name="local_size[]" value="0" class="form-control" placeholder="Local Size"></td>
                 <td><input type="number" name="diaspora_size[]" value="0" class="form-control" placeholder="Diaspora Size"></td>
+                <td><input type="number" name="dormant_size[]" value="0" class="form-control" placeholder="Dormant Size"></td>
                 <td>
                     <button type="button" class="btn btn-outline-primary add-row"><i class="bi bi-plus-circle"></i></button>
                     <button type="button" class="btn btn-outline-danger del-row"><i class="bi bi-dash-circle"></i></button>
