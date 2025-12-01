@@ -225,14 +225,14 @@ if (!function_exists('rankTeamsFromScores')) {
 if (!function_exists('confirmTeamCompositionUpdated')) {
     function confirmTeamCompositionUpdated() {
         $team = optional(auth()->user()->team);
-        if ($team->updated_at) {
-            $teamUpdatedAt = Carbon\Carbon::parse($team->updated_at);
+        foreach ($team->team_sizes as $item) {
+            $startPeriod = Carbon\Carbon::parse($item->start_period);
             $startMonth = Carbon\Carbon::today()->startOfMonth();
             $endMonth =  Carbon\Carbon::today()->endOfMonth();
-            if ($teamUpdatedAt->between($startMonth, $endMonth)) {
+            if ($startPeriod->between($startMonth, $endMonth)) {
                 return true;
             }
-        } 
+        }
         return false;
     }
 }
