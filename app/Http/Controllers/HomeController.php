@@ -106,7 +106,7 @@ class HomeController extends Controller
 
         // captain team composition notice
         if (auth()->user()->user_type === 'captain' && !confirmTeamCompositionUpdated()) {
-            session()->put('warning', 'Team composition requires update at start of every month');        
+            session()->put('warning', 'Team composition update reqired for this month');        
         }
 
         return view('home', compact(
