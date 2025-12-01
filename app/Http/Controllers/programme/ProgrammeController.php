@@ -66,11 +66,11 @@ class ProgrammeController extends Controller
             // compare month for compute type monthly
             $period_from = Carbon::parse($input['period_from']);
             $period_to = Carbon::parse($input['period_to']);
-            if ($input['compute_type'] == 'Monthly') {
-                if ($period_from->format('m') != $period_to->format('m')) {
-                    throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
-                }
-            }
+            // if ($input['compute_type'] == 'Monthly') {
+            //     if ($period_from->format('m') != $period_to->format('m')) {
+            //         throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
+            //     }
+            // }
 
             Programme::create($input);
 
@@ -145,11 +145,11 @@ class ProgrammeController extends Controller
             // compare month for compute type monthly
             $period_from = Carbon::parse($input['period_from']);
             $period_to = Carbon::parse($input['period_to']);
-            if ($input['compute_type'] === 'Monthly') {
-                if ($period_from->format('m') != $period_to->format('m')) {
-                    throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
-                }
-            }
+            // if ($input['compute_type'] === 'Monthly') {
+            //     if ($period_from->format('m') != $period_to->format('m')) {
+            //         throw ValidationException::withMessages(['Not Allowed! Computation period should be of the same month']);
+            //     }
+            // }
             // deactivate checkboxes if not set
             if (!isset($input['is_active'])) $input['is_active'] = 0;
             if (!isset($input['is_cumulative'])) $input['is_cumulative'] = 0;

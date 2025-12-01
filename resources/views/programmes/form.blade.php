@@ -16,7 +16,7 @@
         {{ Form::checkbox('is_cumulative', isset($programme->is_cumulative)? $programme->is_cumulative : 0, false, ['id' => 'isCumulative', 'class' => 'ms-2']) }}
     </div>
     <div class="col-md-6 d-none">
-        <select name="cumulative_programme_id" id="cumulativeProgramme" class="form-control select2" data-placeholder="Cumulation prior program">
+        <select name="cumulative_programme_id" id="cumulativeProgramme" class="form-control select2" data-placeholder="Search prior program to cumulate from">
             <option value=""></option>
             @foreach ($cumulativeProgrammes as $row)
                 <option value="{{ $row->id }}" {{ @$programme->cumulative_programme_id == $row->id? 'selected' : '' }}>
@@ -82,10 +82,10 @@
     </div>
 </div>
 <div class="row mb-3">
-    <label for="team_size" class="col-md-2">Team Size</label>
+    <label for="team_size" class="col-md-2">Computation Size</label>
     <div class="col-md-8 col-12">
         <select name="team_size" id="team_size" class="form-control select2" autocomplete="false">
-            @foreach (['local_size' => 'Local Team Size', 'diaspora_size' => 'Diaspora Team Size', 'total_size' => 'Total Team Size'] as $key => $item)
+            @foreach (['local_size' => 'Local', 'diaspora_size' => 'Diaspora', 'total_size' => 'Total'] as $key => $item)
                 <option value="{{ $key }}" {{ @$programme->team_size == $key? 'selected' : '' }}>{{ $item }}</option>
             @endforeach
         </select>   

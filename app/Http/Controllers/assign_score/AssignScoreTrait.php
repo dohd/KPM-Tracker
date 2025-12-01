@@ -115,7 +115,7 @@ trait AssignScoreTrait
             
             case 'Attendance':
                 if ($metrics->count()) {
-                    $dates = array_unique($metrics->pluck('date')->toArray());
+                    $dates = $metrics->pluck('date')->unique()->values()->toArray();
                     $days = count($dates);
                 }
 
@@ -150,60 +150,50 @@ trait AssignScoreTrait
                     }
 
                     // team sizes
-                    $team_local_sizes = [];
-                    $team_diasp_sizes = [];
-                    // monthly team size
-                    $team_sizes = $team->team_sizes->where('start_period', $input['date_from']);
-                    if ($team_sizes->count() && $programme->compute_type == 'Monthly') {
-                        $team_local_sizes = $team_sizes->pluck('local_size')->toArray();
-                        $team_diasp_sizes = $team_sizes->pluck('diaspora_size')->toArray();
-                        $team_sizes_ids  = array_merge($team_sizes_ids, $team_sizes->pluck('id')->toArray());
-                    } else {
-                        // team size within a date range (daily) including the previous last team size
+                    $team_sizes = collect();
+                    $metric = $metrics->where('team_id', $team->id)->first();
+                    if ($programme->compute_type === 'Monthly' && $metric) {
+                        $metricDate = Carbon::parse($metric->date);
+                        $team_sizes = $team->team_sizes()
+                        ->whereYear('start_period', $metricDate->format('Y'))
+                        ->whereMonth('start_period', $metricDate->format('m'))
+                        ->orderBy('start_period', 'ASC')
+                        ->take(1)
+                        ->get();
+                    } elseif ($programme->compute_type === 'Daily') {
                         $team_sizes = $team->team_sizes
                         ->where('start_period', '>=', $input['date_from'])
                         ->where('start_period', '<=', $input['date_to']);
-                        if ($team_sizes->count()) {
-                            $team_local_sizes = $team_sizes->pluck('local_size')->toArray();
-                            $team_diasp_sizes = $team_sizes->pluck('diaspora_size')->toArray();
-                            $team_sizes_ids  = array_merge($team_sizes_ids, $team_sizes->pluck('id')->toArray());
-                            // previous last team size
-                            $initial = $team->team_sizes()->where('start_period', '<', $input['date_from'])->latest()->first();
-                            if ($initial) {
-                                $team_local_sizes[] = $initial->local_size;
-                                $team_diasp_sizes[] = $initial->diaspora_size;
-                                $team_sizes_ids[]  = $initial->id;
-                            }
-                        } else {
-                            // default team size
-                            $initial = $team->team_sizes()->where('start_period', '<=', $input['date_from'])->latest()->first();
-                            if ($initial) {
-                                $team_local_sizes[] = $initial->local_size;
-                                $team_diasp_sizes[] = $initial->diaspora_size;
-                                $team_sizes_ids[]  = $initial->id;
-                            }
-                        }
                     }
-                    
-                    // check if is choir programme
+                    $team_local_sizes = $team_sizes->pluck('local_size')->toArray();
+                    $team_diasp_sizes = $team_sizes->pluck('diaspora_size')->toArray();
+                    $team_sizes_ids  = array_merge($team_sizes_ids, $team_sizes->pluck('id')->toArray());                            
+
+                    // team size count
+                    $team->total = 0;
+
+                    // choir programme
                     if ($programme->include_choir) {
                         $team->total = $scale->choir_no;
                         if ($team->total == 0) continue;
+
                         $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                         $team->perc_score = 0;
                         $team->points = $team->team_avg_att;
-                    } else {
-                        $team->total = 0;
+                    } 
+                    // other programme
+                    else {
                         $local_sizes_sum = array_sum($team_local_sizes);
                         $diasp_sizes_sum = array_sum($team_diasp_sizes);
-                        if ($programme->team_size == 'total_size' && $team_local_sizes && $team_diasp_sizes) {
+                        $computation_size = $programme->team_size;
+                        if ($computation_size === 'total_size' && $team_local_sizes && $team_diasp_sizes) {
                             $team->total = round(($local_sizes_sum + $diasp_sizes_sum) / count($team_local_sizes),2);
-                        } elseif ($programme->team_size == 'diaspora_size' && $team_diasp_sizes) {
+                        } elseif ($computation_size === 'diaspora_size' && $team_diasp_sizes) {
                             $team->total = round($diasp_sizes_sum / count($team_diasp_sizes),2);
-                        } elseif ($team_local_sizes) {
+                        } elseif ($computation_size === 'local_size' && $team_local_sizes) {
                             $team->total = round($local_sizes_sum / count($team_local_sizes),2);
                         }
-                        
+    
                         if ($team->total == 0) continue;
                         $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                         $team->perc_score = round($team->team_avg_att / $team->total * 100, 4);
