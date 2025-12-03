@@ -153,6 +153,7 @@ trait AssignScoreTrait
                     $team_sizes = collect();
                     $metric = $metrics->where('team_id', $team->id)->first();
                     if ($programme->compute_type === 'Monthly' && $metric) {
+                        $team->days = 1;
                         $metricDate = Carbon::parse($metric->date);
                         $team_sizes = $team->team_sizes()
                         ->whereYear('start_period', $metricDate->format('Y'))
@@ -409,7 +410,10 @@ trait AssignScoreTrait
         ]);
         return response()->json([
             'flash_success' => 'Scores assigned successfully', 
-            'data' => ['teams' => $valid_teams, 'req_input' => $input]
+            'data' => [
+                'teams' => $valid_teams, 
+                'req_input' => $input,
+            ]
         ]);
     }
 }
