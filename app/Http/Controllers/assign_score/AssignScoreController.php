@@ -177,6 +177,7 @@ class AssignScoreController extends Controller
     {
         $input = $request->req_input;
         $teams = array_map(fn($v) => (object) $v, $request->teams);
+
         return view('assign_scores.partial.load_score_table', compact('teams', 'input'));
     }
 }

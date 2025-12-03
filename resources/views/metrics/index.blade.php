@@ -1,5 +1,4 @@
 @extends('layouts.core')
-
 @section('title', 'Metrics Management')
     
 @section('content')
@@ -8,18 +7,24 @@
     <div class="card">
         <div class="card-body">
             <div class="card-content pt-3">
-                <div class="row">
-                    <div class="col-md-5 col-5">
-                        <div class="d-flex justify-content-between">
-                            <label>Date Range</label>
-                            <input type="date" id="dateFrom">
-                            <input type="date" id="dateTo">
+                <div class="row no-gutters">
+                    <div class="col-md-6 col-6">
+                        <div class="row g-2 align-items-center">
+                          <div class="col-12 col-sm-auto">
+                            <label class="me-sm-2">Date Range</label>
+                          </div>
+                          <div class="col-12 col-sm-auto">
+                            <input type="date" id="dateFrom" class="form-control">
+                          </div>
+                          <div class="col-12 col-sm-auto">
+                            <input type="date" id="dateTo" class="form-control">
+                          </div>
                         </div>
                     </div>
                 </div>
                 <hr>
                 <div class="row">
-                    <div class="col-md-4 col-4">
+                    <div class="col-md-4 col-12 mb-1">
                         <select id="programme" class="form-control select2" data-placeholder="Choose Program">
                             <option value=""></option>
                             @foreach ($programmes as $row)
@@ -29,7 +34,7 @@
                             @endforeach
                         </select>   
                     </div>
-                    <div class="col-md-3 col-3">
+                    <div class="col-md-3 col-12 mb-1">
                         <select id="team" class="form-control select2" data-placeholder="Choose Team">
                             <option value=""></option>
                             @foreach ($teams as $row)
@@ -39,14 +44,14 @@
                             @endforeach
                         </select>   
                     </div>
-                    <div class="col-md-2 col-2">
+                    <div class="col-md-2 col-12 mb-1">
                         <select id="scoreStatus" class="form-control" data-placeholder="Choose Status">
                             <option value="">-- Score Status --</option>
                             <option value="1">Scored</option>
                             <option value="2">N/Scored</option>
                         </select>   
                     </div>
-                    <div class="col-md-2 col-2">
+                    <div class="col-md-2 col-12 mb-1">
                         <button type="button" id="filterBtn" class="btn btn-primary">
                             <i class="bi bi-funnel"></i> Filter
                         </button>
@@ -96,8 +101,9 @@
 @section('script')
 <script>
     let dataTable;
-    const initRow = $('#metricsTbl tbody tr:first').clone(); 
     let metricIds = [];
+    const initRow = $('#metricsTbl tbody tr:first').clone(); 
+    setTimeout(() => fetchData(), 500);
 
     $(document).on('change', '#checkAll', function() {
         if ($(this).prop('checked')) {
@@ -137,15 +143,20 @@
         }
     });
 
-    fetchData();
     $('#filterBtn').click(function () {
-        if (dataTable) dataTable.destroy();
+        if (dataTable) {
+            dataTable.destroy();
+            dataTable = null;
+        }
         $('#metricsTbl tbody').html(initRow);
-        fetchData();
+        setTimeout(() => fetchData(), 500);
     });
     
+    let currentReq = null;
     function fetchData() {
-        $.post("{{ route('metrics.get_data') }}", {
+        if (currentReq) currentReq.abort();
+
+        currentReq = $.post("{{ route('metrics.get_data') }}", {
             date_from: $('#dateFrom').val(),
             date_to: $('#dateTo').val(),
             programme_id: $('#programme').val(),
@@ -162,9 +173,11 @@
             });
         })
         .fail((xhr, status, err) => {
-            // flashMessage(data)
-            $('#metricsTbl tbody').html('');
-            dataTable = new simpleDatatables.DataTable('#metricsTbl');
+            if (status !== 'abort') {
+                // flashMessage(data)
+                $('#metricsTbl tbody').html('');
+                dataTable = new simpleDatatables.DataTable('#metricsTbl');                
+            }
         });
     }
 </script>
