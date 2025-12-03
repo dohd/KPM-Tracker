@@ -331,6 +331,7 @@
             @endforeach
         </tbody>
         @break  
+        
     @case('Other-Activities')
         <thead>
             <tr>
