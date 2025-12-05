@@ -38,6 +38,10 @@ trait AssignScoreTrait
             ->orderBy('date', 'ASC')
             ->with('programme')
             ->get();
+        if (!$metrics->count()) {
+            return response()->json(['flash_error' => 'Approved metric inputs required!']);
+        }
+        
         $teams = Team::whereIn('id', $metrics->pluck('team_id')->toArray())->get();
 
         function getAncestors($model) {
@@ -152,6 +156,8 @@ trait AssignScoreTrait
                     // team sizes
                     $team_sizes = collect();
                     $metric = $metrics->where('team_id', $team->id)->first();
+                    $maxAggrScore = $metric->programme->max_aggr_score;
+
                     if ($programme->compute_type === 'Monthly' && $metric) {
                         $team->days = 1;
                         $metricDate = Carbon::parse($metric->date);
@@ -174,10 +180,8 @@ trait AssignScoreTrait
                     $team->total = 0;
 
                     // choir programme
-                    if ($programme->include_choir) {
+                    if ($programme->include_choir && $scale->choir_no > 0) {
                         $team->total = $scale->choir_no;
-                        if ($team->total == 0) continue;
-
                         $team->team_avg_att = round($team->team_total_att / $team->days, 4);
                         $team->perc_score = 0;
                         $team->points = $team->team_avg_att;
@@ -210,8 +214,13 @@ trait AssignScoreTrait
                             }
                         }
                     }
-                    
+
+                    // net points
                     $team->net_points = $team->points? ($team->points + $team->guest_total_att) : 0;
+                    if ($maxAggrScore > 0 && $team->net_points > $maxAggrScore) {
+                        $team->net_points = $maxAggrScore;
+                    }
+
                     $modTeams->push($team);
                 }
                 break;
