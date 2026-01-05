@@ -28,22 +28,25 @@ class HomeController extends Controller
     public function index()
     {
         // charts
-        $startDate = date('Y-m-d', strtotime(date('Y-01-01')));
-        $endDate = date('Y-m-d', strtotime(date('Y-12-31')));
+        $date = Carbon::now('Africa/Nairobi');
+        $startDate = (clone $date)->toDateString();
+        $endDate = (clone $date)->endOfYear()->toDateString();
 
-        $teamExists = Team::withoutGlobalScopes()->whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))->exists();
-        if (!$teamExists) {
-            $yr = date('Y')-1;
-            $startDate = date($yr . '-m-d', strtotime(date($yr . '-01-01')));
-            $endDate = date($yr . '-m-d', strtotime(date($yr . '-12-31')));
-        }
+        $teamQuery = Team::withoutGlobalScopes()
+            ->whereHas('team_sizes', function($q) use($startDate, $endDate) {
+                $q->whereBetween('start_period', [$startDate, $endDate])
+                ->where('verified', 1)
+                ->whereDate('verified_at', '>=', $startDate)
+                ->whereDate('verified_at', '<=', $endDate);
+            });
 
         // counts
         $numProgrammes = Programme::whereBetween('created_at', [$startDate, $endDate])->count();
-        $numTeams = Team::withoutGlobalScopes()->whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))->count();
+        $numTeams = (clone $teamQuery)->count();
+            
         
         $rankedTeams = rankTeamsFromScores([$startDate, $endDate]);
-        $teams = Team::withoutGlobalScopes()->whereHas('team_sizes', fn($q) => $q->whereBetween('start_period', [$startDate, $endDate]))
+        $teams = (clone $teamQuery)
             ->with(['team_sizes' => fn($q) => $q->whereBetween('start_period', [$startDate, $endDate])])
             ->get(['id', 'name'])
             ->map(function($v) {
@@ -65,7 +68,7 @@ class HomeController extends Controller
 
         // finance and mission contributions
         $metrics = Metric::withoutGlobalScopes()
-            ->whereHas('team')
+            ->whereIn('team_id', $teams->pluck('id'))
             ->whereHas('programme')
             ->whereBetween('date', [$startDate, $endDate])
             ->where(fn($q) => $q->where('grant_amount', '>', 0)->orWhere('team_mission_amount', '>', 0))
