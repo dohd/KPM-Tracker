@@ -116,6 +116,7 @@ class MetricController extends Controller
             // duplicate meeting
             $is_exists = Metric::whereHas('programme', fn($q) => $q->where('metric', 'Online-Meeting'))
                 ->whereMonth('date', date('m', strtotime($input['date'])))
+                ->whereYear('date', date('Y', strtotime($input['date'])))
                 ->where(['programme_id' => $input['programme_id'], 'team_id' => $input['team_id']])
                 ->exists();
             if ($is_exists) return errorHandler('Metric input exists for a similar month');
@@ -214,6 +215,7 @@ class MetricController extends Controller
             $is_exists = Metric::where('id', '!=', $metric->id)
                 ->whereHas('programme', fn($q) => $q->where('metric', 'Online-Meeting'))
                 ->whereMonth('date', date('m', strtotime($input['date'])))
+                ->whereYear('date', date('Y', strtotime($input['date'])))
                 ->where(['programme_id' => $input['programme_id'], 'team_id' => $input['team_id']])
                 ->exists();
             if ($is_exists) return errorHandler('Metric input exists for a similar month');
