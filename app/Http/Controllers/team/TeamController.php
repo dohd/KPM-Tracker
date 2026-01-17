@@ -4,6 +4,7 @@ namespace App\Http\Controllers\team;
 
 use App\Http\Controllers\Controller;
 use App\Models\team\Team;
+use App\Models\team\TeamMember;
 use App\Models\team\TeamSize;
 use Exception;
 use Illuminate\Http\Request;
@@ -49,43 +50,33 @@ class TeamController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'member_list' => 'required',
+            // member details
+            'full_name' => ['required', 'array', 'min:1'],
+            'category' => ['required', 'array', 'min:1'],
+            'df_name' => ['required', 'array', 'min:1'],
+            'phone_no' => ['required', 'array', 'min:1'],
+            'physical_addr' => ['required', 'array', 'min:1'],            
         ]);
-        $input = $request->except('_token');
+
+        $basic_details = $request->only('is_active', 'name', 'max_guest');
+        $member_details = $request->only('full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
 
         try {    
             DB::beginTransaction();
-               
-            foreach ($input['start_date'] as $key => $date) {
-                $size = @$input['local_size'][$key];
-                if ($date && $size > 0) $input['start_date'][$key] = databaseDate($date);
-                else unset(
-                    $input['start_date'][$key], 
-                    $input['local_size'][$key], 
-                    $input['diaspora_size'][$key],
-                    $input['dormant_size'][$key],
-                );
-            }
-            $teamSizeArr = [
-                'start_period' => $input['start_date'],
-                'local_size' => $input['local_size'],
-                'diaspora_size' => $input['diaspora_size'],
-                'dormant_size' => $input['dormant_size'],
-            ];
 
-            // save Team
-            // unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
-            foreach ($input as $key => $value) {
-                if (in_array($key, ['start_date', 'local_size', 'diaspora_size', 'dormant_size'])) {
-                    $input[$key] = implode(',', $value);
-                }
-            }
-            $team = Team::create($input);
+            $team = Team::create($basic_details);
 
-            // save Team size
-            $teamSizeArr['team_id'] = array_fill(0, count($teamSizeArr['local_size']), $team->id);
-            $teamSizeArr = databaseArray($teamSizeArr);
-            TeamSize::insert($teamSizeArr);
+            $n = count($member_details['full_name']);
+            $member_details['team_id'] = array_fill(0, $n, $team->id);
+            $member_details['user_id'] = array_fill(0, $n, auth()->id());
+            $member_details['ins'] = array_fill(0, $n, auth()->user()->ins);
+            $member_details = databaseArray($member_details);
+            // Remove duplicate names
+            $member_details = collect($member_details)
+                ->unique('name')
+                ->values()
+                ->toArray();
+            TeamMember::insert($member_details);
 
             DB::commit();
 
@@ -128,13 +119,38 @@ class TeamController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'member_list' => 'required',
+            // member details
+            'full_name' => ['required', 'array', 'min:1'],
+            'category' => ['required', 'array', 'min:1'],
+            'df_name' => ['required', 'array', 'min:1'],
+            'phone_no' => ['required', 'array', 'min:1'],
+            'physical_addr' => ['required', 'array', 'min:1'],            
         ]);
+        
+        $basic_details = $request->only('is_active', 'name', 'max_guest');
+        $member_details = $request->only('full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
+        $confirmation_details = $request->only('start_date', 'local_size', 'diaspora_size', 'dormant_size', 'checked');
+
         $input = $request->except('_token');
+        dd($input);
 
         try {   
             DB::beginTransaction();
 
+            
+
+
+
+
+
+
+
+
+
+
+            
+
+            // ========  Initial code logic ========
             foreach ($input['start_date'] as $key => $date) {
                 $size = @$input['local_size'][$key];
                 if ($date && $size > 0) $input['start_date'][$key] = databaseDate($date);

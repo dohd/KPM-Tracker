@@ -2,20 +2,15 @@
 
 namespace App\Models\team;
 
-use App\Models\ModelTrait;
-use App\Models\team\Traits\TeamAttribute;
-use App\Models\team\Traits\TeamRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class Team extends Model
+class VerifyMember extends Model
 {
-    use ModelTrait, TeamAttribute, TeamRelationship;    
-
     /**
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'teams';
+    protected $table = 'verify_members';
 
     /**
      * Mass Assignable fields of model
@@ -60,16 +55,9 @@ class Team extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $model->tid = Team::max('tid')+1;
             $model->user_id = auth()->user()->id;
             $model->ins = auth()->user()->ins;
             return $model;
-        });
-
-        static::addGlobalScope('id', function ($builder) {
-            if (in_array(auth()->user()->user_type, ['captain', 'member'])) {
-                $builder->where('id', auth()->user()->team_id);
-            }
         });
     }
 }
