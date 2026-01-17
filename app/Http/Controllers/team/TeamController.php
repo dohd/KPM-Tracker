@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\team\Team;
 use App\Models\team\TeamMember;
 use App\Models\team\TeamSize;
+use App\Models\team\VerifyMember;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -73,9 +75,7 @@ class TeamController extends Controller
             $member_details = databaseArray($member_details);
             // Remove duplicate names
             $member_details = collect($member_details)
-                ->unique('name')
-                ->values()
-                ->toArray();
+                ->unique('full_name')->values()->toArray();
             TeamMember::insert($member_details);
 
             DB::commit();
@@ -127,61 +127,85 @@ class TeamController extends Controller
             'physical_addr' => ['required', 'array', 'min:1'],            
         ]);
         
-        $basic_details = $request->only('is_active', 'name', 'max_guest');
-        $member_details = $request->only('full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
-        $confirmation_details = $request->only('start_date', 'local_size', 'diaspora_size', 'dormant_size', 'checked');
-
-        $input = $request->except('_token');
-        dd($input);
+        $basicDetails = $request->only('is_active', 'name', 'max_guest');
+        $memberDetails = $request->only('member_id', 'full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
+        $confirmationDetails = $request->only('start_date', 'local_size', 'diaspora_size', 'dormant_size');
+        $checkedRowIds = [];
+        foreach ($request->all() as $key => $value) {
+            if (preg_match('/^checked_\d+$/', $key)) {
+                $checkedRowIds[] = $value;
+            }
+        }
 
         try {   
             DB::beginTransaction();
 
-            
+            $team->update($basicDetails);
 
-
-
-
-
-
-
-
-
-
-            
-
-            // ========  Initial code logic ========
-            foreach ($input['start_date'] as $key => $date) {
-                $size = @$input['local_size'][$key];
-                if ($date && $size > 0) $input['start_date'][$key] = databaseDate($date);
-                else unset(
-                    $input['start_date'][$key], 
-                    $input['local_size'][$key], 
-                    $input['diaspora_size'][$key],
-                    $input['dormant_size'][$key],
-                );
-            }
-            $teamSizeArr = [
-                'start_period' => $input['start_date'],
-                'local_size' => $input['local_size'],
-                'diaspora_size' => $input['diaspora_size'],
-                'dormant_size' => $input['dormant_size'],
-            ];
-
-            // update Team
-            // unset($input['start_date'], $input['local_size'], $input['diaspora_size']);
-            foreach ($input as $key => $value) {
-                if (in_array($key, ['start_date', 'local_size', 'diaspora_size'])) {
-                    $input[$key] = implode(',', $value);
+            // create or update member
+            $memberDetails = collect(databaseArray($memberDetails))
+                ->unique('full_name')->values()->toArray();                
+            foreach ($memberDetails as $key => $item) {
+                $id = @$item['member_id'];
+                if ($id) {
+                    unset($item['member_id']);
+                    $team->members()->find($id)->update($item);
+                } else {
+                    $team->members()->create($item);
                 }
             }
-            $team->update($input);
 
-            // save Team size
-            $teamSizeArr['team_id'] = array_fill(0, count($teamSizeArr['local_size']), $team->id);
-            $teamSizeArr = databaseArray($teamSizeArr);
-            $team->team_sizes()->delete();
-            TeamSize::insert($teamSizeArr);
+            // manage team size and member verification
+            $startDates = $confirmationDetails['start_date'] ?: [];
+            foreach($startDates as $key => $date) {
+                $date = databaseDate($date);
+                $month = Carbon::parse($date)->month;
+                $year = Carbon::parse($date)->year;
+
+                // add member verification for the month
+                $memberIds = $checkedRowIds[$key] ?: [];
+                $teamMembers = $team->members()
+                    ->whereIn('team_members.id', $memberIds)
+                    ->get(['id', 'team_id', 'category']);
+                if ($teamMembers->count()) {
+                    $team->verify_members()
+                        ->whereMonth('date', $month)
+                        ->whereYear('date', $year)
+                        ->delete();
+                    foreach ($teamMembers as $member) {
+                        $team->verify_members()->create([
+                            'team_member_id' => $member->id,
+                            'category' => $member->category,
+                            'date' => $date,
+                            'checked' => 1,
+                        ]);
+                    }                    
+                }
+
+                // update team size for the month
+                $localSize = $confirmationDetails['local_size'][$key] ?? 0;
+                $diasporaSize = $confirmationDetails['diaspora_size'][$key] ?? 0;
+                $dormantSize = $confirmationDetails['dormant_size'][$key] ?? 0;
+                $verifiedMemberCount = $team->verify_members()
+                    ->selectRaw('category, COUNT(*) AS size')
+                    ->groupBy('category')
+                    ->pluck('size', 'category');
+                if ($verifiedMemberCount->count()) {
+                    $localSize = $verifiedMemberCount['local'] ?? 0;
+                    $diasporaSize = $verifiedMemberCount['diaspora'] ?? 0;
+                    $dormantSize = $verifiedMemberCount['dormant'] ?? 0;                    
+                }
+                $team->team_sizes()
+                    ->whereMonth('start_period', $month)
+                    ->whereYear('start_period', $year)
+                    ->delete();
+                $team->team_sizes()->create([
+                    'start_period' => $date,
+                    'local_size' => numberClean($localSize),
+                    'diaspora_size' => numberClean($diasporaSize),
+                    'dormant_size' => numberClean($dormantSize),
+                ]);  
+            }
 
             DB::commit();
 

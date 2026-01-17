@@ -20,9 +20,10 @@
     function getMasterMembers() {
         const list = [];
         $('#masterMembersTbl tbody tr').not('[temp="1"]').each(function(idx){
+            const id = $(this).find('.master-id').val();
             const name = ($(this).find('.master-name').val() || '').trim();
             const cat  = ($(this).find('.master-category').val() || 'local');
-            if (name.length) list.push({ name, cat, idx });
+            if (name.length) list.push({ id, name, cat, idx });
         });
         return list;
     }
@@ -49,13 +50,14 @@
 
         let html = '';
         members.forEach(m => {
-            const id = `m_${$confirmRow.attr('data-row-key')}_${m.idx}`;
+            const key = $confirmRow.attr('data-row-key');
+            const id = `m_${key}_${m.idx}`;
             const checked = selected.has(m.name) ? 'checked' : '';
             html += `
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="form-check border rounded px-3 py-2 h-100">
-                        <input name="checked[]" class="form-check-input member-check" type="checkbox"
-                            id="${id}" value="${escapeHtml(m.name)}" data-cat="${escapeHtml(m.cat)}" ${checked}>
+                        <input name="checked_${key}[]" class="form-check-input member-check" type="checkbox"
+                            id="${id}" value="${escapeHtml(m.id)}" data-cat="${escapeHtml(m.cat)}" ${checked}>
                         <label class="form-check-label w-100" for="${id}">
                             <div class="d-flex justify-content-between">
                                 <span>${escapeHtml(m.name)}</span>
