@@ -119,15 +119,15 @@
                 <thead class="table-light">
                     <tr>
                         <th>Beginning Date</th>
-                        <th>Local Size</th>
-                        <th>Diaspora Size</th>
-                        <th>Dormant Size</th>
-                        <th width="22%">Action</th>
+                        <th width="20%">Local Size</th>
+                        <th width="20%">Diaspora Size</th>
+                        <th width="20%">Dormant Size</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{-- Existing month rows (kept from your original logic) --}}
-                    @foreach ((@$team->team_sizes ?: collect())->sortByDesc('start_period') as $row)
+                    @foreach ((@$team->team_sizes ?: collect())->sortBy('start_period') as $row)
                         @php
                             $isLocked = ($row->in_score && auth()->user()->user_type != 'chair');
                         @endphp
@@ -152,9 +152,8 @@
                             <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control diaspora-size" {{ $isLocked ? 'readonly' : '' }}></td>
                             <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control dormant-size" {{ $isLocked ? 'readonly' : '' }}></td>
 
-                            <td>
-                                <button type="button" class="btn btn-outline-primary add-month-row"><i class="bi bi-plus-circle"></i></button>
-                                <button type="button" class="btn btn-outline-danger del-month-row" {{ $isLocked ? 'disabled' : '' }}><i class="bi bi-dash-circle"></i></button>
+                            <td class="text-center">                                
+                                <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ $isLocked ? 'disabled' : '' }}><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>
 
@@ -205,17 +204,15 @@
                                     Diaspora: <span class="sum-diaspora">0</span> |
                                     Dormant: <span class="sum-dormant">0</span>
                                 </span>
-                            </div>
+                            </div>                                
                         </td>
                         <td><input type="number" name="local_size[]" value="0" class="form-control local-size"></td>
                         <td><input type="number" name="diaspora_size[]" value="0" class="form-control diaspora-size"></td>
                         <td><input type="number" name="dormant_size[]" value="0" class="form-control dormant-size"></td>
-                        <td>
-                            <button type="button" class="btn btn-outline-primary add-month-row"><i class="bi bi-plus-circle"></i></button>
-                            <button type="button" class="btn btn-outline-danger del-month-row"><i class="bi bi-dash-circle"></i></button>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-danger del-month-row"><i class="bi bi-trash"></i></button>
                         </td>
                     </tr>
-
                     {{-- confirm row template --}}
                     <tr class="d-none confirm-row" temp="1" data-row-key="__KEY__">
                         <td colspan="5">

@@ -208,13 +208,6 @@
         $('#addMasterMember').trigger('click');
         $('#addMonthRow').trigger('click');
     } else {
-        const verifyMembers = @json($team->verify_members);
-        const teamSizes = @json($team->team_sizes);
-        // for new team trigger default row
-        if (!verifyMembers.length && !teamSizes.length) {
-            $('#addMonthRow').trigger('click');
-        }
-
         // for existing rows, render checkbox grids (empty selections unless you later bind saved selections)
         $('#teamSizeTbl tbody tr.month-row').not('[temp="1"]').each(function(){
             const $month = $(this);
@@ -230,6 +223,40 @@
                 parseInt($month.find('.diaspora-size').val() || 0) +
                 parseInt($month.find('.dormant-size').val() || 0)
             );
+        });
+
+        const verifyMembers = @json(@$team->verify_members ?? []);
+        const teamSizes = @json(@$team->team_sizes ?? []);
+        // for new team trigger default row
+        if (!verifyMembers.length && !teamSizes.length) {
+            $('#addMonthRow').trigger('click');
+        }
+
+        const opened = new Set();
+        // map date value -> monthRow
+        const rowsByDate = {};
+        $('#teamSizeTbl tbody tr.month-row').each(function () {
+          const $row = $(this);
+          const date = $row.find('input[type="date"]').val(); // assuming 1 date input per row
+          if (date) rowsByDate[date] = $row;
+        });
+        verifyMembers.forEach(v => {
+          const $monthRow = rowsByDate[v.date];
+          if (!$monthRow) return;
+
+          const $confirmRow = $monthRow.next();
+
+          // open once per date
+          if (!opened.has(v.date)) {
+            opened.add(v.date);
+            $monthRow.find('.toggle-confirm').trigger('click');
+          }
+
+          $confirmRow
+            .find(`.member-check[value="${v.team_member_id}"]`)
+            .prop('checked', true);
+            
+            recalcMonth($monthRow);
         });
     }
 </script>

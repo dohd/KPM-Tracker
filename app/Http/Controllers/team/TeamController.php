@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\team\Team;
 use App\Models\team\TeamMember;
 use App\Models\team\TeamSize;
-use App\Models\team\VerifyMember;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -72,9 +71,7 @@ class TeamController extends Controller
             $member_details['team_id'] = array_fill(0, $n, $team->id);
             $member_details['user_id'] = array_fill(0, $n, auth()->id());
             $member_details['ins'] = array_fill(0, $n, auth()->user()->ins);
-            $member_details = databaseArray($member_details);
-            // Remove duplicate names
-            $member_details = collect($member_details)
+            $member_details = collect(databaseArray($member_details))
                 ->unique('full_name')->values()->toArray();
             TeamMember::insert($member_details);
 
@@ -146,32 +143,30 @@ class TeamController extends Controller
             $memberDetails = collect(databaseArray($memberDetails))
                 ->unique('full_name')->values()->toArray();                
             foreach ($memberDetails as $key => $item) {
-                $id = @$item['member_id'];
-                if ($id) {
-                    unset($item['member_id']);
-                    $team->members()->find($id)->update($item);
-                } else {
-                    $team->members()->create($item);
-                }
+                $member = $team->members()->find($item['member_id'] ?? null);
+                unset($item['member_id']);
+                if ($member) $member->update($item);
+                else $team->members()->create($item);
             }
 
             // manage team size and member verification
-            $startDates = $confirmationDetails['start_date'] ?: [];
+            $startDates = $confirmationDetails['start_date'] ?? [];
             foreach($startDates as $key => $date) {
                 $date = databaseDate($date);
                 $month = Carbon::parse($date)->month;
                 $year = Carbon::parse($date)->year;
 
                 // add member verification for the month
-                $memberIds = $checkedRowIds[$key] ?: [];
+                $memberIds = $checkedRowIds[$key] ?? [];
                 $teamMembers = $team->members()
                     ->whereIn('team_members.id', $memberIds)
-                    ->get(['id', 'team_id', 'category']);
+                    ->get(['id', 'team_id', 'category']);                
                 if ($teamMembers->count()) {
-                    $team->verify_members()
-                        ->whereMonth('date', $month)
-                        ->whereYear('date', $year)
-                        ->delete();
+                    if ($key == 0) {
+                        $team->verify_members()
+                            ->whereYear('date', $year)
+                            ->delete();                        
+                    }
                     foreach ($teamMembers as $member) {
                         $team->verify_members()->create([
                             'team_member_id' => $member->id,
@@ -187,18 +182,22 @@ class TeamController extends Controller
                 $diasporaSize = $confirmationDetails['diaspora_size'][$key] ?? 0;
                 $dormantSize = $confirmationDetails['dormant_size'][$key] ?? 0;
                 $verifiedMemberCount = $team->verify_members()
-                    ->selectRaw('category, COUNT(*) AS size')
-                    ->groupBy('category')
+                    ->whereMonth('date', $month)
+                    ->whereYear('date', $year)
+                    ->selectRaw('YEAR(date) year, MONTH(date) month, category, COUNT(*) size')
+                    ->groupBy('year', 'month', 'category')
                     ->pluck('size', 'category');
                 if ($verifiedMemberCount->count()) {
                     $localSize = $verifiedMemberCount['local'] ?? 0;
                     $diasporaSize = $verifiedMemberCount['diaspora'] ?? 0;
                     $dormantSize = $verifiedMemberCount['dormant'] ?? 0;                    
                 }
-                $team->team_sizes()
-                    ->whereMonth('start_period', $month)
-                    ->whereYear('start_period', $year)
-                    ->delete();
+                
+                if ($key == 0) {
+                    $team->team_sizes()
+                        ->whereYear('start_period', $year)
+                        ->delete();                    
+                }
                 $team->team_sizes()->create([
                     'start_period' => $date,
                     'local_size' => numberClean($localSize),
