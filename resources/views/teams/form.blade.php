@@ -167,9 +167,9 @@
                                 </div>
                             </td>
 
-                            <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control local-size" {{ $isLocked ? 'readonly' : '' }}></td>
-                            <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control diaspora-size" {{ $isLocked ? 'readonly' : '' }}></td>
-                            <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control dormant-size" {{ $isLocked ? 'readonly' : '' }}></td>
+                            <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control local-size" readonly></td>
+                            <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control diaspora-size" readonly></td>
+                            <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control dormant-size" readonly></td>
 
                             <td class="text-center">                                
                                 <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ $isLocked ? 'disabled' : '' }}><i class="bi bi-trash"></i></button>
@@ -221,9 +221,9 @@
                                 </span>
                             </div>                                
                         </td>
-                        <td><input type="number" name="local_size[]" value="0" class="form-control local-size"></td>
-                        <td><input type="number" name="diaspora_size[]" value="0" class="form-control diaspora-size"></td>
-                        <td><input type="number" name="dormant_size[]" value="0" class="form-control dormant-size"></td>
+                        <td><input type="number" name="local_size[]" value="0" class="form-control local-size" readonly></td>
+                        <td><input type="number" name="diaspora_size[]" value="0" class="form-control diaspora-size" readonly></td>
+                        <td><input type="number" name="dormant_size[]" value="0" class="form-control dormant-size" readonly></td>
                         <td class="text-center">
                             <button type="button" class="btn btn-sm btn-outline-danger del-month-row"><i class="bi bi-trash"></i></button>
                         </td>

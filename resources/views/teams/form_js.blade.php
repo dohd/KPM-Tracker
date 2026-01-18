@@ -54,7 +54,7 @@
             const key = $confirmRow.attr('data-row-key');
             const id = `m_${key}_${m.idx}`;
             const id2 = `s_${key}_${m.idx}`;
-            const checked = selected.has(m.name) ? 'checked' : '';
+            const checked = selected.has(m.id) ? 'checked' : '';
             html += `
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="form-check border rounded px-3 py-2 h-100">
