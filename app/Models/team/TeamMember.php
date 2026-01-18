@@ -2,10 +2,12 @@
 
 namespace App\Models\team;
 
+use App\Models\team\Traits\TeamMemberRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class TeamMember extends Model
 {
+    use TeamMemberRelationship;
     /**
      * The database table used by the model.
      * @var string
@@ -59,5 +61,12 @@ class TeamMember extends Model
             $instance->ins = auth()->user()->ins;
             return $instance;
         });
+    }
+
+    // custom attributes
+    public function getIsCategoryMemberVerifiedAttribute()
+    {
+        $category = $this->attributes['category'];
+        return $this->verify_members()->where('category',  $category)->exists();
     }
 }

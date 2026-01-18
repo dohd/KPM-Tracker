@@ -120,14 +120,25 @@ class TeamController extends Controller
         ]);
         
         $basicDetails = $request->only('is_active', 'name', 'max_guest');
-        $memberDetails = $request->only('member_id', 'full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
+        $memberDetails = $request->only('master_id', 'full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
         $confirmationDetails = $request->only('start_date', 'local_size', 'diaspora_size', 'dormant_size');
+        $memberCategories = []; // pair member_id -> category
         $checkedRowIds = [];
         foreach ($request->all() as $key => $value) {
             if (preg_match('/^checked_\d+$/', $key)) {
                 $checkedRowIds[] = $value;
             }
+            if (preg_match('/^membercat_\d+$/', $key)) {
+                $value1 = [];
+                foreach ($value as $i => $cat) {
+                    $pair = explode('-', $cat);
+                    $value1[$pair[0]] = $pair[1];
+                }
+                $memberCategories[] = $value1;
+            }
         }
+
+        // dd($memberCategories);
 
         try {   
             DB::beginTransaction();
@@ -136,13 +147,14 @@ class TeamController extends Controller
             $team->update($basicDetails);
 
             // create or update member
-            $memberDetails = collect(databaseArray($memberDetails))
-                ->unique('full_name')->values()->toArray();                
+            $memberDetails = databaseArray($memberDetails);              
             foreach ($memberDetails as $key => $item) {
-                $member = $team->members()->find($item['member_id'] ?? null);
-                unset($item['member_id']);
+                $member = $team->members()->find($item['master_id'] ?? null);
+                unset($item['master_id']);
                 if ($member) $member->update($item);
-                elseif ($item['full_name'] && $item['category']) $team->members()->create($item);
+                elseif ($item['full_name'] && $item['category']) {
+                    $team->members()->create($item);
+                }
             }
 
             // manage team size and member verification
@@ -153,6 +165,7 @@ class TeamController extends Controller
                 $year = Carbon::parse($date)->year;
 
                 // add member verification for the month
+                $rowCategories = $memberCategories[$key] ?? [];
                 $memberIds = $checkedRowIds[$key] ?? [];
                 $teamMembers = $team->members()
                     ->whereIn('team_members.id', $memberIds)
@@ -166,7 +179,7 @@ class TeamController extends Controller
                     foreach ($teamMembers as $member) {
                         $team->verify_members()->create([
                             'team_member_id' => $member->id,
-                            'category' => $member->category,
+                            'category' => $rowCategories[$member->id] ?? $member->category,
                             'date' => $date,
                             'checked' => 1,
                         ]);

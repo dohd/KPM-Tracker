@@ -44,13 +44,16 @@
                 <tr class="d-none" temp="1">
                     <td>
                         <input type="text" name="full_name[]" class="form-control form-control-sm master-name" placeholder="e.g. John Doe">
-                        <input type="hidden"  class="master-id" name="member_id[]" value="">
+                        <input type="hidden"  class="master-id" name="master_id[]" value="0">
                     </td>
                     <td>
-                        <select name="category[]" class="form-select form-select-sm master-category">
-                            <option value="local">Local</option>
-                            <option value="diaspora">Diaspora</option>
-                            <option value="dormant">Dormant</option>
+                        <select 
+                            name="category[]" 
+                            class="form-select form-select-sm master-category"
+                        >
+                            @foreach (['local', 'diaspora', 'dormant'] as $value)
+                                <option value="{{ $value }}">{{ ucfirst($value) }}</option>
+                            @endforeach
                         </select>
                     </td>
                     <td>
@@ -72,14 +75,30 @@
                     <tr>
                         <td>
                             <input type="text" name="full_name[]" value="{{ $row->full_name }}" class="form-control form-control-sm master-name" placeholder="e.g. John Doe">
-                            <input type="hidden"  class="master-id" name="member_id[]" value="{{ $row->id }}">
+                            <input type="hidden"  class="master-id" name="master_id[]" value="{{ $row->id }}">
                         </td>
                         <td>
-                            <select name="category[]" class="form-select form-select-sm master-category">
-                                @foreach (['local', 'diaspora', 'dormant'] as $value)
-                                    <option value="{{ $value }}" {{ $value === $row->category? 'selected' : '' }}>{{ ucfirst($value) }}</option>
-                                @endforeach
-                            </select>
+                            @if ($row->is_category_member_verified)
+                                <select 
+                                    name="category[]" 
+                                    class="form-select form-select-sm master-category"
+                                    readonly
+                                    style="pointer-events: none; background-color: #e9ecef;" 
+                                >
+                                    @foreach (['local', 'diaspora', 'dormant'] as $value)
+                                        <option value="{{ $value }}" {{ $value === $row->category? 'selected' : '' }}>{{ ucfirst($value) }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <select 
+                                    name="category[]" 
+                                    class="form-select form-select-sm master-category"
+                                >
+                                    @foreach (['local', 'diaspora', 'dormant'] as $value)
+                                        <option value="{{ $value }}" {{ $value === $row->category? 'selected' : '' }}>{{ ucfirst($value) }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </td>
                         <td>
                             <input type="text" name="df_name[]" value="{{ $row->df_name }}" class="form-control form-control-sm master-dfname">
@@ -127,7 +146,7 @@
                 </thead>
                 <tbody>
                     {{-- Existing month rows (kept from your original logic) --}}
-                    @foreach ((@$team->team_sizes ?: collect())->sortBy('start_period') as $row)
+                    @foreach ((@$team->team_sizes ?: collect())->sortByDesc('start_period') as $row)
                         @php
                             $isLocked = ($row->in_score && auth()->user()->user_type != 'chair');
                         @endphp
@@ -163,7 +182,7 @@
                                 <div class="border rounded p-3 bg-white">
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                         <div class="fw-semibold">
-                                            <i class="bi bi-check2-square"></i> Confirm Members (tick from master)
+                                            <i class="bi bi-check2-square"></i> Confirm Members 
                                         </div>
 
                                         <div class="d-flex gap-2">
@@ -180,11 +199,7 @@
                                     </div>
 
                                     {{-- where checkboxes render --}}
-                                    <div class="row g-2 member-checkbox-grid"></div>
-
-                                    <small class="text-muted d-block mt-2">
-                                        Counts auto-calc from selected members using their default category in the master register.
-                                    </small>
+                                    <div class="row g-2 member-checkbox-grid"></div>                                    
                                 </div>
                             </td>
                         </tr>
@@ -219,7 +234,7 @@
                             <div class="border rounded p-3 bg-white">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                     <div class="fw-semibold">
-                                        <i class="bi bi-check2-square"></i> Confirm Members (tick from master)
+                                        <i class="bi bi-check2-square"></i> Confirm Members
                                     </div>
 
                                     <div class="d-flex gap-2">
@@ -235,11 +250,7 @@
                                     </div>
                                 </div>
 
-                                <div class="row g-2 member-checkbox-grid"></div>
-
-                                <small class="text-muted d-block mt-2">
-                                    Counts auto-calc from selected members using their default category in the master register.
-                                </small>
+                                <div class="row g-2 member-checkbox-grid"></div>                            
                             </div>
                         </td>
                     </tr>

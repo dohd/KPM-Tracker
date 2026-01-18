@@ -48,10 +48,12 @@
             selected.add($(this).val());
         });
 
+
         let html = '';
         members.forEach(m => {
             const key = $confirmRow.attr('data-row-key');
             const id = `m_${key}_${m.idx}`;
+            const id2 = `s_${key}_${m.idx}`;
             const checked = selected.has(m.name) ? 'checked' : '';
             html += `
                 <div class="col-12 col-md-6 col-lg-4">
@@ -61,7 +63,12 @@
                         <label class="form-check-label w-100" for="${id}">
                             <div class="d-flex justify-content-between">
                                 <span>${escapeHtml(m.name)}</span>
-                                <small class="text-muted text-uppercase">${escapeHtml(m.cat)}</small>
+                                <small class="text-muted text-uppercase d-none">${escapeHtml(m.cat)}</small>
+                                <select id="${id2}" name="membercat_${key}[]" class="form-select form-select-sm member-category" style="height: 30px; width: 110px;">
+                                    <option data-cat="local" value="${escapeHtml(m.id)}-local"   ${escapeHtml(m.cat) === 'local'   ? 'selected' : ''}>Local</option>
+                                    <option data-cat="diaspora" value="${escapeHtml(m.id)}-diaspora"${escapeHtml(m.cat) === 'diaspora'? 'selected' : ''}>Diaspora</option>
+                                    <option data-cat="dormant" value="${escapeHtml(m.id)}-dormant" ${escapeHtml(m.cat) === 'dormant' ? 'selected' : ''}>Dormant</option>
+                                </select>
                             </div>
                         </label>
                     </div>
@@ -76,17 +83,20 @@
         const $confirmRow = getConfirmRow($monthRow);
         let local = 0, diaspora = 0, dormant = 0, confirmed = 0;
 
-        $confirmRow.find('input.member-check:checked').each(function(){
-            confirmed++;
-            const cat = ($(this).data('cat') || '').toLowerCase();
-            if (cat === 'local') local++;
-            if (cat === 'diaspora') diaspora++;
-            if (cat === 'dormant') dormant++;
-        });
+        $confirmRow.find('select.member-category').each(function(){
+            const $checkbox = $(this).closest('div.form-check').find('input.member-check');
+            if ($checkbox.prop('checked')) {
+                const cat = $(this).val().slice(2);
+                confirmed++;
+                if (cat === 'local') local++;
+                if (cat === 'diaspora') diaspora++;
+                if (cat === 'dormant') dormant++;
+            }
+        });        
 
         $monthRow.find('.local-size').val(local);
         $monthRow.find('.diaspora-size').val(diaspora);
-        $monthRow.find('.dormant-size').val(dormant);
+        $monthRow.find('.dormant-size').val(dormant);           
 
         $monthRow.find('.sum-confirmed').text(confirmed);
         $monthRow.find('.sum-local').text(local);
@@ -97,34 +107,16 @@
     // ========= MASTER: add/remove =========
     $('#addMasterMember').on('click', function(){
         const $row = $masterTpl.clone(true, true).removeClass('d-none').removeAttr('temp');
-        $('#masterMembersTbl tbody').append($row);
+        $('#masterMembersTbl tbody').prepend($row);
 
         // re-render all month checkbox grids
-        $('#teamSizeTbl tbody tr.confirm-row').not('[temp="1"]').each(function(){
+        {{-- $('#teamSizeTbl tbody tr.confirm-row').not('[temp="1"]').each(function(){
             renderMonthCheckboxes($(this));
-        });
+        }); --}}
     });
 
     $(document).on('click', '.del-master', function(){
         $(this).closest('tr').remove();
-
-        // re-render all month checkbox grids + recalc
-        $('#teamSizeTbl tbody tr.month-row').not('[temp="1"]').each(function(){
-            const $month = $(this);
-            const $confirm = getConfirmRow($month);
-            renderMonthCheckboxes($confirm);
-            {{-- recalcMonth($month); --}}
-        });
-    });
-
-    $(document).on('keyup change', '.master-name, .master-category', function(){
-        // re-render all month checkbox grids + recalc
-        $('#teamSizeTbl tbody tr.month-row').not('[temp="1"]').each(function(){
-            const $month = $(this);
-            const $confirm = getConfirmRow($month);
-            renderMonthCheckboxes($confirm);
-            recalcMonth($month);
-        });
     });
 
     // ========= MONTH: add/remove rows (paired with confirm panel) =========
@@ -133,7 +125,7 @@
         const $newMonth = $monthTpl.clone(true, true).removeClass('d-none').removeAttr('temp').attr('data-row-key', key);
         const $newConfirm = $confirmTpl.clone(true, true).removeClass('d-none').removeAttr('temp').attr('data-row-key', key);
 
-        $('#teamSizeTbl tbody').append($newMonth).append($newConfirm);
+        $('#teamSizeTbl tbody').prepend($newConfirm).prepend($newMonth);
 
         renderMonthCheckboxes($newConfirm);
         recalcMonth($newMonth);
@@ -199,7 +191,17 @@
         const $confirmRow = $(this).closest('tr.confirm-row');
         const key = $confirmRow.attr('data-row-key');
         const $monthRow = $('#teamSizeTbl tbody tr.month-row').not('[temp="1"]').filter(`[data-row-key="${key}"]`);
-        recalcMonth($monthRow);
+        recalcMonth($monthRow);        
+    });
+
+    // ========= select changes  =========
+    $(document).on('change', 'select.member-category', function(){
+        const $checkbox = $(this).closest('div.form-check').find('.member-check');
+        let cat = '';
+        if ($(this).val().includes('local')) cat = 'local';
+        if ($(this).val().includes('diaspora')) cat = 'diaspora';
+        if ($(this).val().includes('dormant')) cat = 'dormant';
+        $checkbox.attr('data-cat', cat);
     });
 
     // ========= init =========
@@ -237,12 +239,17 @@
             $monthRow.find('.toggle-confirm').trigger('click');
           }
 
-          $confirmRow
-            .find(`.member-check[value="${v.team_member_id}"]`)
-            .prop('checked', true);
+          const $checkbox = $confirmRow.find(`.member-check[value="${v.team_member_id}"]`);
+          const $select = $checkbox.siblings().find('select:first');
 
-            recalcMonth($monthRow);
+          if ($checkbox.length && $select.val().includes(v.category)) {
+              $checkbox.prop('checked', true);
+          }         
         });
+
+        for (key in rowsByDate) {
+            recalcMonth(rowsByDate[key]);            
+        }
     } else {
         $('#addMasterMember').trigger('click');
         $('#addMonthRow').trigger('click');
