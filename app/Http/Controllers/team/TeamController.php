@@ -53,27 +53,25 @@ class TeamController extends Controller
             'name' => 'required',
             // member details
             'full_name' => ['required', 'array', 'min:1'],
-            'category' => ['required', 'array', 'min:1'],
-            'df_name' => ['required', 'array', 'min:1'],
-            'phone_no' => ['required', 'array', 'min:1'],
-            'physical_addr' => ['required', 'array', 'min:1'],            
+            'category' => ['required', 'array', 'min:1'],           
         ]);
 
-        $basic_details = $request->only('is_active', 'name', 'max_guest');
-        $member_details = $request->only('full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
+        $basicDetails = $request->only('is_active', 'name', 'max_guest');
+        $memberDetails = $request->only('full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
 
         try {    
             DB::beginTransaction();
 
-            $team = Team::create($basic_details);
+            $basicDetails['max_guest'] = numberClean($basicDetails['max_guest']);
+            $team = Team::create($basicDetails);
 
-            $n = count($member_details['full_name']);
-            $member_details['team_id'] = array_fill(0, $n, $team->id);
-            $member_details['user_id'] = array_fill(0, $n, auth()->id());
-            $member_details['ins'] = array_fill(0, $n, auth()->user()->ins);
-            $member_details = collect(databaseArray($member_details))
+            $n = count($memberDetails['full_name']);
+            $memberDetails['team_id'] = array_fill(0, $n, $team->id);
+            $memberDetails['user_id'] = array_fill(0, $n, auth()->id());
+            $memberDetails['ins'] = array_fill(0, $n, auth()->user()->ins);
+            $memberDetails = collect(databaseArray($memberDetails))
                 ->unique('full_name')->values()->toArray();
-            TeamMember::insert($member_details);
+            TeamMember::insert($memberDetails);
 
             DB::commit();
 
@@ -117,11 +115,8 @@ class TeamController extends Controller
         $request->validate([
             'name' => 'required',
             // member details
-            'full_name' => ['required', 'array', 'min:1'],
-            'category' => ['required', 'array', 'min:1'],
-            'df_name' => ['required', 'array', 'min:1'],
-            'phone_no' => ['required', 'array', 'min:1'],
-            'physical_addr' => ['required', 'array', 'min:1'],            
+            // 'full_name' => ['required', 'array', 'min:1'],
+            // 'category' => ['required', 'array', 'min:1'],          
         ]);
         
         $basicDetails = $request->only('is_active', 'name', 'max_guest');
@@ -137,6 +132,7 @@ class TeamController extends Controller
         try {   
             DB::beginTransaction();
 
+            $basicDetails['max_guest'] = numberClean($basicDetails['max_guest']);
             $team->update($basicDetails);
 
             // create or update member
@@ -146,7 +142,7 @@ class TeamController extends Controller
                 $member = $team->members()->find($item['member_id'] ?? null);
                 unset($item['member_id']);
                 if ($member) $member->update($item);
-                else $team->members()->create($item);
+                elseif ($item['full_name'] && $item['category']) $team->members()->create($item);
             }
 
             // manage team size and member verification

@@ -113,7 +113,7 @@
             const $month = $(this);
             const $confirm = getConfirmRow($month);
             renderMonthCheckboxes($confirm);
-            recalcMonth($month);
+            {{-- recalcMonth($month); --}}
         });
     });
 
@@ -204,35 +204,18 @@
 
     // ========= init =========
     const team = @json(@$team);
-    if (!team) {
-        $('#addMasterMember').trigger('click');
-        $('#addMonthRow').trigger('click');
-    } else {
-        // for existing rows, render checkbox grids (empty selections unless you later bind saved selections)
-        $('#teamSizeTbl tbody tr.month-row').not('[temp="1"]').each(function(){
-            const $month = $(this);
-            const $confirm = getConfirmRow($month);
-            renderMonthCheckboxes($confirm);
-
-            // keep the summary showing existing numeric values
-            $month.find('.sum-local').text(parseInt($month.find('.local-size').val() || 0));
-            $month.find('.sum-diaspora').text(parseInt($month.find('.diaspora-size').val() || 0));
-            $month.find('.sum-dormant').text(parseInt($month.find('.dormant-size').val() || 0));
-            $month.find('.sum-confirmed').text(
-                parseInt($month.find('.local-size').val() || 0) +
-                parseInt($month.find('.diaspora-size').val() || 0) +
-                parseInt($month.find('.dormant-size').val() || 0)
-            );
-        });
-
+    if (team?.id) {
+        const teamMembers = @json(@$team->members ?? []);        
         const verifyMembers = @json(@$team->verify_members ?? []);
         const teamSizes = @json(@$team->team_sizes ?? []);
         // for new team trigger default row
         if (!verifyMembers.length && !teamSizes.length) {
             $('#addMonthRow').trigger('click');
         }
+        if (!teamMembers.length) {
+            $('#addMasterMember').trigger('click');
+        }
 
-        const opened = new Set();
         // map date value -> monthRow
         const rowsByDate = {};
         $('#teamSizeTbl tbody tr.month-row').each(function () {
@@ -240,6 +223,8 @@
           const date = $row.find('input[type="date"]').val(); // assuming 1 date input per row
           if (date) rowsByDate[date] = $row;
         });
+        
+        const opened = new Set();
         verifyMembers.forEach(v => {
           const $monthRow = rowsByDate[v.date];
           if (!$monthRow) return;
@@ -255,8 +240,11 @@
           $confirmRow
             .find(`.member-check[value="${v.team_member_id}"]`)
             .prop('checked', true);
-            
+
             recalcMonth($monthRow);
         });
+    } else {
+        $('#addMasterMember').trigger('click');
+        $('#addMonthRow').trigger('click');
     }
 </script>
