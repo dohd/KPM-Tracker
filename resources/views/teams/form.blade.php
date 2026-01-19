@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div class="mt-2" style="width:85%; margin-left:auto; margin-right:auto">
+<div class="mt-2 mb-3" style="width:85%; margin-left:auto; margin-right:auto">
     {{-- ========= MASTER TABLE ========= --}}
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h6 class="mb-0"><i class="bi bi-people"></i> Master Member Register</h6>

@@ -237,61 +237,63 @@
             $('#addMasterMember').trigger('click');
         }
 
-        // map date value -> monthRow
-        const rowsByDate = {};
-        $('#teamSizeTbl tbody tr.month-row').each(function () {
-          const $row = $(this);
-          const date = $row.find('input[type="date"]').val(); // assuming 1 date input per row
-          if (date) rowsByDate[date] = $row;
-        });
-        
-        const opened = new Set();
-        verifyMembers.forEach(v => {
-          const $monthRow = rowsByDate[v.date];
-          if (!$monthRow) return;
+        if (verifyMembers.length) {
+            // map date value -> monthRow
+            const rowsByDate = {};
+            $('#teamSizeTbl tbody tr.month-row').each(function () {
+              const $row = $(this);
+              const date = $row.find('input[type="date"]').val(); // assuming 1 date input per row
+              if (date) rowsByDate[date] = $row;
+            });
+            
+            const opened = new Set();
+            verifyMembers.forEach(v => {
+              const $monthRow = rowsByDate[v.date];
+              if (!$monthRow) return;
 
-          const $confirmRow = $monthRow.next();
+              const $confirmRow = $monthRow.next();
 
-          // open once per date
-          if (!opened.has(v.date)) {
-            opened.add(v.date);
-            $monthRow.find('.toggle-confirm').trigger('click');
-          }
+              // open once per date
+              if (!opened.has(v.date)) {
+                opened.add(v.date);
+                $monthRow.find('.toggle-confirm').trigger('click');
+              }
 
-          const $checkbox = $confirmRow.find(`.member-check[value="${v.team_member_id}"]`);
-          const $select = $checkbox.siblings().find('select:first');
+              const $checkbox = $confirmRow.find(`.member-check[value="${v.team_member_id}"]`);
+              const $select = $checkbox.siblings().find('select:first');
 
-          if ($checkbox.length && $select.val().includes(v.category)) {
-            $checkbox.prop('checked', true);
-          }         
-        });
+              if ($checkbox.length && $select.val().includes(v.category)) {
+                $checkbox.prop('checked', true);
+              }         
+            });
 
-        let n = 0;
-        for (key in rowsByDate) {
-            const $monthRow = rowsByDate[key]; 
-            recalcMonth($monthRow);
-            // hide open confirm panels
-            $(`.collapse-confirm:eq(${n})`).click();
+            let n = 0;
+            for (key in rowsByDate) {
+                const $monthRow = rowsByDate[key]; 
+                recalcMonth($monthRow);
+                // hide open confirm panels
+                $(`.collapse-confirm:eq(${n})`).click();
 
-            // disable rows without permission
-            const $confirmRow = $monthRow.next();
-            for (i = 0; i < teamSizes.length; i++) {
-                const teamSize = teamSizes[i];
-                if (teamSize.start_period === key && teamSize.is_editable === false) {
-                    $confirmRow.find('select.member-category').each(function(){
-                        $(this).css({ pointerEvents: 'none', backgroundColor: '#e9ecef' })
-                        .on('click', function(e) {
-                            e.preventDefault(); // stops toggling
-                        });
-                        const $checkbox = $(this).closest('div.form-check').find('input.member-check');
-                        $checkbox.on('click', function(e) {
-                            e.preventDefault(); // stops toggling
-                        });
-                    }); 
-                    break;
+                // disable rows without permission
+                const $confirmRow = $monthRow.next();
+                for (i = 0; i < teamSizes.length; i++) {
+                    const teamSize = teamSizes[i];
+                    if (teamSize.start_period === key && teamSize.is_editable === false) {
+                        $confirmRow.find('select.member-category').each(function(){
+                            $(this).css({ pointerEvents: 'none', backgroundColor: '#e9ecef' })
+                            .on('click', function(e) {
+                                e.preventDefault(); // stops toggling
+                            });
+                            const $checkbox = $(this).closest('div.form-check').find('input.member-check');
+                            $checkbox.on('click', function(e) {
+                                e.preventDefault(); // stops toggling
+                            });
+                        }); 
+                        break;
+                    }
                 }
-            }
-            n++;       
+                n++;       
+            }            
         }
     } else {
         $('#addMasterMember').trigger('click');
