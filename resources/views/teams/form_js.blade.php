@@ -41,41 +41,59 @@
     function renderMonthCheckboxes($confirmRow) {
         const $grid = $confirmRow.find('.member-checkbox-grid');
         const members = getMasterMembers();
+        const key = $confirmRow.attr('data-row-key');
 
-        // preserve currently selected values
-        const selected = new Set();
-        $confirmRow.find('input.member-check:checked').each(function(){
-            selected.add($(this).val());
+        // 1) Build a map of existing cards by member id (preserves state + events)
+        const existing = {};
+        $grid.find('input.member-check').each(function () {
+            const id = $(this).val(); // member id
+            existing[id] = $(this).closest('.col-12').detach(); // detach keeps element "as is"
         });
 
+        // 2) Rebuild grid in the correct order, reusing old elements if present
+        const frag = $(document.createDocumentFragment());
 
-        let html = '';
         members.forEach(m => {
-            const key = $confirmRow.attr('data-row-key');
+            const memberId = String(m.id);
+
+            if (existing[memberId]) {
+              // reuse exact old element (state preserved)
+              frag.append(existing[memberId]);
+              delete existing[memberId];
+              return;
+            }
+
+            // 3) Create only if it didn't exist before
             const id = `m_${key}_${m.idx}`;
             const id2 = `s_${key}_${m.idx}`;
-            const checked = selected.has(m.id) ? 'checked' : '';
-            html += `
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="form-check border rounded px-3 py-2 h-100">
-                        <input name="checked_${key}[]" class="form-check-input member-check" type="checkbox"
-                            id="${id}" value="${escapeHtml(m.id)}" data-cat="${escapeHtml(m.cat)}" ${checked}>
-                        <label class="form-check-label w-100" for="${id}">
-                            <div class="d-flex justify-content-between">
-                                <span>${escapeHtml(m.name)}</span>
-                                <small class="text-muted text-uppercase d-none">${escapeHtml(m.cat)}</small>
-                                <select id="${id2}" name="membercat_${key}[]" class="form-select form-select-sm member-category" style="height: 30px; width: 110px;">
-                                    <option data-cat="local" value="${escapeHtml(m.id)}-local"   ${escapeHtml(m.cat) === 'local'   ? 'selected' : ''}>Local</option>
-                                    <option data-cat="diaspora" value="${escapeHtml(m.id)}-diaspora"${escapeHtml(m.cat) === 'diaspora'? 'selected' : ''}>Diaspora</option>
-                                    <option data-cat="dormant" value="${escapeHtml(m.id)}-dormant" ${escapeHtml(m.cat) === 'dormant' ? 'selected' : ''}>Dormant</option>
-                                </select>
-                            </div>
-                        </label>
+
+            frag.append($(`
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="form-check border rounded px-3 py-2 h-100">
+                  <input name="checked_${key}[]" class="form-check-input member-check" type="checkbox"
+                         id="${id}" value="${escapeHtml(m.id)}" data-cat="${escapeHtml(m.cat)}">
+                  <label class="form-check-label w-100" for="${id}">
+                    <div class="d-flex justify-content-between">
+                      <span>${escapeHtml(m.name)}</span>
+                      <small class="text-muted text-uppercase d-none">${escapeHtml(m.cat)}</small>
+                      <select id="${id2}" name="membercat_${key}[]" class="form-select form-select-sm member-category"
+                              style="height:30px;width:110px;">
+                        <option value="${escapeHtml(m.id)}-local"    ${m.cat === 'local' ? 'selected' : ''}>Local</option>
+                        <option value="${escapeHtml(m.id)}-diaspora" ${m.cat === 'diaspora' ? 'selected' : ''}>Diaspora</option>
+                        <option value="${escapeHtml(m.id)}-dormant"  ${m.cat === 'dormant' ? 'selected' : ''}>Dormant</option>
+                      </select>
                     </div>
-                </div>`;
+                  </label>
+                </div>
+              </div>
+            `));
         });
 
-        $grid.html(html);
+        // 4) Anything left in `existing` was removed from master list → discard it
+        // (detached nodes not appended will be GC’d)
+
+        // 5) Replace grid content with preserved/new nodes
+        $grid.empty().append(frag);
     }
 
     // ========= recalc counts based on checked members =========
@@ -210,6 +228,7 @@
         const teamMembers = @json(@$team->members ?? []);        
         const verifyMembers = @json(@$team->verify_members ?? []);
         const teamSizes = @json(@$team->team_sizes ?? []);
+
         // for new team trigger default row
         if (!verifyMembers.length && !teamSizes.length) {
             $('#addMonthRow').trigger('click');
@@ -243,12 +262,36 @@
           const $select = $checkbox.siblings().find('select:first');
 
           if ($checkbox.length && $select.val().includes(v.category)) {
-              $checkbox.prop('checked', true);
+            $checkbox.prop('checked', true);
           }         
         });
 
+        let n = 0;
         for (key in rowsByDate) {
-            recalcMonth(rowsByDate[key]);            
+            const $monthRow = rowsByDate[key]; 
+            recalcMonth($monthRow);
+            // hide open confirm panels
+            $(`.collapse-confirm:eq(${n})`).click();
+
+            // disable rows without permission
+            const $confirmRow = $monthRow.next();
+            for (i = 0; i < teamSizes.length; i++) {
+                const teamSize = teamSizes[i];
+                if (teamSize.start_period === key && teamSize.is_editable === false) {
+                    $confirmRow.find('select.member-category').each(function(){
+                        $(this).css({ pointerEvents: 'none', backgroundColor: '#e9ecef' })
+                        .on('click', function(e) {
+                            e.preventDefault(); // stops toggling
+                        });
+                        const $checkbox = $(this).closest('div.form-check').find('input.member-check');
+                        $checkbox.on('click', function(e) {
+                            e.preventDefault(); // stops toggling
+                        });
+                    }); 
+                    break;
+                }
+            }
+            n++;       
         }
     } else {
         $('#addMasterMember').trigger('click');

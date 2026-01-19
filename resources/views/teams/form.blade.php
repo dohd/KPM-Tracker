@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div style="width:85%; margin-left:auto; margin-right:auto">
+<div class="mt-2" style="width:85%; margin-left:auto; margin-right:auto">
     {{-- ========= MASTER TABLE ========= --}}
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h6 class="mb-0"><i class="bi bi-people"></i> Master Member Register</h6>
@@ -27,9 +27,9 @@
         </button>
     </div>
 
-    <div class="table-responsive mb-4">
+    <div class="table-responsive mb-4" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd;">
         <table id="masterMembersTbl" class="table table-bordered table-sm align-middle">
-            <thead class="table-light">
+            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                 <tr>
                     <th>Member Name</th>
                     <th>Category</th>
@@ -71,7 +71,7 @@
                         </button>
                     </td>
                 </tr>
-                @foreach (@$team->members ?: [] as $key => $row)
+                @foreach (($team->members ?? collect())->sortByDesc('id') as $key => $row)
                     <tr>
                         <td>
                             <input type="text" name="full_name[]" value="{{ $row->full_name }}" class="form-control form-control-sm master-name" placeholder="e.g. John Doe">
@@ -90,10 +90,7 @@
                                     @endforeach
                                 </select>
                             @else
-                                <select 
-                                    name="category[]" 
-                                    class="form-select form-select-sm master-category"
-                                >
+                                <select name="category[]" class="form-select form-select-sm master-category">                                
                                     @foreach (['local', 'diaspora', 'dormant'] as $value)
                                         <option value="{{ $value }}" {{ $value === $row->category? 'selected' : '' }}>{{ ucfirst($value) }}</option>
                                     @endforeach
@@ -110,7 +107,7 @@
                             <input type="text" name="physical_addr[]" value="{{ $row->physical_addr }}" class="form-control form-control-sm master-addr">
                         </td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-outline-danger del-master">
+                            <button type="button" class="btn btn-sm btn-outline-danger del-master" {{ $row->is_category_member_verified? 'disabled' : '' }}>
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -118,9 +115,6 @@
                 @endforeach
             </tbody>
         </table>
-        <small class="text-muted">
-            Master list. Monthly confirmations will show these members as checkboxes.
-        </small>
     </div>
     {{-- ======== END MASTER TABLE ======== --}}
 
@@ -133,9 +127,9 @@
             </button>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd;">
             <table id="teamSizeTbl" class="table table-bordered table-sm align-middle">
-                <thead class="table-light">
+                <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                     <tr>
                         <th>Beginning Date</th>
                         <th width="20%">Local Size</th>
@@ -146,13 +140,10 @@
                 </thead>
                 <tbody>
                     {{-- Existing month rows (kept from your original logic) --}}
-                    @foreach ((@$team->team_sizes ?: collect())->sortByDesc('start_period') as $row)
-                        @php
-                            $isLocked = ($row->in_score && auth()->user()->user_type != 'chair');
-                        @endphp
+                    @foreach (($team->team_sizes ?? collect())->sortByDesc('start_period') as $row)
                         <tr class="month-row" data-row-key="{{ $loop->index }}">
                             <td>
-                                <input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control" {{ $isLocked ? 'readonly' : '' }}>
+                                <input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control" {{ $row->is_editable? '' :  'readonly' }}>
 
                                 <div class="mt-2 d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-sm btn-outline-secondary toggle-confirm">
@@ -172,7 +163,7 @@
                             <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control dormant-size" readonly></td>
 
                             <td class="text-center">                                
-                                <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ $isLocked ? 'disabled' : '' }}><i class="bi bi-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ $row->is_editable? '' : 'disabled' }}><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>
 
@@ -186,10 +177,10 @@
                                         </div>
 
                                         <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary select-all" {{ $isLocked ? 'disabled' : '' }}>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary select-all" {{ $row->is_editable? '' : 'disabled' }}>
                                                 <i class="bi bi-check-all"></i> Select All
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary clear-all" {{ $isLocked ? 'disabled' : '' }}>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary clear-all" {{ $row->is_editable? '' : 'disabled' }}>
                                                 <i class="bi bi-x-circle"></i> Clear
                                             </button>
                                             <button type="button" class="btn btn-sm btn-outline-secondary collapse-confirm">

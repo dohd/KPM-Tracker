@@ -46,6 +46,13 @@ class TeamSize extends Model
     ];
 
     /**
+     * Guarded fields of model
+     * @var array
+     */
+    protected $appends = ['is_editable'];
+
+
+    /**
      * Constructor of Model
      * @param array $attributes
      */
@@ -58,4 +65,16 @@ class TeamSize extends Model
     {
         parent::boot();
     }
+
+    // custom attributes
+    public function getIsEditableAttribute()
+    {
+        if ($this->in_score) {
+            if (auth()->user()->user_type !== 'chair') {
+                return false;
+            }
+        }
+        return true;
+    }
 }
+
