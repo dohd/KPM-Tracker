@@ -138,12 +138,11 @@ class TeamController extends Controller
             }
         }
 
-        // dd($memberCategories);
-
         try {   
             DB::beginTransaction();
 
             $basicDetails['max_guest'] = numberClean($basicDetails['max_guest']);
+            $basicDetails['is_active'] = $basicDetails['is_active'] ?? null; 
             $team->update($basicDetails);
 
             // create or update member

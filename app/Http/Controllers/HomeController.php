@@ -41,7 +41,7 @@ class HomeController extends Controller
             });
 
         // counts
-        $numProgrammes = Programme::whereBetween('created_at', [$startDate, $endDate])->count();
+        $numProgrammes = Programme::where('is_active', 1)->count();
         $rankedTeams = rankTeamsFromScores([$startDate, $endDate]);
 
         $numTeams = (clone $teamQuery)->count();
@@ -83,7 +83,7 @@ class HomeController extends Controller
                 $mod = @$init[$key];
                 if ($mod) {
                     if ($mod['team_id'] == $key) {
-                        if ($curr->programme->metric == 'Finance') {
+                        if ($curr->programme->metric === 'Finance') {
                             $mod['finance'] += floatval($curr->finance);
                         } else {
                             $mod['mission'] += floatval($curr->mission);
@@ -108,7 +108,7 @@ class HomeController extends Controller
 
         // captain team composition notice
         if (auth()->user()->user_type === 'captain' && !confirmTeamCompositionUpdated()) {
-            session()->put('warning', 'Team composition reqired for this month');        
+            session()->put('warning', 'Team composition required for this month');        
         }
 
         return view('home', compact(
