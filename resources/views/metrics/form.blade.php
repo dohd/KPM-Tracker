@@ -147,8 +147,81 @@
     </div>
 </div>
 
+<div class="mt-2 mb-3" style="width:85%; margin-left:auto; margin-right:auto">
+    <div class="border rounded p-3 bg-white mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <div class="fw-semibold">
+                <i class="bi bi-check2-square"></i> Confirm Members
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary select-all">
+                    <i class="bi bi-check-all"></i> Select All
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary clear-all">
+                    <i class="bi bi-x-circle"></i> Clear
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-3 member-checkbox-grid">
+        </div>                            
+    </div>    
+</div>
+
 @section('script')
 <script>
+    // ========= count team members =========
+    function countTeam() {
+        let local = 0, diaspora = 0, dormant = 0, confirmed = 0;
+        $('input.member-check:checked').each(function() {
+            const cat = $(this).data('cat');
+            if (cat === 'local') local++;
+            if (cat === 'diaspora') diaspora++;
+            if (cat === 'dormant') dormant++;                
+            confirmed++;
+        });
+        $('input[name="team_total"]').val(confirmed);
+    }
+
+    // ========= render checkbox grid =========
+    function renderMonthCheckboxes() {
+        $('.member-checkbox-grid').html('');
+        $.post("{{ route('metrics.verified_team_members') }}", {
+            team_id: $('#team').val(),
+            is_metric_edit: "{{ @$metric->id }}",
+        })
+        .then(resp => {
+            $('.member-checkbox-grid').html(resp);
+        })
+        .fail((xhr, status, err) => console.log(err));
+    }
+
+    // ========= select/clear all =========
+    $(document).on('click', '.select-all', function(){
+        $('.member-checkbox-grid').find('input.member-check').prop('checked', true);
+        countTeam();
+    });
+
+    $(document).on('click', '.clear-all', function(){
+        $('.member-checkbox-grid').find('input.member-check').prop('checked', false);
+        countTeam();
+    });
+
+    $(document).on('change', 'input.member-check', function(){
+        countTeam();
+    });
+
+    $(document).on('change', 'input[name="team_total"]', function(){
+        if ($('input.member-check').length) {
+            countTeam();
+        }
+    });
+
+    $('#team').change(function() {
+        renderMonthCheckboxes();
+    });
+
     $('#programme').change(function() {
         const metric = $(this).find(':selected').attr('metric');
         $('.metric').each(function() {
@@ -165,13 +238,18 @@
 
     // on editing
     const metric = @json(@$metric);
-    if (metric && metric.id && metric.in_score) {
+    if (metric?.id && metric.in_score) {
         $('#date').attr('readonly', true);
         $('.metric input').attr('readonly', true);
         $('#programme, #team').attr('disabled', true);
         const programmeInp = `<input type="hidden" name="programme_id" value="${$('#programme').val()}">`;
         const teamInp = `<input type="hidden" name="team_id" value="${$('#team').val()}">`;
         $('form').append(programmeInp + teamInp);
+    }
+
+    const metricMembers = @json($metric->metricMembers ?? []);
+    if (metricMembers.length) {
+        renderMonthCheckboxes();
     }
 </script>
 @stop

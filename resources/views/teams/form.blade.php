@@ -144,23 +144,22 @@
                         <tr class="month-row" data-row-key="{{ $loop->index }}">
                             <td>
                                 <input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control" {{ $row->is_editable? '' :  'readonly' }}>
-
                                 <div class="mt-2 d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-sm btn-outline-secondary toggle-confirm">
                                         <i class="bi bi-ui-checks"></i> Confirm Members
                                     </button>
                                     <span class="badge bg-light text-dark align-self-center confirm-summary">
                                         Confirmed: <span class="sum-confirmed">0</span> |
-                                        Local: <span class="sum-local">{{ (int)$row->local_size }}</span> |
-                                        Diaspora: <span class="sum-diaspora">{{ (int)$row->diaspora_size }}</span> |
-                                        Dormant: <span class="sum-dormant">{{ (int)$row->dormant_size }}</span>
+                                        Local: <span class="sum-local">{{ (int) $row->local_size }}</span> |
+                                        Diaspora: <span class="sum-diaspora">{{ (int) $row->diaspora_size }}</span> |
+                                        Dormant: <span class="sum-dormant">{{ (int) $row->dormant_size }}</span>
                                     </span>
                                 </div>
                             </td>
 
-                            <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control local-size" readonly></td>
-                            <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control diaspora-size" readonly></td>
-                            <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control dormant-size" readonly></td>
+                            <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control local-size"></td>
+                            <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control diaspora-size"></td>
+                            <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control dormant-size"></td>
 
                             <td class="text-center">                                
                                 <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ $row->is_editable? '' : 'disabled' }}><i class="bi bi-trash"></i></button>
@@ -190,7 +189,7 @@
                                     </div>
 
                                     {{-- where checkboxes render --}}
-                                    <div class="row g-2 member-checkbox-grid"></div>                                    
+                                    <div class="row g-3 member-checkbox-grid"></div>                                    
                                 </div>
                             </td>
                         </tr>
@@ -212,9 +211,9 @@
                                 </span>
                             </div>                                
                         </td>
-                        <td><input type="number" name="local_size[]" value="0" class="form-control local-size" readonly></td>
-                        <td><input type="number" name="diaspora_size[]" value="0" class="form-control diaspora-size" readonly></td>
-                        <td><input type="number" name="dormant_size[]" value="0" class="form-control dormant-size" readonly></td>
+                        <td><input type="number" name="local_size[]" value="0" class="form-control local-size"></td>
+                        <td><input type="number" name="diaspora_size[]" value="0" class="form-control diaspora-size"></td>
+                        <td><input type="number" name="dormant_size[]" value="0" class="form-control dormant-size"></td>
                         <td class="text-center">
                             <button type="button" class="btn btn-sm btn-outline-danger del-month-row"><i class="bi bi-trash"></i></button>
                         </td>
@@ -240,8 +239,7 @@
                                         </button>
                                     </div>
                                 </div>
-
-                                <div class="row g-2 member-checkbox-grid"></div>                            
+                                <div class="row g-3 member-checkbox-grid"></div>                            
                             </div>
                         </td>
                     </tr>
