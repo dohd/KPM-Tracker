@@ -75,7 +75,6 @@
                   <label class="form-check-label w-100" for="${id}">
                     <div class="d-flex justify-content-between">
                       <span>${escapeHtml(m.name)}</span>
-                      <small class="text-muted text-uppercase d-none">${escapeHtml(m.cat)}</small>
                       <select id="${id2}" name="membercat_${key}[]" class="form-select form-select-sm member-category"
                               style="height:30px;width:110px;">
                         <option value="${escapeHtml(m.id)}-local"    ${m.cat === 'local' ? 'selected' : ''}>Local</option>
@@ -241,13 +240,13 @@
             // map date value -> monthRow
             const rowsByDate = {};
             $('#teamSizeTbl tbody tr.month-row').each(function () {
-              const $row = $(this);
-              const date = $row.find('input[type="date"]').val(); // assuming 1 date input per row
-              if (date) rowsByDate[date] = $row;
+                const $row = $(this);
+                const date = $row.find('input[type="date"]').val(); // assuming 1 date input per row
+                if (date) rowsByDate[date] = $row;
             });
-            
+
             const opened = new Set();
-            verifyMembers.forEach(v => {
+            verifyMembers.forEach((v,i) => {
               const $monthRow = rowsByDate[v.date];
               if (!$monthRow) return;
 
@@ -262,11 +261,12 @@
               const $checkbox = $confirmRow.find(`.member-check[value="${v.team_member_id}"]`);
               const $select = $checkbox.siblings().find('select:first');
 
-              if ($checkbox.length && $select.val().includes(v.category)) {
+              if ($checkbox.length) {
                 $checkbox.prop('checked', true);
+                $select.val(v.team_member_id + '-' + v.category);
               }         
             });
-
+            
             let n = 0;
             for (key in rowsByDate) {
                 const $monthRow = rowsByDate[key]; 
@@ -278,7 +278,7 @@
                 const $confirmRow = $monthRow.next();
                 for (i = 0; i < teamSizes.length; i++) {
                     const teamSize = teamSizes[i];
-                    if (teamSize.start_period === key && teamSize.is_editable === false) {
+                    if (teamSize.start_period === key && !teamSize.is_editable) {
                         $confirmRow.find('select.member-category').each(function(){
                             $(this).css({ pointerEvents: 'none', backgroundColor: '#e9ecef' })
                             .on('click', function(e) {
