@@ -258,12 +258,14 @@ class TeamController extends Controller
             'year' => 'required',
         ]);
 
-        $teams = Team::whereHas('team_sizes', function($q) use($request) {
-            $q->whereYear('start_period', $request->year)->whereMonth('start_period', $request->month);
+        $teams = Team::whereHas('team_sizes', function($q) {
+            $q->whereYear('start_period', request('year'))
+            ->whereMonth('start_period', request('month'));
         })
         ->get(['id', 'name'])
         ->map(function($team) use($request) {
-            $team->team_size = $team->teamSizesForPeriod($request->month, $request->year)->first();
+            $teamSizes = $team->teamSizesForPeriod($request->month, $request->year);
+            $team->team_size = $teamSizes->first();
             return $team;
         });
 

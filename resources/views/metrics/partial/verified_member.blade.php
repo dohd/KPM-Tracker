@@ -1,6 +1,6 @@
 @foreach ($teamMembers as $key => $row)
   @php
-    $checked = $isMetricEdit? optional($row->metricMembers->first())->checked : false;
+    $checked = $isMetricEdit? optional($row->metricMembers->where('checked', 1))->first() : null;
   @endphp
 <div class="col-12 col-md-6 col-lg-4">
   <div class="form-check border rounded px-3 py-2 h-100">
