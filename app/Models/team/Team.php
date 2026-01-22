@@ -59,10 +59,11 @@ class Team extends Model
     {
         parent::boot();
 
-        static::creating(function ($instance) {
-            $instance->user_id = auth()->user()->id;
-            $instance->ins = auth()->user()->ins;
-            return $instance;
+        static::creating(function ($model) {
+            $model->tid = Team::max('tid')+1;
+            $model->user_id = auth()->user()->id;
+            $model->ins = auth()->user()->ins;
+            return $model;
         });
 
         static::addGlobalScope('id', function ($builder) {

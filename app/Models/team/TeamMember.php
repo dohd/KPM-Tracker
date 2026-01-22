@@ -2,19 +2,17 @@
 
 namespace App\Models\team;
 
-use App\Models\ModelTrait;
-use App\Models\team\Traits\TeamSizeRelationship;
+use App\Models\team\Traits\TeamMemberRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class TeamSize extends Model
+class TeamMember extends Model
 {
-    use ModelTrait, TeamSizeRelationship;
-
+    use TeamMemberRelationship;
     /**
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'team_sizes';
+    protected $table = 'team_members';
 
     /**
      * Mass Assignable fields of model
@@ -46,13 +44,6 @@ class TeamSize extends Model
     ];
 
     /**
-     * Guarded fields of model
-     * @var array
-     */
-    protected $appends = ['is_editable'];
-
-
-    /**
      * Constructor of Model
      * @param array $attributes
      */
@@ -64,17 +55,18 @@ class TeamSize extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($instance) {
+            $instance->user_id = auth()->user()->id;
+            $instance->ins = auth()->user()->ins;
+            return $instance;
+        });
     }
 
     // custom attributes
-    public function getIsEditableAttribute()
+    public function getIsCategoryMemberVerifiedAttribute()
     {
-        if ($this->in_score) {
-            if (auth()->user()->user_type !== 'chair') {
-                return false;
-            }
-        }
-        return true;
+        $category = $this->attributes['category'];
+        return $this->verify_members()->where('category',  $category)->exists();
     }
 }
-

@@ -1,20 +1,16 @@
 <?php
 
-namespace App\Models\team;
+namespace App\Models\metric;
 
-use App\Models\ModelTrait;
-use App\Models\team\Traits\TeamSizeRelationship;
 use Illuminate\Database\Eloquent\Model;
 
-class TeamSize extends Model
+class MetricMember extends Model
 {
-    use ModelTrait, TeamSizeRelationship;
-
     /**
      * The database table used by the model.
      * @var string
      */
-    protected $table = 'team_sizes';
+    protected $table = 'metric_members';
 
     /**
      * Mass Assignable fields of model
@@ -46,13 +42,6 @@ class TeamSize extends Model
     ];
 
     /**
-     * Guarded fields of model
-     * @var array
-     */
-    protected $appends = ['is_editable'];
-
-
-    /**
      * Constructor of Model
      * @param array $attributes
      */
@@ -64,17 +53,13 @@ class TeamSize extends Model
     protected static function boot()
     {
         parent::boot();
-    }
 
-    // custom attributes
-    public function getIsEditableAttribute()
-    {
-        if ($this->in_score) {
-            if (auth()->user()->user_type !== 'chair') {
-                return false;
-            }
-        }
-        return true;
+        static::creating(function ($instance) {
+            $instance->fill([
+                'user_id' => auth()->user()->id,
+                'ins' => auth()->user()->ins,
+            ]);
+            return $instance;
+        });
     }
 }
-

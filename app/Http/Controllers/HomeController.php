@@ -29,7 +29,7 @@ class HomeController extends Controller
     {
         // charts
         $date = Carbon::now('Africa/Nairobi');
-        $startDate = (clone $date)->toDateString();
+        $startDate = (clone $date)->startOfYear()->toDateString();
         $endDate = (clone $date)->endOfYear()->toDateString();
 
         $teamQuery = Team::withoutGlobalScopes()
@@ -41,11 +41,10 @@ class HomeController extends Controller
             });
 
         // counts
-        $numProgrammes = Programme::whereBetween('created_at', [$startDate, $endDate])->count();
-        $numTeams = (clone $teamQuery)->count();
-            
-        
+        $numProgrammes = Programme::where('is_active', 1)->count();
         $rankedTeams = rankTeamsFromScores([$startDate, $endDate]);
+
+        $numTeams = (clone $teamQuery)->count();
         $teams = (clone $teamQuery)
             ->with(['team_sizes' => fn($q) => $q->whereBetween('start_period', [$startDate, $endDate])])
             ->get(['id', 'name'])
@@ -84,7 +83,7 @@ class HomeController extends Controller
                 $mod = @$init[$key];
                 if ($mod) {
                     if ($mod['team_id'] == $key) {
-                        if ($curr->programme->metric == 'Finance') {
+                        if ($curr->programme->metric === 'Finance') {
                             $mod['finance'] += floatval($curr->finance);
                         } else {
                             $mod['mission'] += floatval($curr->mission);
@@ -109,7 +108,7 @@ class HomeController extends Controller
 
         // captain team composition notice
         if (auth()->user()->user_type === 'captain' && !confirmTeamCompositionUpdated()) {
-            session()->put('warning', 'Team composition update reqired for this month');        
+            session()->put('warning', 'Team composition required for this month');        
         }
 
         return view('home', compact(
