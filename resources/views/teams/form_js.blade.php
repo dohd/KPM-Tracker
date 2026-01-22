@@ -101,7 +101,10 @@
         let local = 0, diaspora = 0, dormant = 0, confirmed = 0;
 
         $confirmRow.find('select.member-category').each(function(){
-            const $checkbox = $(this).closest('div.form-check').find('input.member-check');
+            const $wrap = $(this).closest('.form-check'); // no tag restriction
+            const $checkbox = $wrap.find('.member-check').first();
+            if (!$checkbox.length) return;
+
             if ($checkbox.prop('checked')) {
                 confirmed++;
                 const cat = $(this).val();
@@ -213,7 +216,8 @@
 
     // ========= select changes  =========
     $(document).on('change', 'select.member-category', function(){
-        const $checkbox = $(this).closest('div.form-check').find('.member-check');
+        const $wrap = $(this).closest('.form-check'); // no tag restriction
+        const $checkbox = $wrap.find('.member-check').first();
         let cat = '';
         if ($(this).val().includes('local')) cat = 'local';
         if ($(this).val().includes('diaspora')) cat = 'diaspora';
@@ -260,7 +264,7 @@
               }
 
               const $checkbox = $confirmRow.find(`.member-check[value="${v.team_member_id}"]`);
-              const $select = $checkbox.siblings().find('select:first');
+              const $select = $checkbox.closest('.form-check').find('select.member-category').first();
 
               if ($checkbox.length) {
                 $checkbox.prop('checked', true);
@@ -268,33 +272,39 @@
               }         
             });
             
-            let n = 0;
-            for (key in rowsByDate) {
+
+            for (const key in rowsByDate) {
                 const $monthRow = rowsByDate[key]; 
-                recalcMonth($monthRow);
+
+                // recompute confirmed checkboxes
+                setTimeout(() => recalcMonth($monthRow), 0);
+
                 // hide open confirm panels
-                $(`.collapse-confirm:eq(${n})`).click();
+                $monthRow.next().find('.collapse-confirm').trigger('click');
 
                 // disable rows without permission
                 const $confirmRow = $monthRow.next();
-                for (i = 0; i < teamSizes.length; i++) {
+                for (let i = 0; i < teamSizes.length; i++) {
                     const teamSize = teamSizes[i];
                     if (teamSize.start_period === key && !teamSize.is_editable) {
                         $confirmRow.find('select.member-category').each(function(){
                             $(this).css({ pointerEvents: 'none', backgroundColor: '#e9ecef' })
-                            .on('click', function(e) {
-                                e.preventDefault(); // stops toggling
-                            });
-                            const $checkbox = $(this).closest('div.form-check').find('input.member-check');
-                            $checkbox.on('click', function(e) {
-                                e.preventDefault(); // stops toggling
-                            });
+                                .off('click')
+                                .on('click', function(e) {
+                                    e.preventDefault(); // stops toggling
+                                });
+                            const $wrap = $(this).closest('.form-check'); // no tag restriction
+                            const $checkbox = $wrap.find('.member-check').first()
+                            $checkbox
+                                .off('click')
+                                .on('click', function(e) {
+                                    e.preventDefault(); // stops toggling
+                                });
                         }); 
                         break;
                     }
                 }
-                n++;       
-            }            
+            }          
         }
     } else {
         $('#addMasterMember').trigger('click');
