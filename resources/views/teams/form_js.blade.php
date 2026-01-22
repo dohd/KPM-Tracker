@@ -103,13 +103,13 @@
         $confirmRow.find('select.member-category').each(function(){
             const $checkbox = $(this).closest('div.form-check').find('input.member-check');
             if ($checkbox.prop('checked')) {
-                const cat = $(this).val().slice(2);
                 confirmed++;
-                if (cat === 'local') local++;
-                if (cat === 'diaspora') diaspora++;
-                if (cat === 'dormant') dormant++;
+                const cat = $(this).val();
+                if (cat.includes('local')) local++;
+                if (cat.includes('diaspora')) diaspora++;
+                if (cat.includes('dormant')) dormant++;
             }
-        });        
+        });    
 
         $monthRow.find('.local-size').val(local);
         $monthRow.find('.diaspora-size').val(diaspora);
@@ -224,9 +224,10 @@
     // ========= init =========
     const team = @json(@$team);
     if (team?.id) {
-        const teamMembers = @json(@$team->members ?? []);        
-        const verifyMembers = @json(@$team->verify_members ?? []);
-        const teamSizes = @json(@$team->team_sizes ?? []);
+        const teamMembers = @json($team->members ?? collect());        
+        const teamSizes = @json($team->team_sizes ?? collect());
+        const verifyMembers = @json($team->verify_members ?? collect());
+        {{-- console.log(verifyMembers); --}}
 
         // for new team trigger default row
         if (!verifyMembers.length && !teamSizes.length) {
