@@ -86,8 +86,8 @@ class MetricController extends Controller
             'programme_id' => ['required', 'integer', 'exists:programmes,id'],
             'team_id' => ['required', 'integer', 'exists:teams,id'],
 
+            'grant_amount' => ['nullable', 'regex:/^\d+(,\d+)*$/'],
             'team_total' => ['nullable', 'numeric', 'min:0'],
-            'grant_amount' => ['nullable', 'numeric', 'min:0'],
             'retreat_leader_total' => ['nullable', 'numeric', 'min:0'],
             'online_meeting_team_total' => ['nullable', 'numeric', 'min:0'],
             'activities_total' => ['nullable', 'numeric', 'min:0'],
@@ -205,8 +205,8 @@ class MetricController extends Controller
             'programme_id' => ['required', 'integer', 'exists:programmes,id'],
             'team_id' => ['required', 'integer', 'exists:teams,id'],
 
+            'grant_amount' => ['nullable', 'regex:/^\d+(,\d+)*$/'],
             'team_total' => ['nullable', 'numeric', 'min:0'],
-            'grant_amount' => ['nullable', 'numeric', 'min:0'],
             'retreat_leader_total' => ['nullable', 'numeric', 'min:0'],
             'online_meeting_team_total' => ['nullable', 'numeric', 'min:0'],
             'activities_total' => ['nullable', 'numeric', 'min:0'],
