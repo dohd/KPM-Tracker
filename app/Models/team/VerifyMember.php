@@ -2,10 +2,13 @@
 
 namespace App\Models\team;
 
+use App\Models\team\Traits\VerifyMemberRelationship;
 use Illuminate\Database\Eloquent\Model;
 
 class VerifyMember extends Model
 {
+    use VerifyMemberRelationship;
+    
     /**
      * The database table used by the model.
      * @var string

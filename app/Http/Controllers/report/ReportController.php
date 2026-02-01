@@ -122,6 +122,56 @@ class ReportController extends Controller
     }
 
     /**
+     * Team Member Summary
+     */
+    public function teamMemberSummary(Request $request)
+    {
+        if (!$request->post()) {
+            return view('reports.team_member_summary');
+        }
+
+        $input = inputClean($request->except('_token'));
+
+        $filename = 'Team Member Summary';
+        $meta['title'] = 'Team Member Summary';
+        $meta['date_from'] = dateFormat($request->date_from);
+        $meta['date_to'] = dateFormat($request->date_to);
+        
+        $records = Team::whereHas('verify_members', function($q) use($input) {
+            $q->whereBetween('date', [$input['date_from'], $input['date_to']]);
+        })
+        ->whereHas('verify_members.teamMember')
+        ->with([
+            'verify_members' => function($q) use($input) {
+                $q->whereBetween('date', [$input['date_from'], $input['date_to']])
+                ->selectRaw('MIN(team_id) team_id, team_member_id, category, COUNT(*) count')
+                ->groupBy('team_member_id', 'category');
+            },
+            'verify_members.teamMember',
+        ])
+        ->get();
+        
+        switch ($request->output) {
+            case 'pdf_print':
+                $html = view('reports.pdf.print_team_member_summary', compact('records', 'meta'))->render();
+                $headers = [
+                    "Content-type" => "application/pdf",
+                    "Pragma" => "no-cache",
+                    "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires" => "0"
+                ];
+                $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
+                $pdf->WriteHTML($html);
+                return response()->stream($pdf->Output($filename . '.pdf', 'I'), 200, $headers);
+            case 'pdf':
+                $html = view('reports.pdf.print_team_member_summary', compact('records', 'meta'))->render();
+                $pdf = new \Mpdf\Mpdf(array_replace(config('pdf'), ['format' => 'A4-L']));
+                $pdf->WriteHTML($html);
+                return $pdf->Output($filename . '.pdf', 'D');
+        }
+    }
+
+    /**
      *  Program Metrics Summary
      */
     public function metricSummary(Request $request)

@@ -47,6 +47,9 @@
         <a class="nav-link collapsed" href="{{ route('reports.metric_summary') }}">
           <i class="bi bi-circle"></i><span>Program Metrics Summary</span>
         </a>
+        <a class="nav-link collapsed" href="{{ route('reports.team_member_summary') }}">
+          <i class="bi bi-circle"></i><span>Team Member Summary</span>
+        </a>
         <a class="nav-link collapsed" href="{{ route('reports.team_size_summary') }}">
           <i class="bi bi-circle"></i><span>Team Size Summary</span>
         </a>
