@@ -127,7 +127,8 @@ class ReportController extends Controller
     public function teamMemberSummary(Request $request)
     {
         if (!$request->post()) {
-            return view('reports.team_member_summary');
+            $teams = Team::whereHas('verify_members.teamMember')->get();
+            return view('reports.team_member_summary', compact('teams'));
         }
 
         $input = inputClean($request->except('_token'));
@@ -137,7 +138,8 @@ class ReportController extends Controller
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
         
-        $records = Team::whereHas('verify_members', function($q) use($input) {
+        $records = Team::when(request('team_id'), fn($q) => $q->whereIn('id', [request('team_id')]))
+        ->whereHas('verify_members', function($q) use($input) {
             $q->whereBetween('date', [$input['date_from'], $input['date_to']]);
         })
         ->whereHas('verify_members.teamMember')

@@ -33,6 +33,19 @@
                         {{ Form::date('date_to', null, ['class' => 'form-control']) }}
                     </div>
                 </div>
+                <div class="row mb-3">
+                    <label for="program" class="col-md-2">Team</label>
+                    <div class="col-md-6 col-12">
+                        <select name="team_id" id="team" class="form-control select2" data-placeholder="Search Team">
+                            <option value=""></option>
+                            @foreach ($teams as $row)
+                                <option value="{{ $row->id }}">
+                                    {{ tidCode('', $row->tid) }} - {{ $row->name }}
+                                </option>
+                            @endforeach
+                        </select>   
+                    </div>
+                </div>
                 <div class="row mb-3 g-0">
                     <label for="output" class="col-md-2">Output Format</label>
                     <div class="col-md-4 col-12">
