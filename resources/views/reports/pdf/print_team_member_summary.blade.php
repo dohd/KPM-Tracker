@@ -86,15 +86,13 @@
             <thead>
                 <tr class="heading">
                     <th>#</th>
-                    <th>Team</th>
                     <th>Member Name</th>
                     <th>Destiny Family</th>
                     <th>Phone No.</th>
                     <th>Physical Addr.</th>
-                    <th>Local</th>
-                    <th>Diaspora</th>
-                    <th>Dormant</th>
-                    {{-- <th>Total</th> --}}
+                    <th>Team</th>
+                    <th>Category</th>
+                    <th>Count</th>
                 </tr>
             </thead>
             <tbody>
@@ -102,15 +100,13 @@
                     @foreach ($team->verify_members as $j => $verifyMember)
                         <tr class="dotted">
                             <td>{{ $loop->iteration }}</td>
-                            <td><b>{{ $team->name }}</b></td>
                             <td><b>{{ @$verifyMember->teamMember->full_name }}</b></td>
                             <td>{{ @$verifyMember->teamMember->df_name }}</td>
                             <td>{{ @$verifyMember->teamMember->phone_no }}</td>
                             <td>{{ @$verifyMember->teamMember->physical_addr }}</td>
-                            <td>{{ $verifyMember->category === 'local'? $verifyMember->count : 0 }}</td>
-                            <td>{{ $verifyMember->category === 'diaspora'? $verifyMember->count : 0 }}</td>
-                            <td>{{ $verifyMember->category === 'dormant'? $verifyMember->count : 0 }}</td>
-                            {{-- <td></td> --}}
+                            <td>{{ $team->name }}</td>
+                            <td>{{ ucfirst($verifyMember->category) }}</td>
+                            <td>{{ $verifyMember->count }}</td>
                         </tr>
                     @endforeach
                 @endforeach
