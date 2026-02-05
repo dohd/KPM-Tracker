@@ -143,6 +143,7 @@
                     @foreach (($team->team_sizes ?? collect())->sortByDesc('start_period') as $row)
                         <tr class="month-row" data-row-key="{{ $loop->index }}">
                             <td>
+                                <input type="hidden" name="team_size_id[]" value="{{ $row->id }}">
                                 <input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control" {{ $row->is_editable? '' :  'readonly' }}>
                                 <div class="mt-2 d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-sm btn-outline-secondary toggle-confirm">
@@ -156,11 +157,9 @@
                                     </span>
                                 </div>
                             </td>
-
                             <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control local-size"></td>
                             <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control diaspora-size"></td>
                             <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control dormant-size"></td>
-
                             <td class="text-center">                                
                                 <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ $row->is_editable? '' : 'disabled' }}><i class="bi bi-trash"></i></button>
                             </td>
@@ -198,6 +197,7 @@
                     {{-- month row template --}}
                     <tr class="d-none month-row" temp="1" data-row-key="__KEY__">
                         <td>
+                            <input type="hidden" name="team_size_id[]" value="">
                             <input type="date" name="start_date[]" value="" class="form-control">
                             <div class="mt-2 d-flex gap-2 flex-wrap">
                                 <button type="button" class="btn btn-sm btn-outline-secondary toggle-confirm">

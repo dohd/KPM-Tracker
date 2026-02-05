@@ -121,7 +121,7 @@ class TeamController extends Controller
         
         $basicDetails = $request->only('is_active', 'name', 'max_guest');
         $memberDetails = $request->only('master_id', 'full_name', 'category', 'df_name', 'phone_no', 'physical_addr');
-        $confirmationDetails = $request->only('start_date', 'local_size', 'diaspora_size', 'dormant_size');
+        $confirmationDetails = $request->only('team_size_id', 'start_date', 'local_size', 'diaspora_size', 'dormant_size');
         $memberCategories = []; // pair member_id -> category
         $checkedRowIds = [];
         foreach ($request->all() as $key => $value) {
@@ -156,7 +156,14 @@ class TeamController extends Controller
                 }
             }
 
+            $team->load(['members', 'team_sizes', 'verify_members']);
+            $verifiedDates = $team->team_sizes
+                ->whereNotNull('verified')
+                ->pluck('start_period');
+
             // manage team size and member verification
+            $verifyMembersData = [];
+            $teamSizesData = [];
             $startDates = $confirmationDetails['start_date'] ?? [];
             foreach($startDates as $key => $date) {
                 $date = databaseDate($date);
@@ -166,23 +173,21 @@ class TeamController extends Controller
                 // add member verification for the month
                 $rowCategories = $memberCategories[$key] ?? [];
                 $memberIds = $checkedRowIds[$key] ?? [];
-                $teamMembers = $team->members()
-                    ->whereIn('team_members.id', $memberIds)
-                    ->get(['id', 'team_id', 'category']);                
-                if ($teamMembers->count()) {
-                    if ($key == 0) {
-                        $team->verify_members()
-                            ->whereYear('date', $year)
-                            ->delete();                        
-                    }
-                    foreach ($teamMembers as $member) {
-                        $team->verify_members()->create([
+                $teamMembers = $team->members->whereIn('id', $memberIds);
+                // delete non-verified records 
+                $team->verify_members()
+                    ->whereNotIn('date', $verifiedDates)
+                    ->whereYear('date', $year)
+                    ->delete();
+                foreach ($teamMembers as $member) {
+                    if (!in_array($date, $verifiedDates->toArray())) {
+                        $verifyMembersData[] = [
                             'team_member_id' => $member->id,
                             'category' => $rowCategories[$member->id] ?? $member->category,
                             'date' => $date,
                             'checked' => 1,
-                        ]);
-                    }                    
+                        ];                     
+                    }
                 }
 
                 // update team size for the month
@@ -201,17 +206,26 @@ class TeamController extends Controller
                     $dormantSize = $verifiedMemberCount['dormant'] ?? 0;                    
                 }
                 
-                if ($key == 0) {
-                    $team->team_sizes()
-                        ->whereYear('start_period', $year)
-                        ->delete();                    
+                // delete non-verified records
+                $team->team_sizes()
+                    ->whereNotIn('start_period', $verifiedDates)
+                    ->whereYear('start_period', $year)
+                    ->delete();
+                if (!in_array($date, $verifiedDates->toArray())) {
+                    $teamSizesData[] = [
+                        'start_period' => $date,
+                        'local_size' => numberClean($localSize),
+                        'diaspora_size' => numberClean($diasporaSize),
+                        'dormant_size' => numberClean($dormantSize),
+                    ];                  
                 }
-                $team->team_sizes()->create([
-                    'start_period' => $date,
-                    'local_size' => numberClean($localSize),
-                    'diaspora_size' => numberClean($diasporaSize),
-                    'dormant_size' => numberClean($dormantSize),
-                ]);  
+            }
+
+            foreach ($verifyMembersData as $key => $value) {
+                $team->verify_members()->create($value);
+            }
+            foreach ($teamSizesData as $key => $value) {
+                $team->team_sizes()->create($value);
             }
 
             DB::commit();
