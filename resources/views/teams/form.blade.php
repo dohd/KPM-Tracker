@@ -157,9 +157,9 @@
                                     </span>
                                 </div>
                             </td>
-                            <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" class="form-control local-size"></td>
-                            <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" class="form-control diaspora-size"></td>
-                            <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" class="form-control dormant-size"></td>
+                            <td><input type="number" name="local_size[]" value="{{ $row->local_size }}" data-value="{{$row->local_size}}" class="form-control local-size"></td>
+                            <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" data-value="{{$row->diaspora_size}}" class="form-control diaspora-size"></td>
+                            <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" data-value="{{$row->dormant_size}}" class="form-control dormant-size"></td>
                             <td class="text-center">                                
                                 <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ $row->is_editable? '' : 'disabled' }}><i class="bi bi-trash"></i></button>
                             </td>

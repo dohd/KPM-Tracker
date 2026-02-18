@@ -226,6 +226,8 @@
     });
 
     // ========= init =========
+    // Edit Mode
+    // ========================
     const team = @json(@$team);
     if (team?.id) {
         const teamMembers = @json($team->members ?? collect());        
@@ -306,6 +308,13 @@
                 }
             }          
         }
+
+        setTimeout(() => {
+            $('input[data-value]').each(function() {
+                const value = $(this).attr('data-value');
+                $(this).val(value);
+            });            
+        }, 100);
     } else {
         $('#addMasterMember').trigger('click');
         $('#addMonthRow').trigger('click');
