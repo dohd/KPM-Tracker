@@ -123,6 +123,9 @@ class UserProfileController extends Controller
                 DB::beginTransaction();
                 
                 $input = $request->only(['fname', 'lname', 'email', 'phone', 'user_type', 'team_id']);
+                if (isset($input['phone'])) {
+                    $input['password'] = $input['phone'];
+                }
                 // $role = Role::find($input['role_id']);
                 // $user_profile->syncRoles([$role->name]);
                 // dd($input);
