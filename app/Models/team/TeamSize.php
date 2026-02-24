@@ -70,11 +70,8 @@ class TeamSize extends Model
     public function getIsEditableAttribute()
     {
         if ($this->in_score) {
-            if (auth()->user()->user_type !== 'chair') {
-                return false;
-            }
+            return false;
         }
         return true;
     }
 }
-
