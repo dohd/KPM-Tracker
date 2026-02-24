@@ -133,18 +133,20 @@ class MetricController extends Controller
             $metric = Metric::create($input);
 
             // create members data
-            $n = $teamMembersData['team_member_id'];
-            $teamMembersData = array_replace($teamMembersData, [
-                'metric_id' => array_fill(0, count($n), $metric->id),
-                'team_id' => array_fill(0, count($n), $metric->team_id),
-                'programme_id' => array_fill(0, count($n), $metric->programme_id),
-                'date' => array_fill(0, count($n), $metric->date),
-                'checked' => array_fill(0, count($n), 1),
-                'user_id' => array_fill(0, count($n), auth()->id()),
-                'ins' => array_fill(0, count($n), auth()->user()->ins),
-            ]);
-            $teamMembersData = databaseArray($teamMembersData);
-            $metric->metricMembers()->insert($teamMembersData);
+            $n = count($teamMembersData['team_member_id'] ?? []);
+            if ($n) {
+                $teamMembersData = array_replace($teamMembersData, [
+                    'metric_id' => array_fill(0, $n, $metric->id),
+                    'team_id' => array_fill(0, $n, $metric->team_id),
+                    'programme_id' => array_fill(0, $n, $metric->programme_id),
+                    'date' => array_fill(0, $n, $metric->date),
+                    'checked' => array_fill(0, $n, 1),
+                    'user_id' => array_fill(0, $n, auth()->id()),
+                    'ins' => array_fill(0, $n, auth()->user()->ins),
+                ]);
+                $teamMembersData = databaseArray($teamMembersData);
+                $metric->metricMembers()->insert($teamMembersData);                
+            }
 
             DB::commit();
 
@@ -253,19 +255,21 @@ class MetricController extends Controller
             $metric->update($input);
 
             // create members data
-            $n = count($teamMembersData['team_member_id']);
-            $teamMembersData = array_replace($teamMembersData, [
-                'metric_id' => array_fill(0, $n, $metric->id),
-                'team_id' => array_fill(0, $n, $metric->team_id),
-                'programme_id' => array_fill(0, $n, $metric->programme_id),
-                'date' => array_fill(0, $n, $metric->date),
-                'checked' => array_fill(0, $n, 1),
-                'user_id' => array_fill(0, $n, auth()->id()),
-                'ins' => array_fill(0, $n, auth()->user()->ins),
-            ]);
-            $teamMembersData = databaseArray($teamMembersData);
             $metric->metricMembers()->delete();
-            $metric->metricMembers()->insert($teamMembersData);
+            $n = count($teamMembersData['team_member_id'] ?? []);
+            if ($n) {
+                $teamMembersData = array_replace($teamMembersData, [
+                    'metric_id' => array_fill(0, $n, $metric->id),
+                    'team_id' => array_fill(0, $n, $metric->team_id),
+                    'programme_id' => array_fill(0, $n, $metric->programme_id),
+                    'date' => array_fill(0, $n, $metric->date),
+                    'checked' => array_fill(0, $n, 1),
+                    'user_id' => array_fill(0, $n, auth()->id()),
+                    'ins' => array_fill(0, $n, auth()->user()->ins),
+                ]);
+                $teamMembersData = databaseArray($teamMembersData);
+                $metric->metricMembers()->insert($teamMembersData);                
+            }
 
             DB::commit();
 
