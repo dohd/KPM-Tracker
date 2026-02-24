@@ -21,13 +21,14 @@
 <div class="mt-2 mb-3" style="width:85%; margin-left:auto; margin-right:auto">
     {{-- ========= MASTER TABLE ========= --}}
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="mb-0"><i class="bi bi-people"></i> Master Member Register</h6>
+        @php $memberCount = ($team->members ?? collect())->count() @endphp
+        <h6 class="mb-0"><i class="bi bi-people"></i> Master Member Register {{ $memberCount? "({$memberCount})" : "" }}</h6>
         <button type="button" class="btn btn-sm btn-outline-success" id="addMasterMember">
             <i class="bi bi-person-plus"></i> Add Member
         </button>
     </div>
 
-    <div class="table-responsive mb-4" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd;">
+    <div class="table-responsive mb-4" style="max-height: 50vh; overflow-y: auto; border: 1px solid #ddd;">
         <table id="masterMembersTbl" class="table table-bordered table-sm align-middle">
             <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                 <tr>
@@ -82,8 +83,8 @@
                                 <select 
                                     name="category[]" 
                                     class="form-select form-select-sm master-category"
-                                    readonly
                                     style="pointer-events: none; background-color: #e9ecef;" 
+                                    readonly
                                 >
                                     @foreach (['local', 'diaspora', 'dormant'] as $value)
                                         <option value="{{ $value }}" {{ $value === $row->category? 'selected' : '' }}>{{ ucfirst($value) }}</option>
@@ -127,7 +128,7 @@
             </button>
         </div>
 
-        <div class="table-responsive" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd;">
+        <div class="table-responsive" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ddd;">
             <table id="teamSizeTbl" class="table table-bordered table-sm align-middle">
                 <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                     <tr>
@@ -144,7 +145,7 @@
                         <tr class="month-row" data-row-key="{{ $loop->index }}">
                             <td>
                                 <input type="hidden" name="team_size_id[]" value="{{ $row->id }}">
-                                <input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control" {{ $row->is_editable? '' :  'readonly' }}>
+                                <input type="date" name="start_date[]" value="{{ $row->start_period }}" class="form-control" {{ !$row->is_editable? 'readonly' : '' }}>
                                 <div class="mt-2 d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-sm btn-outline-secondary toggle-confirm">
                                         <i class="bi bi-ui-checks"></i> Confirm Members
@@ -161,7 +162,7 @@
                             <td><input type="number" name="diaspora_size[]" value="{{ $row->diaspora_size }}" data-value="{{$row->diaspora_size}}" class="form-control diaspora-size"></td>
                             <td><input type="number" name="dormant_size[]" value="{{ $row->dormant_size }}" data-value="{{$row->dormant_size}}" class="form-control dormant-size"></td>
                             <td class="text-center">                                
-                                <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ $row->is_editable? '' : 'disabled' }}><i class="bi bi-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger del-month-row" {{ !$row->is_editable? 'disabled' : '' }}><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>
 
@@ -175,10 +176,10 @@
                                         </div>
 
                                         <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary select-all" {{ $row->is_editable? '' : 'disabled' }}>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary select-all" {{ !$row->is_editable? 'disabled' : '' }}>
                                                 <i class="bi bi-check-all"></i> Select All
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary clear-all" {{ $row->is_editable? '' : 'disabled' }}>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary clear-all" {{ !$row->is_editable? 'disabled' : '' }}>
                                                 <i class="bi bi-x-circle"></i> Clear
                                             </button>
                                             <button type="button" class="btn btn-sm btn-outline-secondary collapse-confirm">

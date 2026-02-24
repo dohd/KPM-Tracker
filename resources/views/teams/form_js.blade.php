@@ -233,7 +233,6 @@
         const teamMembers = @json($team->members ?? collect());        
         const teamSizes = @json($team->team_sizes ?? collect());
         const verifyMembers = @json($team->verify_members ?? collect());
-        {{-- console.log(verifyMembers); --}}
 
         // for new team trigger default row
         if (!verifyMembers.length && !teamSizes.length) {
@@ -277,42 +276,35 @@
 
             for (const key in rowsByDate) {
                 const $monthRow = rowsByDate[key]; 
-
                 // recompute confirmed checkboxes
                 setTimeout(() => recalcMonth($monthRow), 0);
-
                 // hide open confirm panels
                 $monthRow.next().find('.collapse-confirm').trigger('click');
 
-                // disable rows without permission
+                // disable non-editable rows
                 const $confirmRow = $monthRow.next();
                 for (let i = 0; i < teamSizes.length; i++) {
                     const teamSize = teamSizes[i];
                     if (teamSize.start_period === key && !teamSize.is_editable) {
-                        $confirmRow.find('select.member-category').each(function(){
-                            $(this).css({ pointerEvents: 'none', backgroundColor: '#e9ecef' })
+                        $monthRow.find('.toggle-confirm').prop('disabled', true);
+                        $monthRow.find('input').each(function(){
+                            $(this)
+                                .css({ pointerEvents: 'none', backgroundColor: '#e9ecef' })
                                 .off('click')
                                 .on('click', function(e) {
                                     e.preventDefault(); // stops toggling
                                 });
-                            const $wrap = $(this).closest('.form-check'); // no tag restriction
-                            const $checkbox = $wrap.find('.member-check').first()
-                            $checkbox
-                                .off('click')
-                                .on('click', function(e) {
-                                    e.preventDefault(); // stops toggling
-                                });
-                        }); 
+                        });
                         break;
                     }
                 }
             }          
         }
 
+        // correct rendering bug
         setTimeout(() => {
             $('input[data-value]').each(function() {
-                const value = $(this).attr('data-value');
-                $(this).val(value);
+                $(this).val($(this).attr('data-value'));
             });            
         }, 100);
     } else {
