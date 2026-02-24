@@ -45,13 +45,13 @@ trait AssignScoreTrait
         $teams = Team::whereIn('id', $metrics->pluck('team_id')->toArray())->get();
 
         function getAncestors($model) {
-        	$ancestors = collect();
-		    $parent = $model->parent;
-		    while ($parent) {
-		        $ancestors->push($parent);
-		        $parent = $parent->parent;
-		    }
-		    return $ancestors;
+            $ancestors = collect();
+            $parent = $model->parent;
+            while ($parent) {
+                $ancestors->push($parent);
+                $parent = $parent->parent;
+            }
+            return $ancestors;
         }
         $ancestors = getAncestors($programme);
 
@@ -59,25 +59,25 @@ trait AssignScoreTrait
         $cumulativeScores = collect();
         $ancestor = $ancestors->first();
         if ($ancestor) {
-	    	$cumulativeScores = AssignScore::where('programme_id', $ancestor->id)
-	            ->where('date_from', '>=', $input['date_from'])
-	            ->where('date_to', '<=', $input['date_to'])
-	            ->get(['id', 'programme_id', 'team_id', 'date_from', 'date_to', 'accrued_amount']);
+            $cumulativeScores = AssignScore::where('programme_id', $ancestor->id)
+                ->where('date_from', '>=', $input['date_from'])
+                ->where('date_to', '<=', $input['date_to'])
+                ->get(['id', 'programme_id', 'team_id', 'date_from', 'date_to', 'accrued_amount']);
 
-	        $cumulativeTeams = Team::whereIn('id', $cumulativeScores->pluck('team_id')->toArray())
-	        ->whereNotIn('id', $teams->pluck('id')->toArray())
-	        ->get();  
-	        $teams = collect($teams)->merge($cumulativeTeams);
+            $cumulativeTeams = Team::whereIn('id', $cumulativeScores->pluck('team_id')->toArray())
+            ->whereNotIn('id', $teams->pluck('id')->toArray())
+            ->get();  
+            $teams = collect($teams)->merge($cumulativeTeams);
         }
 
-    	$modTeams = collect();
+        $modTeams = collect();
         switch ($programme->metric) {
             case 'Finance':
                 foreach ($teams as $key => $team) {
                     $team->points = 0;
                     $team->extra_points = 0;
                     $team->accrued_amount = 0;
-                    foreach ($metrics as $i => $metric) {
+                    foreach ($metrics as $metric) {
                         if ($metric->team_id == $team->id) {
                             $metricDate = Carbon::parse($metric->date);
                             $programmeDeadline = Carbon::parse($programme->amount_perc_by);
@@ -88,17 +88,17 @@ trait AssignScoreTrait
                     }
                     // cumulate accrued amount per team
                     $teamCumulatedAmount = $cumulativeScores->where('team_id', $team->id)
-                    	->sum('accrued_amount');
+                        ->sum('accrued_amount');
                     $team->accrued_amount += $teamCumulatedAmount;
 
                     // scoring bands
-                    $bands = json_decode($programme->bandjson) ?: [];
+                    $bands = json_decode($programme->bandjson) ?? [];
                     foreach ($bands as $key => $band) {
-                    	$conditionalAmount = round($band->threshold / 100 * $programme->target_amount);
-                    	if ($team->accrued_amount >= $conditionalAmount) {
-                    		$team->points = $band->points;
-                    		break;
-                    	}
+                        $conditionalAmount = round($band->threshold / 100 * $programme->target_amount);
+                        if ($team->accrued_amount >= $conditionalAmount) {
+                            $team->points = $band->points;
+                            break;
+                        }
                     }
 
                     // extra points
@@ -114,6 +114,10 @@ trait AssignScoreTrait
 
                     $team->net_points = $team->points + $team->extra_points;
                     $modTeams->push($team);
+                }
+                $valid_teams = $modTeams->filter(fn($v) => $v->points > 0);
+                if (!count($valid_teams)) {
+                    return response()->json(['flash_error' => 'Program points threshold not met or cumulative scores not yet computed!']);
                 }
                 break;
             
