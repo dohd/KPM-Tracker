@@ -1,5 +1,3 @@
-php_value max_input_vars 10000
-
 <IfModule mod_rewrite.c>
 # That was ONLY to protect you from 500 errors
 # if your server did not have mod_rewrite enabled
@@ -22,3 +20,5 @@ Deny from all
 order allow,deny
 Deny from all
 </Files>
+
+php_value max_input_vars 10000
