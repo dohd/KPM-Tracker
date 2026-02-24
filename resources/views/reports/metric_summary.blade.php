@@ -1,24 +1,24 @@
 @extends('layouts.core')
-@section('title', 'Program Metrics Summary')
+@section('title', 'Metrics Summary')
 
 @section('content')
 <div class="pagetitle">
     <div class="row">
       <div class="col-6">
-        <h1>Program Metrics Summary</h1>
+        <h1>Metrics Summary</h1>
       </div>
     </div>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Program Metrics Summary</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('assign_scores.index') }}">Metrics Summary</a></li>
       </ol>
     </nav>
 </div>
 
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title mb-0">Program Metrics Summary</h5>
+        <h5 class="card-title mb-0">Metrics Summary</h5>
         <div class="card-content p-2">
             {{ Form::open(['route' => 'reports.metric_summary.post', 'method' => 'POST', 'target' => '_blank']) }}
                 <div class="row mb-3">
@@ -37,13 +37,13 @@
                 <div class="row mb-3">
                     <label for="date" class="col-md-2">From Date</label>
                     <div class="col-md-6 col-12">
-                        {{ Form::date('date_from', null, ['class' => 'form-control']) }}
+                        {{ Form::date('date_from', date('Y-01-01'), ['class' => 'form-control']) }}
                     </div>
                 </div>
                 <div class="row mb-3">
                     <label for="date" class="col-md-2">To Date</label>
                     <div class="col-md-6 col-12">
-                        {{ Form::date('date_to', null, ['class' => 'form-control']) }}
+                        {{ Form::date('date_to', date('Y-12-31'), ['class' => 'form-control']) }}
                     </div>
                 </div>
                 <div class="row mb-3 g-0">
