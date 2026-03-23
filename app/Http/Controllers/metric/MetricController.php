@@ -340,10 +340,15 @@ class MetricController extends Controller
             ->whereHas('verify_members', fn($q) => $q->whereYear('date', $year))
             ->with([
                 'metricMembers' => function($q) {
-                    $q->select('id', 'team_member_id', 'checked')
-                    ->where('team_id', request('team_id'));
-                }
+                    $q->where('team_id', request('team_id'))
+                        ->select('id', 'team_member_id', 'checked');
+                },
+                'verify_members' => function($q) use($year) {
+                    $q->whereYear('date', $year)
+                    ->select('id', 'team_member_id', 'category');
+                },
             ])
+            ->orderBy('id', 'DESC')
             ->get();
 
         return view('metrics.partial.verified_member', compact('teamMembers', 'isMetricEdit'));
