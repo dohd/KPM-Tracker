@@ -223,6 +223,10 @@
         if ($(this).val().includes('diaspora')) cat = 'diaspora';
         if ($(this).val().includes('dormant')) cat = 'dormant';
         $checkbox.attr('data-cat', cat);
+
+        if ($checkbox.prop('checked')) {
+            $checkbox.prop('checked', false);
+        }
     });
 
     // ========= init =========

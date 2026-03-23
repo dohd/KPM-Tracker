@@ -6,7 +6,7 @@
     <div class="card">
         <div class="card-body">
             <div class="card-content p-2">
-                <div class="mb-2">
+                <div class="m-2">
                     @if (auth()->user()->user_type === 'chair')
                         <span class="badge bg-primary" data-bs-toggle="modal" data-bs-target="#verifxnModal" style="cursor: pointer;">
                             Verify Teams <i class="bi bi-caret-down-fill"></i>

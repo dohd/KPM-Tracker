@@ -45,9 +45,9 @@
                   <tr>
                       <th>Team Name</th>
                       <th>As Of Date</th>
-                      <th>Local Size</th>
-                      <th>Diaspora Size</th>
-                      <th>Dormant Size</th>
+                      <th>Local</th>
+                      <th>Diaspora</th>
+                      <th>Dormant</th>
                       <th>Verified</th>
                       <th>Note</th>
                   </tr>

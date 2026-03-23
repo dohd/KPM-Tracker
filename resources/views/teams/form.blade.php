@@ -1,24 +1,16 @@
 {{-- ======== BASIC TEAM DETAILS ========= --}}
 <div class="row mb-3">
-    <label for="is_active" class="col-md-2">Is Active</label>
-    <div class="col-md-8 col-12">
-        {{ Form::checkbox('is_active', isset($team->is_active)? $team->is_active : 1, true, ['id' => 'is_active']) }}
-    </div>
-</div>
-<div class="row mb-3">
-    <label for="name" class="col-md-2">Team Name</label>
-    <div class="col-md-8 col-12">
-        {{ Form::text('name', null, ['class' => 'form-control', 'required' => 'required']) }}
-    </div>
-</div>
-<div class="row mb-3">
-    <label for="guest" class="col-md-2">Max Guest Size</label>
-    <div class="col-md-8 col-12">
-        {{ Form::number('max_guest', null, ['class' => 'form-control', 'placeholder' => 'No. of maximum guest members', 'required' => 'required']) }}
+    <label for="name" class="col-md-1">Team Name</label>
+    <div class="col-md-4 col-12">
+        {{ Form::text('name', null, ['class' => 'form-control mb-1', 'required' => 'required']) }}
+        <div class="form-check">
+            {{ Form::checkbox('is_active', isset($team->is_active)? $team->is_active : 1, true, ['class' => 'form-check-input', 'id' => 'is_active']) }}
+            <label class="form-check-label" for="flexCheckDefault">Is Active</label>
+        </div>
     </div>
 </div>
 
-<div class="mt-2 mb-3" style="width:85%; margin-left:auto; margin-right:auto">
+<div class="mt-4 mb-3" style="width:85%; margin-left:auto; margin-right:auto">
     {{-- ========= MASTER TABLE ========= --}}
     <div class="d-flex justify-content-between align-items-center mb-2">
         @php $memberCount = ($team->members ?? collect())->count() @endphp
