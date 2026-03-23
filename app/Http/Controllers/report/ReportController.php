@@ -127,7 +127,7 @@ class ReportController extends Controller
     public function teamMemberSummary(Request $request)
     {
         if (!$request->post()) {
-            $teams = Team::whereHas('verify_members.teamMember')->get();
+            $teams = Team::get();
             return view('reports.team_member_summary', compact('teams'));
         }
 
@@ -138,14 +138,25 @@ class ReportController extends Controller
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
         
-        $records = Team::when(request('team_id'), fn($q) => $q->whereIn('id', [request('team_id')]))
-        ->whereHas('verify_members', function($q) use($input) {
-            $q->whereBetween('date', [$input['date_from'], $input['date_to']]);
-        })
-        ->whereHas('verify_members.teamMember')
+        $records = Team::when(request('team_id'), fn($q) => $q->where('id', request('team_id')))
+        ->when(
+            request('is_verified') == 1,
+            function($q) use($input) {
+                $q->whereHas('verify_members', function($q) use($input) {
+                    $q->whereBetween('date', [$input['date_from'], $input['date_to']])
+                    ->whereHas('teamMember');
+                });
+            },
+            function($q) use($input) {
+                $q->whereDoesntHave('verify_members', function($q) use($input) {
+                    $q->whereBetween('date', [$input['date_from'], $input['date_to']]);
+                });
+            }
+        )
         ->with([
             'verify_members' => function($q) use($input) {
                 $q->whereBetween('date', [$input['date_from'], $input['date_to']])
+                ->whereHas('teamMember')
                 ->selectRaw('MIN(team_id) team_id, team_member_id, category, COUNT(*) count')
                 ->groupBy('team_member_id', 'category');
             },

@@ -86,30 +86,46 @@
             <thead>
                 <tr class="heading">
                     <th>#</th>
+                    <th>Team</th>
+                    <th>Category</th>
                     <th>Member Name</th>
                     <th>Destiny Family</th>
                     <th>Phone No.</th>
                     <th>Physical Addr.</th>
-                    <th>Team</th>
-                    <th>Category</th>
-                    <th>Count</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($records as $i => $team)
-                    @foreach ($team->verify_members as $j => $verifyMember)
+                @php 
+                    $c = 0; 
+                    $verifyMembers = $records->flatMap->verify_members; 
+                @endphp
+                @if ($verifyMembers->isEmpty())
+                    @foreach ($records as $i => $team)  
                         <tr class="dotted">
                             <td>{{ $loop->iteration }}</td>
-                            <td><b>{{ @$verifyMember->teamMember->full_name }}</b></td>
-                            <td>{{ @$verifyMember->teamMember->df_name }}</td>
-                            <td>{{ @$verifyMember->teamMember->phone_no }}</td>
-                            <td>{{ @$verifyMember->teamMember->physical_addr }}</td>
-                            <td>{{ $team->name }}</td>
-                            <td>{{ ucfirst($verifyMember->category) }}</td>
-                            <td>{{ $verifyMember->count }}</td>
+                            <td>{{ $team->name }}</td>  
+                            <td colspan="5"></td>                            
                         </tr>
                     @endforeach
-                @endforeach
+                @else 
+                    @foreach ($records as $i => $team)  
+                        @foreach ($team->verify_members as $j => $verifyMember)
+                            @php 
+                                $c++; 
+                                $teamMember = optional($verifyMember->teamMember);
+                            @endphp
+                            <tr class="dotted">
+                                <td>{{ $c }}</td>
+                                <td>{{ $team->name }}</td>
+                                <td>{{ ucfirst($verifyMember->category) }}</td>
+                                <td>{{ $teamMember->full_name }}</td>
+                                <td>{{ $teamMember->df_name }}</td>
+                                <td>{{ $teamMember->phone_no }}</td>
+                                <td>{{ $teamMember->physical_addr }}</td>
+                            </tr>
+                        @endforeach
+                    @endforeach                     
+                @endif
             </tbody>
         </table>
     </body>

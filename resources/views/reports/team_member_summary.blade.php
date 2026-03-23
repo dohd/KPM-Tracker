@@ -24,13 +24,13 @@
                 <div class="row mb-3">
                     <label for="date" class="col-md-2">From Date</label>
                     <div class="col-md-6 col-12">
-                        {{ Form::date('date_from', null, ['class' => 'form-control']) }}
+                        {{ Form::date('date_from', now()->startOfMonth()->toDateString(), ['class' => 'form-control']) }}
                     </div>
                 </div>
                 <div class="row mb-3">
                     <label for="date" class="col-md-2">To Date</label>
                     <div class="col-md-6 col-12">
-                        {{ Form::date('date_to', null, ['class' => 'form-control']) }}
+                        {{ Form::date('date_to', now()->endOfMonth()->toDateString(), ['class' => 'form-control']) }}
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -42,6 +42,16 @@
                                 <option value="{{ $row->id }}">
                                     {{ tidCode('', $row->tid) }} - {{ $row->name }}
                                 </option>
+                            @endforeach
+                        </select>   
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="program" class="col-md-2">Is Verified</label>
+                    <div class="col-md-6 col-12">
+                        <select name="is_verified" id="is_verified" class="form-control" data-placeholder="Search Team">
+                            @foreach ([1, 0] as $value)
+                                <option value="{{ $value }}">{{ ucfirst($value? 'yes' : 'no') }}</option>
                             @endforeach
                         </select>   
                     </div>
