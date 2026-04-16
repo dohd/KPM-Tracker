@@ -137,7 +137,7 @@
             {{ Form::hidden('score', null, ['class' => 'form-control', 'id' => 'score']) }}
             {{ Form::hidden('bandjson', null, ['class' => 'form-control', 'id' => 'bandJson']) }}
         </div>
-        <div class="col-md-5 col-12">
+        <div class="col-md-4 col-12">
             @include('programmes.partials.bands')
         </div>
     </div>
