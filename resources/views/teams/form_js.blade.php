@@ -112,7 +112,9 @@
                 if (cat.includes('diaspora')) diaspora++;
                 if (cat.includes('dormant')) dormant++;
             }
-        });    
+        });  
+
+        {{-- console.log({local, diaspora, dormant, confirmed});   --}}
 
         $monthRow.find('.local-size').val(local);
         $monthRow.find('.diaspora-size').val(diaspora);
@@ -281,7 +283,7 @@
             for (const key in rowsByDate) {
                 const $monthRow = rowsByDate[key]; 
                 // recompute confirmed checkboxes
-                setTimeout(() => recalcMonth($monthRow), 0);
+                setTimeout(() => recalcMonth($monthRow), 200);
                 // hide open confirm panels
                 $monthRow.next().find('.collapse-confirm').trigger('click');
 
