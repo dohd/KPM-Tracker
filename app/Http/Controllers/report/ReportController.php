@@ -137,33 +137,32 @@ class ReportController extends Controller
         $meta['title'] = 'Team Member Summary';
         $meta['date_from'] = dateFormat($request->date_from);
         $meta['date_to'] = dateFormat($request->date_to);
-        
+
         $records = Team::when(request('team_id'), fn($q) => $q->where('id', request('team_id')))
-        ->when(
-            request('is_verified') == 1,
-            function($q) use($input) {
-                $q->whereHas('verify_members', function($q) use($input) {
+            ->when(
+                request('is_verified') == 1,
+                function($q) use($input) {
+                    $q->whereHas('members.verify_members', function($q) use($input) {
+                        $q->whereBetween('date', [$input['date_from'], $input['date_to']])
+                            ->whereHas('teamMember')
+                            ->where('checked', 1);
+                    });
+                },
+                function($q) use($input) {
+                    $q->whereHas('members', function($q) use($input) {
+                        $q->doesntHave('verify_members');
+                    });
+                }
+            )
+            ->with([
+                'members.verify_members' => function($q) use($input) {
                     $q->whereBetween('date', [$input['date_from'], $input['date_to']])
-                    ->whereHas('teamMember');
-                });
-            },
-            function($q) use($input) {
-                $q->whereDoesntHave('verify_members', function($q) use($input) {
-                    $q->whereBetween('date', [$input['date_from'], $input['date_to']]);
-                });
-            }
-        )
-        ->with([
-            'verify_members' => function($q) use($input) {
-                $q->whereBetween('date', [$input['date_from'], $input['date_to']])
-                ->whereHas('teamMember')
-                ->selectRaw('MIN(team_id) team_id, team_member_id, category, COUNT(*) count')
-                ->groupBy('team_member_id', 'category');
-            },
-            'verify_members.teamMember',
-        ])
-        ->get();
-        
+                        ->whereHas('teamMember')
+                        ->where('checked', 1);
+                },
+            ])
+            ->get();
+            
         switch ($request->output) {
             case 'pdf_print':
                 $html = view('reports.pdf.print_team_member_summary', compact('records', 'meta'))->render();
