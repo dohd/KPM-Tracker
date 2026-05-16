@@ -69,7 +69,7 @@ class TeamSize extends Model
     // custom attributes
     public function getIsEditableAttribute()
     {
-        if ($this->in_score && $this->verified) {
+        if ($this->verified || $this->verified && $this->in_score) {
             return false;
         }
         return true;
