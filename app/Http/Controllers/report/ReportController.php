@@ -139,26 +139,23 @@ class ReportController extends Controller
         $meta['date_to'] = dateFormat($request->date_to);
 
         $records = Team::when(request('team_id'), fn($q) => $q->where('id', request('team_id')))
-            ->when(
-                request('is_verified') == 1,
-                function($q) use($input) {
-                    $q->whereHas('members.verify_members', function($q) use($input) {
-                        $q->whereBetween('date', [$input['date_from'], $input['date_to']])
-                            ->whereHas('teamMember')
-                            ->where('checked', 1);
-                    });
-                },
-                function($q) use($input) {
-                    $q->whereHas('members', function($q) use($input) {
-                        $q->doesntHave('verify_members');
-                    });
-                }
-            )
+            // ->when(
+            //     request('is_verified') == 1,
+            //     function($q) use($input) {
+            //         $q->whereHas('members.verify_members', function($q) use($input) {
+            //             $q->whereBetween('date', [$input['date_from'], $input['date_to']])
+            //                 ->whereHas('teamMember');
+            //     },
+            //     function($q) use($input) {
+            //         $q->whereHas('members', function($q) use($input) {
+            //             $q->doesntHave('verify_members');
+            //         });
+            //     }
+            // )
             ->with([
                 'members.verify_members' => function($q) use($input) {
                     $q->whereBetween('date', [$input['date_from'], $input['date_to']])
-                        ->whereHas('teamMember')
-                        ->where('checked', 1);
+                        ->whereHas('teamMember');
                 },
             ])
             ->get();

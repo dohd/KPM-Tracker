@@ -46,7 +46,7 @@
                         </select>   
                     </div>
                 </div>
-                <div class="row mb-3">
+                {{-- <div class="row mb-3">
                     <label for="program" class="col-md-2">Is Verified</label>
                     <div class="col-md-6 col-12">
                         <select name="is_verified" id="is_verified" class="form-control" data-placeholder="Search Team">
@@ -55,7 +55,7 @@
                             @endforeach
                         </select>   
                     </div>
-                </div>
+                </div> --}}
                 <div class="row mb-3 g-0">
                     <label for="output" class="col-md-2">Output Format</label>
                     <div class="col-md-4 col-12">
